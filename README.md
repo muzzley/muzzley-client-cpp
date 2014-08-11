@@ -1,6 +1,6 @@
 # Muzzley C++ Client
 
-This repo contains the code for the [muzzley][muzzley] C++ client library.
+This repo contains the code for the [muzzley][muzzley_homepage] C++ client library.
 
 # DEPENDENCIES
 
