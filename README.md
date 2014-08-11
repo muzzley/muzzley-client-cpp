@@ -1,8 +1,9 @@
-*TABLE OF CONTENTS*
+# Muzzley C++ Client
 
-[TOC]
+This repo contains the code for the [muzzley][muzzley] C++ client library.
 
 # DEPENDENCIES
+
 This library depends on:
 
 - GCC 4.5+
@@ -365,4 +366,5 @@ string _country = (string) _o["location"]["country"];
 ```
 
 
+[muzzley_homepage]: https://www.muzzley.com
 [lambda_functions]: http://www.cprogramming.com/c++11/c++11-lambda-closures.html
