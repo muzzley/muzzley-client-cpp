@@ -37,8 +37,8 @@ int main(int argc, char* argv[]) {
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
 	_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		cout << _data["s"] << endl << flush;
-		cout << _data["d"]["a"] << endl << flush;
+		cout << (bool) _data["s"] << endl << flush;
+		cout << (string) _data["d"]["a"] << endl << flush;
 		return true;
 	});
 
