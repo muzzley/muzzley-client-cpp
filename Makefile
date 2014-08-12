@@ -30,3 +30,14 @@ package:
 	find muzzley-sdk-cpp_$(package_version)/ -name "*.so.$(package_version)" | xargs rm -rf
 	tar cvzf Upstream/muzzley-sdk-cpp_$(package_version).tar.gz muzzley-sdk-cpp_$(package_version)
 	rm -rf muzzley-sdk-cpp_$(package_version)/
+
+package:
+	rm -rf Upstream/muzzley-sdk-cpp_$(package_version).tar.gz
+	mkdir -p muzzley-sdk-cpp_$(package_version)/
+	cp base exceptions json log parsers resource stream text Debug Release Makefile README.md muzzley.h muzzley-sdk-cpp_$(package_version)/ -rf
+	find muzzley-sdk-cpp_$(package_version)/ -name "*.o" | xargs rm -rf
+	find muzzley-sdk-cpp_$(package_version)/ -name "*.d" | xargs rm -rf
+	find muzzley-sdk-cpp_$(package_version)/ -name "*.so" | xargs rm -rf
+	find muzzley-sdk-cpp_$(package_version)/ -name "*.so.$(package_version)" | xargs rm -rf
+	tar cvzf Upstream/muzzley-sdk-cpp_$(package_version).tar.gz muzzley-sdk-cpp_$(package_version)
+	rm -rf muzzley-sdk-cpp_$(package_version)/
