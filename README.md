@@ -208,10 +208,15 @@ int main(int argc, char* argv[]) {
 Sometimes you'll need to reply to a received message, especially when the received message is either of type *1* or *3*. The differents message types are:
 
 **1**: Request Initiated by an endpoint (Application or Controller)
+
 **2**: Reply to the endpoint
+
 **3**: Request Initiated by the Muzzley Core server
+
 **4**: Reply to the Muzzley Core server
+
 **5**: Signaling (Fire and forget) between endpoints
+
 
 In order to reply to a received message, you may use the *reply* method:
 	
