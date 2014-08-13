@@ -79,7 +79,7 @@ muzzley::Client::Client() :
 	});
 
 	this->on(muzzley::ParticipantJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		if (!!_data["s"] && !!_data["d"]["participant"]["id"]) {
+		if (!!_data["d"]["participant"]["id"]) {
 			if (((string) _data["d"]["participant"]["deviceId"]) == _client.__device_id) {
 				_client.__participant_id = (long) _data["d"]["participant"]["id"];
 			}
