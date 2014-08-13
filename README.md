@@ -239,18 +239,18 @@ Hence, replying, for instance, to a Signaling Message could look like this:
 ```
 #!c++
 
-	_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		if (_client.reply(_data, JSON(
-			"s" << "true" <<
-			"m" << "this is a testing signal so is always successful!" <<
-			"d" << JSON(
-				"w" << "gamepad"
-			)
-		))) {
-			cout << "great, replied to a Signal Message" << endl << flush;
-		}
-		return true;
-	});
+_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	if (_client.reply(_data, JSON(
+		"s" << "true" <<
+		"m" << "this is a testing signal so is always successful!" <<
+		"d" << JSON(
+			"w" << "gamepad"
+		)
+	))) {
+		cout << "great, replied to a Signal Message" << endl << flush;
+	}
+	return true;
+});
 ```
 
 #MAIN CLASSES
