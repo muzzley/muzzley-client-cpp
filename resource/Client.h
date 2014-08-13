@@ -1,20 +1,20 @@
 /*
-Copyright (c) 2014, Muzzley
+ Copyright (c) 2014, Muzzley
 
-Permission to use, copy, modify, and/or distribute this software for 
-any purpose with or without fee is hereby granted, provided that the 
-above copyright notice and this permission notice appear in all 
-copies.
+ Permission to use, copy, modify, and/or distribute this software for
+ any purpose with or without fee is hereby granted, provided that the
+ above copyright notice and this permission notice appear in all
+ copies.
 
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL 
-WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE 
-AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL 
-DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR 
-PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER 
-TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR 
-PERFORMANCE OF THIS SOFTWARE.
-*/
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+ WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+ AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+ DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
+ PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ PERFORMANCE OF THIS SOFTWARE.
+ */
 
 #pragma once
 
@@ -41,9 +41,16 @@ using namespace __gnu_cxx;
 
 namespace muzzley {
 	
-	#define N_EVENT_TYPES 11
+#define N_EVENT_TYPES 11
 	enum EventType {
-		Connect, Handshake, ActivityCreated, ActivityJoined, ActivityTerminated, ParticipantJoined, ParticipantReady, ParticipantQuit, SignalingMessage, AppLoggedIn, UserLoggedIn
+		Connect, Handshake, ActivityCreated, ActivityJoined, ActivityTerminated, ParticipantJoined, ParticipantReady, ParticipantQuit, SignalingMessage, AppLoggedIn, UserLoggedIn, Reply
+	};
+	enum MessageType {
+		RequestInitiatedByEndpoint = 1,
+		ReplyToEndpoint = 2,
+		RequestInitiatedMuzzleyCore = 3,
+		ReplyToMuzzleyCore = 4,
+		Signaling = 5
 	};
 
 	class Client;
@@ -60,7 +67,7 @@ namespace muzzley {
 #if __cplusplus >= 201103L
 			virtual void on(muzzley::EventType _type, muzzley::Handler _handler) final;
 			virtual void trigger(muzzley::EventType _type, muzzley::JSONObj& _data) final;
-#endif
+			#endif
 			virtual void start() final;
 
 			virtual void connectApp(string _app_token, string _activity_id = "");
@@ -91,6 +98,7 @@ namespace muzzley {
 			virtual void reconnect() final;
 			virtual bool read() final;
 			virtual bool write(muzzley::JSONObj& _data, muzzley::Callback _callback = NULL) final;
+			virtual bool reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& _reply) final;
 
 			void setLoopAssynchronous(bool _assync);
 
@@ -106,7 +114,6 @@ namespace muzzley {
 			bool isLoopAssynchronous() const;
 			bool isStaticActivity() const;
 			bool isUserLoggedin() const;
-
 
 		private:
 			std::vector<muzzley::Handler> __handlers[N_EVENT_TYPES];

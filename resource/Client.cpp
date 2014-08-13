@@ -86,6 +86,10 @@ muzzley::Client::Client() :
 			pthread_mutex_lock(_client.__mtx);
 			_client.__participants.insert(make_pair((long) _data["d"]["participant"]["id"], (string) _data["d"]["participant"]["profileId"]));
 			pthread_mutex_unlock(_client.__mtx);
+
+			_client.reply(_data, JSON(
+				"s" << "true"
+			));
 		}
 		return true;
 	});
@@ -279,6 +283,37 @@ bool muzzley::Client::write(muzzley::JSONObj& _message, muzzley::Callback _callb
 	return true;
 }
 
+bool muzzley::Client::reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& _reply) {
+	assertz(!!_reply["s"], "attribute 's' is mandatory, in the '_data_received' argument", 500, 108);
+	assertz(!!_data_received["h"]["t"], "there is no message type in the '_data_received' argument", 500, 107);
+	assertz(!!_data_received["h"]["cid"], "there is no message ide ('cid') in the '_data_received' argument", 500, 107);
+	muzzley::MessageType _type = (muzzley::MessageType) ((int)_data_received["h"]["t"]);
+	//assertz(_type == 1 || _type == 3, "the message type in the '_data_received' argument is neither '1' nor '3'", 500, 108);
+
+	switch (_type) {
+		case muzzley::RequestInitiatedByEndpoint : {
+			_reply <<
+				"h" << JSON (
+					"t" << (int) muzzley::ReplyToEndpoint <<
+					"cid" << (string) _data_received["h"]["cid"]
+				);
+			break;
+		}
+		case muzzley::RequestInitiatedMuzzleyCore : {
+			_reply <<
+				"h" << JSON (
+					"t" << (int) muzzley::ReplyToMuzzleyCore <<
+					"cid" << (string) _data_received["h"]["cid"]
+				);
+			break;
+		}
+		default :
+			return false;
+	}
+
+	return this->write(_reply);
+}
+
 void muzzley::Client::connectApp(string _app_token, string _activity_id) {
 	this->__activity_id.assign(_activity_id.data());
 	this->__is_static_activity = _activity_id.length() != 0;
@@ -458,7 +493,7 @@ void muzzley::Client::quit() {
 }
 
 void muzzley::Client::participantQuit() {
-	assertz(this->__participant_id != -1, "in order to quit you must have joined first (use joinActivity method)", 500, 104);
+	assertz(this->__participant_id != -1, "in order to quit you must have joined first (use joinActivity method)", 500, 105);
 
 	muzzley::JSONObj _message;
 	_message <<
@@ -483,7 +518,7 @@ void muzzley::Client::participantQuit() {
 }
 
 void muzzley::Client::participantReady(muzzley::Callback _callback) {
-	assertz(this->__participant_id != -1, "in order to be ready you must have joined first (use joinActivity method)", 500, 104);
+	assertz(this->__participant_id != -1, "in order to be ready you must have joined first (use joinActivity method)", 500, 106);
 
 	muzzley::JSONObj _message;
 	_message <<

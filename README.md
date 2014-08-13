@@ -203,6 +203,51 @@ int main(int argc, char* argv[]) {
 }
 ```
 
+# REPLYING TO A MESSAGE
+
+Sometimes you'll need to reply to a received message, especially when the received message is either of type *1* or *3*. The differents message types are:
+
+**1**: Request Initiated by an endpoint (Application or Controller)
+**2**: Reply to the endpoint
+**3**: Request Initiated by the Muzzley Core server
+**4**: Reply to the Muzzley Core server
+**5**: Signaling (Fire and forget) between endpoints
+
+In order to reply to a received message, you may use the *reply* method:
+	
+```
+#!c++
+
+	virtual bool reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& _reply) final;
+```
+
+This method receives the original received message (to check for the original message type) and the data you want to reply with. The reply message fields are:
+
+- **s**: A boolean representing whether the authentication request was successful *(mandatory)*
+- **m**: A textual message explaining the result of the operation *(optional)*
+- **d**: The aditional data *(optional)*
+
+The *reply* method returns *true* if a message were sent and *false* if not (if the received message was of type *5*, for instance). 
+
+Hence, replying, for instance, to a Signaling Message could look like this:
+
+```
+#!c++
+
+	_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		if (_client.reply(_data, JSON(
+			"s" << "true" <<
+			"m" << "this is a testing signal so is always successful!" <<
+			"d" << JSON(
+				"w" << "gamepad"
+			)
+		))) {
+			cout << "great, replied to a Signal Message" << endl << flush;
+		}
+		return true;
+	});
+```
+
 #MAIN CLASSES
 
 There are two classes that you have to learn how to use in order to adequatly use this library:
