@@ -240,13 +240,14 @@ Hence, replying, for instance, to a Signaling Message could look like this:
 #!c++
 
 _client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-	if (_client.reply(_data, JSON(
-		"s" << "true" <<
-		"m" << "this is a testing signal so is always successful!" <<
-		"d" << JSON(
-			"w" << "gamepad"
-		)
-	))) {
+	if (_client.isReplyNeeded(_data)) {
+		_client.reply(_data, JSON(
+			"s" << "true" <<
+			"m" << "this is a testing signal so is always successful!" <<
+			"d" << JSON(
+				"w" << "gamepad"
+			)
+		));
 		cout << "great, replied to a Signal Message" << endl << flush;
 	}
 	return true;
@@ -272,6 +273,12 @@ This class methods are organized in the following way:
 #!c++	
 virtual void on(muzzley::EventType _type, muzzley::Handler _handler) final;
 virtual void trigger(muzzley::EventType _type, muzzley::JSONObj& _data) final;
+```
+
+### Message Handling
+```
+#!c++	
+virtual bool reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& _reply) final;
 ```
 
 ### Protocol performatives
@@ -321,6 +328,7 @@ const ParticipantList& getParticipants() const;
 ### Flag testing
 ```
 #!c++	
+bool isReplyNeeded(muzzley::JSONObj& _data_received) const;
 bool isAppLoggedin() const;
 bool isInitiatingMaster() const;
 bool isConnected() const;

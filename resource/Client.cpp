@@ -78,17 +78,12 @@ muzzley::Client::Client() :
 		return true;
 	});
 
-	this->on(muzzley::ParticipantJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		if (!!_data["d"]["participant"]["id"]) {
-			if (((string) _data["d"]["participant"]["deviceId"]) == _client.__device_id) {
-				_client.__participant_id = (long) _data["d"]["participant"]["id"];
-			}
-			pthread_mutex_lock(_client.__mtx);
-			_client.__participants.insert(make_pair((long) _data["d"]["participant"]["id"], (string) _data["d"]["participant"]["profileId"]));
-			pthread_mutex_unlock(_client.__mtx);
-
+	this->on(muzzley::ActivityTerminated, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		_client.__activity_id.assign("");
+		_client.__is_initiating_master = false;
+		if (_client.isReplyNeeded(_data)) {
 			_client.reply(_data, JSON(
-				"s" << "true"
+				"s" << true
 			));
 		}
 		return true;
@@ -102,9 +97,74 @@ muzzley::Client::Client() :
 				_client.__participants.erase(_found);
 			}
 			pthread_mutex_unlock(_client.__mtx);
+
+			if (_client.isReplyNeeded(_data)) {
+				_client.reply(_data, JSON(
+					"s" << true
+				));
+			}
+		}
+		else if (_client.isReplyNeeded(_data)) {
+			_client.reply(_data, JSON(
+				"s" << false
+			));
 		}
 		return true;
 	});
+
+	this->on(muzzley::ParticipantJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		if (!!_data["h"]["pid"] && !!_data["d"]) {
+			long _pid = (long) _data["h"]["pid"];
+
+			pthread_mutex_lock(_client.__mtx);
+			muzzley::ParticipantList::iterator _found = _client.__participants.find(_pid);
+			if (_found != _client.__participants.end()) {
+				muzzley::JSONObj _participant;
+				muzzley::fromstr(_found->second, _participant);
+				((muzzley::JSONObj) _data["d"]) << "participant" << _participant;
+			}
+			pthread_mutex_unlock(_client.__mtx);
+
+			if (_client.isReplyNeeded(_data)) {
+				_client.reply(_data, JSON(
+					"h" << JSON (
+						"pid" << _pid
+					) <<
+					"s" << true
+				));
+			}
+		}
+		else {
+			_client.reply(_data, JSON(
+				"s" << false
+			));
+		}
+		return true;
+	});
+
+	this->on(muzzley::__INTERNAL_ParticipantJoined__, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		if (!!_data["d"]["participant"]["id"]) {
+			if (((string) _data["d"]["participant"]["deviceId"]) == _client.__device_id) {
+				_client.__participant_id = (long) _data["d"]["participant"]["id"];
+			}
+			pthread_mutex_lock(_client.__mtx);
+			_client.__participants.insert(make_pair((long) _data["d"]["participant"]["id"], (string) _data["d"]));
+			pthread_mutex_unlock(_client.__mtx);
+
+			if (_client.isReplyNeeded(_data)) {
+				_client.reply(_data, JSON(
+					"s" << true
+				));
+			}
+		}
+		else if (_client.isReplyNeeded(_data)) {
+			_client.reply(_data, JSON(
+				"s" << false
+			));
+		}
+		return true;
+	});
+
 }
 
 muzzley::Client::~Client() {
@@ -288,23 +348,36 @@ bool muzzley::Client::reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& 
 	assertz(!!_data_received["h"]["t"], "there is no message type in the '_data_received' argument", 500, 107);
 	assertz(!!_data_received["h"]["cid"], "there is no message ide ('cid') in the '_data_received' argument", 500, 107);
 	muzzley::MessageType _type = (muzzley::MessageType) ((int)_data_received["h"]["t"]);
-	//assertz(_type == 1 || _type == 3, "the message type in the '_data_received' argument is neither '1' nor '3'", 500, 108);
 
 	switch (_type) {
 		case muzzley::RequestInitiatedByEndpoint : {
-			_reply <<
-				"h" << JSON (
+			if (!!_reply["h"]) {
+				((muzzley::JSONObj)_reply["h"]) <<
 					"t" << (int) muzzley::ReplyToEndpoint <<
-					"cid" << (string) _data_received["h"]["cid"]
-				);
+					"cid" << (string) _data_received["h"]["cid"];
+			}
+			else {
+				_reply <<
+					"h" << JSON (
+						"t" << (int) muzzley::ReplyToEndpoint <<
+						"cid" << (string) _data_received["h"]["cid"]
+					);
+			}
 			break;
 		}
 		case muzzley::RequestInitiatedMuzzleyCore : {
-			_reply <<
-				"h" << JSON (
-					"t" << (int) muzzley::ReplyToMuzzleyCore <<
-					"cid" << (string) _data_received["h"]["cid"]
-				);
+			if (!!_reply["h"]) {
+				((muzzley::JSONObj)_reply["h"]) <<
+					"t" << (int) muzzley::ReplyToEndpoint <<
+					"cid" << (string) _data_received["h"]["cid"];
+			}
+			else {
+				_reply <<
+					"h" << JSON (
+						"t" << (int) muzzley::ReplyToMuzzleyCore <<
+						"cid" << (string) _data_received["h"]["cid"]
+					);
+			}
 			break;
 		}
 		default :
@@ -846,6 +919,11 @@ const long muzzley::Client::getParticipantId() const {
 	return __participant_id;
 }
 
+bool muzzley::Client::isReplyNeeded(muzzley::JSONObj& _data_received) const {
+	muzzley::MessageType _type = (muzzley::MessageType) ((int) _data_received["h"]["t"]);
+	return _type == muzzley::RequestInitiatedByEndpoint || _type == muzzley::RequestInitiatedMuzzleyCore;
+}
+
 bool muzzley::Client::isAppLoggedin() const {
 	return __is_app_loggedin;
 }
@@ -969,10 +1047,10 @@ void muzzley::Client::process(muzzley::JSONObj& _received, muzzley::EventType* _
 		*_type = muzzley::ActivityTerminated;
 	}
 	else if (_action == "participantJoined") {
-		*_type = muzzley::ParticipantJoined;
+		*_type = muzzley::__INTERNAL_ParticipantJoined__;
 	}
 	else if (_action == "participantReady") {
-		*_type = muzzley::ParticipantReady;
+		*_type = muzzley::ParticipantJoined;
 	}
 	else if (_action == "participantQuit") {
 		*_type = muzzley::ParticipantQuit;
@@ -1018,8 +1096,8 @@ void muzzley::Client::run() {
 						break;
 					}
 					case 0x08: {
-						        this->disconnect();
-						        break;
+						this->disconnect();
+						break;
 					}
 					case 0x09: {
 						break;

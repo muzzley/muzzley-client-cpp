@@ -43,7 +43,17 @@ namespace muzzley {
 	
 #define N_EVENT_TYPES 11
 	enum EventType {
-		Connect, Handshake, ActivityCreated, ActivityJoined, ActivityTerminated, ParticipantJoined, ParticipantReady, ParticipantQuit, SignalingMessage, AppLoggedIn, UserLoggedIn, Reply
+		Connect = 0,
+		Handshake = 1,
+		ActivityCreated = 2,
+		ActivityJoined = 3,
+		ActivityTerminated = 4,
+		ParticipantJoined = 5,
+		ParticipantQuit = 6,
+		SignalingMessage = 7,
+		AppLoggedIn = 8,
+		UserLoggedIn = 9,
+		__INTERNAL_ParticipantJoined__ = 10
 	};
 	enum MessageType {
 		RequestInitiatedByEndpoint = 1,
@@ -108,6 +118,7 @@ namespace muzzley {
 			const long getParticipantId() const;
 			const ParticipantList& getParticipants() const;
 
+			bool isReplyNeeded(muzzley::JSONObj& _data_received) const;
 			bool isAppLoggedin() const;
 			bool isInitiatingMaster() const;
 			bool isConnected() const;
