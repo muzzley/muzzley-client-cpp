@@ -39,6 +39,7 @@ using namespace __gnu_cxx;
 namespace muzzley {
 
 	void tostr(string& s, int i);
+	void tostr(string& s, bool b);
 	void tostr(std::string&, int, std::ios_base& (&)(std::ios_base&));
 #ifdef __LP64__
 	void tostr(string& s, unsigned int i);

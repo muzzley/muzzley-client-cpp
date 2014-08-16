@@ -28,6 +28,10 @@ void muzzley::tostr(string& s, int i){
 	s.insert(s.length(), oss);
 }
 
+void muzzley::tostr(string& s, bool b){
+	s.insert(s.length(), b ? "true" : "false");
+}
+
 void muzzley::tostr(std::string& s, int i, std::ios_base& (&hex)(std::ios_base&)) {
 	char oss[512];
 	sprintf(oss,"%x", i);

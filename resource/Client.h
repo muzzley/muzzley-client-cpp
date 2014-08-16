@@ -41,7 +41,7 @@ using namespace __gnu_cxx;
 
 namespace muzzley {
 	
-#define N_EVENT_TYPES 11
+#define N_EVENT_TYPES 12
 	enum EventType {
 		Connect = 0,
 		Handshake = 1,
@@ -53,7 +53,8 @@ namespace muzzley {
 		SignalingMessage = 7,
 		AppLoggedIn = 8,
 		UserLoggedIn = 9,
-		__INTERNAL_ParticipantJoined__ = 10
+		WidgetAction = 10,
+		__INTERNAL_ParticipantJoined__ = 11
 	};
 	enum MessageType {
 		RequestInitiatedByEndpoint = 1,
@@ -92,7 +93,8 @@ namespace muzzley {
 
 			virtual void participantReady(muzzley::Callback _callback = NULL);
 			virtual void changeWidget(long _participant_id, string _widget, muzzley::Callback _callback = NULL);
-			virtual void changeWidget(long _participant_id, string _widget, muzzley::JSONObj& _options, muzzley::Callback _callback = NULL);
+			virtual void changeWidget(long _participant_id, string _widget, muzzley::JSONObj& _params, muzzley::Callback _callback = NULL);
+			virtual void changeWidget(long _participant_id, muzzley::JSONObj& _options, muzzley::Callback _callback);
 			virtual void setupComponent(long _participant_id, string _component, string _component_id, string _action, muzzley::Callback _callback = NULL);
 			virtual void setupComponent(long _participant_id, string _component, string _component_id, string _action, muzzley::JSONObj& _options, muzzley::Callback _callback = NULL);
 

@@ -132,7 +132,7 @@ bool muzzley::JSONBoolRef::getBool() {
 
 string muzzley::JSONBoolRef::getString() {
 	string _ret;
-	muzzley::tostr(_ret, this->__value);
+	muzzley::tostr(_ret, (bool) this->__value);
 	return _ret;
 }
 
@@ -145,9 +145,9 @@ muzzley::JSONArrRef& muzzley::JSONBoolRef::getJSONArr() {
 }
 
 void muzzley::JSONBoolRef::stringify(ostream& _out, short _flags, string _tabs) {
-	_out << this->__value << flush;
+	_out << (bool) this->__value << flush;
 }
 
 void muzzley::JSONBoolRef::stringify(string& _out, short _flags, string _tabs) {
-	muzzley::tostr(_out, this->__value);
+	muzzley::tostr(_out, (bool) this->__value);
 }
