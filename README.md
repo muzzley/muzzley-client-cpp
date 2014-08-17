@@ -14,7 +14,11 @@ This library depends on:
 ## Linux
 To install this library reproduce the following steps on a terminal:
 
-> $ git clone https://github.com/muzzley/muzzley-client-cpp.git
+> $ wget -O muzzley-client-cpp.zip https://github.com/muzzley/muzzley-client-cpp/archive/master.zip
+
+> $ unzip muzzley-client-cpp.zip
+
+> $ cd muzzley-client-cpp-master/
 
 > $ make
 
