@@ -353,30 +353,30 @@ bool muzzley::Client::reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& 
 		case muzzley::RequestInitiatedByEndpoint: {
 			if (!!_reply["h"]) {
 				((muzzley::JSONObj) _reply["h"]) <<
-				                    "t" << (int) muzzley::ReplyToEndpoint <<
-				                    "cid" << (string) _data_received["h"]["cid"];
+					"t" << (int) muzzley::ReplyToEndpoint <<
+					"cid" << (string) _data_received["h"]["cid"];
 			}
 			else {
 				_reply <<
-				                    "h" << JSON(
-				                                        "t" << (int) muzzley::ReplyToEndpoint <<
-				                                        "cid" << (string) _data_received["h"]["cid"]
-				                                        );
+					"h" << JSON(
+						"t" << (int) muzzley::ReplyToEndpoint <<
+						"cid" << (string) _data_received["h"]["cid"]
+						);
 			}
 			break;
 		}
 		case muzzley::RequestInitiatedMuzzleyCore: {
 			if (!!_reply["h"]) {
 				((muzzley::JSONObj) _reply["h"]) <<
-				                    "t" << (int) muzzley::ReplyToEndpoint <<
-				                    "cid" << (string) _data_received["h"]["cid"];
+					"t" << (int) muzzley::ReplyToEndpoint <<
+					"cid" << (string) _data_received["h"]["cid"];
 			}
 			else {
 				_reply <<
-				                    "h" << JSON(
-				                                        "t" << (int) muzzley::ReplyToMuzzleyCore <<
-				                                        "cid" << (string) _data_received["h"]["cid"]
-				                                        );
+					"h" << JSON(
+						"t" << (int) muzzley::ReplyToMuzzleyCore <<
+						"cid" << (string) _data_received["h"]["cid"]
+						);
 			}
 			break;
 		}
@@ -443,14 +443,14 @@ void muzzley::Client::connectUser(string _user_token, string _activity_id) {
 void muzzley::Client::loginApp(string _app_token) {
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1
-	                                        ) <<
-	                    "a" << "loginApp" <<
-	                    "d" << JSON(
-	                                        "token" << _app_token
-	                                        );
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1
+			) <<
+		"a" << "loginApp" <<
+		"d" << JSON(
+			"token" << _app_token
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -466,14 +466,14 @@ void muzzley::Client::loginApp(string _app_token) {
 void muzzley::Client::loginUser(string _user_token) {
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1
-	                                        ) <<
-	                    "a" << "loginUser" <<
-	                    "d" << JSON(
-	                                        "token" << _user_token
-	                                        );
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1
+			) <<
+		"a" << "loginUser" <<
+		"d" << JSON(
+			"token" << _user_token
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -491,11 +491,11 @@ void muzzley::Client::createActivity() {
 
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1
-	                                        ) <<
-	                    "a" << "create";
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1
+			) <<
+		"a" << "create";
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -521,14 +521,14 @@ void muzzley::Client::joinActivity(string _activity_id) {
 
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1
-	                                        ) <<
-	                    "a" << "join" <<
-	                    "d" << JSON(
-	                                        "activityId" << _activity_id
-	                                        );
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1
+			) <<
+		"a" << "join" <<
+		"d" << JSON(
+			"activityId" << _activity_id
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -548,11 +548,11 @@ void muzzley::Client::quit() {
 
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1
-	                                        ) <<
-	                    "a" << "quit";
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1
+			) <<
+		"a" << "quit";
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -570,14 +570,14 @@ void muzzley::Client::participantQuit() {
 
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1
-	                                        ) <<
-	                    "a" << "participantQuit" <<
-	                    "d" << JSON(
-	                                        "participantId" << this->__participant_id
-	                                        );
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1
+			) <<
+		"a" << "participantQuit" <<
+		"d" << JSON(
+			"participantId" << this->__participant_id
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -595,14 +595,14 @@ void muzzley::Client::participantReady(muzzley::Callback _callback) {
 
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1
-	                                        ) <<
-	                    "a" << "signal" <<
-	                    "d" << JSON(
-	                                        "a" << "ready"
-	                                        );
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1
+			) <<
+		"a" << "signal" <<
+		"d" << JSON(
+			"a" << "ready"
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -618,15 +618,15 @@ void muzzley::Client::participantReady(muzzley::Callback _callback) {
 void muzzley::Client::changeWidget(long _participant_id, string _widget, muzzley::Callback _callback) {
 	muzzley::JSONObj _options;
 	_options <<
-	                    "widget" << _widget;
+		"widget" << _widget;
 	this->changeWidget(_participant_id, _options, _callback);
 }
 
 void muzzley::Client::changeWidget(long _participant_id, string _widget, muzzley::JSONObj& _params, muzzley::Callback _callback) {
 	muzzley::JSONObj _options;
 	_options <<
-	                    "widget" << _widget <<
-	                    "params" << _params;
+		"widget" << _widget <<
+		"params" << _params;
 	this->changeWidget(_participant_id, _options, _callback);
 }
 
@@ -640,16 +640,16 @@ void muzzley::Client::changeWidget(long _participant_id, muzzley::JSONObj& _opti
 
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1 <<
-	                                        "pid" << _participant_id
-	                                        ) <<
-	                    "a" << "signal" <<
-	                    "d" << JSON(
-	                                        "a" << "changeWidget" <<
-	                                        "d" << _options
-	                                        );
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1 <<
+			"pid" << _participant_id
+			) <<
+		"a" << "signal" <<
+		"d" << JSON(
+			"a" << "changeWidget" <<
+			"d" << _options
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -673,20 +673,20 @@ void muzzley::Client::setupComponent(long _participant_id, string _component, st
 
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1 <<
-	                                        "pid" << _participant_id
-	                                        ) <<
-	                    "a" << "signal" <<
-	                    "d" << JSON(
-	                                        "a" << "setupComponent" <<
-	                                        "d" << JSON(
-	                                        "c" << _component <<
-	                                        "id" << _component_id <<
-	                                        "a" << _action
-	                                        )
-	                                        );
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1 <<
+			"pid" << _participant_id
+			) <<
+		"a" << "signal" <<
+		"d" << JSON(
+			"a" << "setupComponent" <<
+			"d" << JSON(
+				"c" << _component <<
+				"id" << _component_id <<
+				"a" << _action
+				)
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -710,21 +710,21 @@ void muzzley::Client::setupComponent(long _participant_id, string _component, st
 
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1 <<
-	                                        "pid" << _participant_id
-	                                        ) <<
-	                    "a" << "signal" <<
-	                    "d" << JSON(
-	                                        "a" << "setupComponent" <<
-	                                        "d" << JSON(
-	                                        "c" << _component <<
-	                                        "id" << _component_id <<
-	                                        "a" << _action <<
-	                                        "p" << _options
-	                                        )
-	                                        );
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1 <<
+			"pid" << _participant_id
+			) <<
+		"a" << "signal" <<
+		"d" << JSON(
+			"a" << "setupComponent" <<
+			"d" << JSON(
+				"c" << _component <<
+				"id" << _component_id <<
+				"a" << _action <<
+				"p" << _options
+				)
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -748,15 +748,15 @@ void muzzley::Client::sendSignal(long _participant_id, string _type, muzzley::Ca
 
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1 <<
-	                                        "pid" << _participant_id
-	                                        ) <<
-	                    "a" << "signal" <<
-	                    "d" << JSON(
-	                                        "a" << _type
-	                                        );
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1 <<
+			"pid" << _participant_id
+			) <<
+		"a" << "signal" <<
+		"d" << JSON(
+			"a" << _type
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -780,16 +780,16 @@ void muzzley::Client::sendSignal(long _participant_id, string _type, muzzley::JS
 
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1 <<
-	                                        "pid" << _participant_id
-	                                        ) <<
-	                    "a" << "signal" <<
-	                    "d" << JSON(
-	                                        "a" << _type <<
-	                                        "d" << _data
-	                                        );
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1 <<
+			"pid" << _participant_id
+			) <<
+		"a" << "signal" <<
+		"d" << JSON(
+			"a" << _type <<
+			"d" << _data
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -807,14 +807,14 @@ void muzzley::Client::sendSignal(long _participant_id, string _type, muzzley::JS
 void muzzley::Client::sendSignal(string _type, muzzley::Callback _callback) {
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1
-	                                        ) <<
-	                    "a" << "signal" <<
-	                    "d" << JSON(
-	                                        "a" << _type
-	                                        );
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1
+			) <<
+		"a" << "signal" <<
+		"d" << JSON(
+			"a" << _type
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -830,15 +830,15 @@ void muzzley::Client::sendSignal(string _type, muzzley::Callback _callback) {
 void muzzley::Client::sendSignal(string _type, muzzley::JSONObj& _data, muzzley::Callback _callback) {
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1
-	                                        ) <<
-	                    "a" << "signal" <<
-	                    "d" << JSON(
-	                                        "a" << _type <<
-	                                        "d" << _data
-	                                        );
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1
+			) <<
+		"a" << "signal" <<
+		"d" << JSON(
+			"a" << _type <<
+			"d" << _data
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -854,16 +854,16 @@ void muzzley::Client::sendSignal(string _type, muzzley::JSONObj& _data, muzzley:
 void muzzley::Client::sendWidgetData(string _widget, string _component, string _event_type, string _event_value) {
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "t" << 5
-	                                        ) <<
-	                    "a" << "signal" <<
-	                    "d" << JSON(
-	                                        "w" << _widget <<
-	                                        "c" << _component <<
-	                                        "e" << _event_type <<
-	                                        "v" << _event_value
-	                                        );
+		"h" << JSON(
+			"t" << 5
+			) <<
+		"a" << "signal" <<
+		"d" << JSON(
+			"w" << _widget <<
+			"c" << _component <<
+			"e" << _event_type <<
+			"v" << _event_value
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -932,15 +932,15 @@ const muzzley::ParticipantList& muzzley::Client::getParticipants() const {
 bool muzzley::Client::handshake(muzzley::Handler _callback) {
 	muzzley::JSONObj _message;
 	_message <<
-	                    "h" << JSON(
-	                                        "cid" << this->__serial <<
-	                                        "t" << 1
-	                                        ) <<
-	                    "a" << "handshake" <<
-	                    "d" << JSON(
-	                                        "protocolVersion" << "1.2.0" <<
-	                                        "lib" << "C++ 0.1.0"
-	                                        );
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1
+			) <<
+		"a" << "handshake" <<
+		"d" << JSON(
+			"protocolVersion" << "1.2.0" <<
+			"lib" << "C++ 0.1.0"
+			);
 
 #ifdef MUZZLEY_DEBUG
 	{
