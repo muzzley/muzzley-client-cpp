@@ -121,7 +121,7 @@ muzzley::Client::Client() :
 			if (_found != _client.__participants.end()) {
 				muzzley::JSONObj _participant;
 				muzzley::fromstr(_found->second, _participant);
-				((muzzley::JSONObj) _data["d"]) << "participant" << _participant;
+				((muzzley::JSONObj) _data) << "d" << _participant;
 			}
 			pthread_mutex_unlock(_client.__mtx);
 
