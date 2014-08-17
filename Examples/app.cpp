@@ -51,19 +51,47 @@ int main(int argc, char* argv[]) {
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
 	_client.on(muzzley::ActivityCreated, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		if (!!_data["s"] && ((string) _data["d"]["activityId"]) != "121345") {
+		cout << "Activity created with id " << _data["d"]["activityId"] << endl << flush;
+		return true;
+	});
 
-			muzzley::JSONObj _s_data;
-			_s_data <<
-				"w"<< "gamepad" <<
-				"c"<< "ba" <<
-				"v"<< "a" <<
-				"e"<< "press";
+	_client.on(muzzley::ParticipantJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
 
-			_client.sendSignal("changeWidget", _s_data, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-				cout << "signal accepted by server" << endl << flush;
-			});
-		}
+		// string widget = "gamepad";
+		string widget = "webview";
+		long participant_id = _data["d"]["participant"]["id"];
+		string name = _data["d"]["participant"]["name"];
+
+		cout << "Participant " << name << "(" << participant_id << ")" << " joined." << endl << flush;
+		cout << "Chaning widget to a... " << widget << endl << flush;
+
+		string participant_string;
+		muzzley::tostr(participant_string, _data);
+		cout << "Participant string: " << participant_string << endl << flush;
+
+		// Change widget to the native gamepad
+		// _client.changeWidget(participant_id, widget, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		// 	cout << "Widget successfully changed" << endl << flush;
+		// });
+
+		// Change widget to a custom WebView widget
+		muzzley::JSONObj _widget_opts;
+		_widget_opts <<
+		  "widget" << widget <<
+		  "params" << JSON (
+				"uuid" << "58b54ae9-c94d-4c71-a4f1-6412b2376b1d" <<
+				"orientation" << "portrait"
+	  	);
+		_client.changeWidget(participant_id, _widget_opts, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+			cout << "Widget successfully changed" << endl << flush;
+		});
+		return true;
+	});
+
+	_client.on(muzzley::WidgetAction, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		string widget_data;
+		muzzley::tostr(widget_data, _data["d"]);
+		cout << "Native Widget action event fired: " << widget_data << endl << flush;
 		return true;
 	});
 
@@ -71,6 +99,13 @@ int main(int argc, char* argv[]) {
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
 	_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+
+		string action;
+		action.assign((string) _data["d"]["a"]);
+
+		cout << "Received signaling message for action " << action << endl << flush;
+		cout << "with data " << _data["d"]["d"] << endl << flush;
+		cout << "and isReplyNeeded " << _client.isReplyNeeded(_data) << endl << flush;
 
 		// Switch on the Intel(R) Galileo LED 13
 		// (pure c++ version)
