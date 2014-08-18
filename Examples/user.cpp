@@ -32,22 +32,28 @@ int main(int argc, char* argv[]) {
 
 	muzzley::Client _client;
 
-	// Register listener to be invoked when user succesfully logs in.
-	//
-	// Don't bother to store the returned deviceId or sessionId, the Client class already does that,
-	// access it through the 'getDeviceId'  and 'getSessionId' method.
-	//
-	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::UserLoggedIn, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		_client.joinActivity();
-		return true;
-	});
-
 	// Register listener to be invoked when user succesfully joins the activity.
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
 	_client.on(muzzley::ActivityJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		_client.sendWidgetData("xpto", "a", "some", "value");
+		cout << "User joined activity. Assigned device Id: " << _client.getDeviceId() << endl << flush;
+		// _client.sendWidgetData("xpto", "a", "some", "value");
+		return true;
+	});
+
+	// Register listener to be invoked when the app requests
+	// the user to change to a certain widget.
+	//
+	// Return 'false' if you want to stop other listeners from being invoked.
+	_client.on(muzzley::ChangeWidget, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		string widgetobj_str;
+		muzzley::tostr(widgetobj_str, _data["d"]["d"]);
+		cout << "User was requested to change to a widget. Object: " << widgetobj_str << endl << flush;
+
+		if ((string) _data["d"]["d"]["widget"] == "gamepad") {
+			// Assuming we changed to a gamepad, send a "button b pressed" event
+			_client.sendWidgetData("gamepad", "ba", "press", "a");
+		}
 		return true;
 	});
 
@@ -55,8 +61,18 @@ int main(int argc, char* argv[]) {
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
 	_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		cout << (bool) _data["s"] << endl << flush;
-		cout << (string) _data["d"]["a"] << endl << flush;
+		cout << "Received a signaling message:" << endl << flush;
+		string signalobj_str;
+		muzzley::tostr(signalobj_str, _data["d"]);
+		cout << signalobj_str << endl << flush;
+		return true;
+	});
+
+	// Register listener to be invoked when the activity we've joined terminates
+	//
+	// Return 'false' if you want to stop other listeners from being invoked.
+	_client.on(muzzley::ActivityTerminated, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		cout << "Activity Terminated. We either try to reconnect or exit." << endl << flush;
 		return true;
 	});
 
@@ -66,7 +82,7 @@ int main(int argc, char* argv[]) {
 	//
 	// It will start the application loop synchronously,
 	// i.e. the program will not execute anything below this line.
-	_client.connectUser("c1bc8d7d6bc38873", string(argv[1]));
+	_client.connectUser("guest", string(argv[1]));
 
 	return 0;
 }
