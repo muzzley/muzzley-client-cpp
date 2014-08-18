@@ -66,6 +66,15 @@ muzzley::Client::Client() :
 			_client.__session_id.assign((string) _data["d"]["sessionId"]);
 			_client.__is_app_loggedin = false;
 			_client.__is_user_loggedin = true;
+			_client.joinActivity(_client.__activity_id);
+		}
+		return true;
+	});
+
+	this->on(muzzley::ActivityJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		if (!!_data["s"]) {
+			_client.__participant_id = (long) _data["d"]["participant"]["id"];
+			_client.participantReady();
 		}
 		return true;
 	});
@@ -160,6 +169,24 @@ muzzley::Client::Client() :
 		else if (_client.isReplyNeeded(_data)) {
 			_client.reply(_data, JSON(
 					"s" << false
+				));
+		}
+		return true;
+	});
+
+	this->on(muzzley::ChangeWidget, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		if (_client.isReplyNeeded(_data)) {
+			_client.reply(_data, JSON(
+					"s" << true
+				));
+		}
+		return true;
+	});
+
+	this->on(muzzley::SetupComponent, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		if (_client.isReplyNeeded(_data)) {
+			_client.reply(_data, JSON(
+					"s" << true
 				));
 		}
 		return true;
@@ -1017,6 +1044,14 @@ void muzzley::Client::process(muzzley::JSONObj& _received, muzzley::EventType* _
 	else if (_action == "signal") {
 		if (_signal_action == "ready") {
 			*_type = muzzley::ParticipantJoined;
+		}
+		else if (_signal_action == "changeWidget") {
+			// {"c":"ba","e":"release","v":"a","w":"gamepad"}
+			*_type = muzzley::ChangeWidget;
+		}
+		else if (_signal_action == "setupComponent") {
+			// {"c":"ba","e":"release","v":"a","w":"gamepad"}
+			*_type = muzzley::SetupComponent;
 		}
 		else if (_signal_action == "" && !!_received["d"]["w"] && !!_received["d"]["c"]) {
 			// {"c":"ba","e":"release","v":"a","w":"gamepad"}

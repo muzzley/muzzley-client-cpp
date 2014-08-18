@@ -41,7 +41,7 @@ using namespace __gnu_cxx;
 
 namespace muzzley {
 	
-#define N_EVENT_TYPES 12
+#define N_EVENT_TYPES 14
 	enum EventType {
 		Connect = 0,
 		Handshake = 1,
@@ -51,10 +51,12 @@ namespace muzzley {
 		ParticipantJoined = 5,
 		ParticipantQuit = 6,
 		SignalingMessage = 7,
-		AppLoggedIn = 8,
-		UserLoggedIn = 9,
-		WidgetAction = 10,
-		__INTERNAL_ParticipantJoined__ = 11
+		ChangeWidget = 8,
+		SetupComponent = 9,
+		AppLoggedIn = 10,
+		UserLoggedIn = 11,
+		WidgetAction = 12,
+		__INTERNAL_ParticipantJoined__ = 13
 	};
 	enum MessageType {
 		RequestInitiatedByEndpoint = 1,
