@@ -144,7 +144,7 @@ int main(int argc, char* argv[]) {
 	//
 	// It will start the application loop synchronously,
 	// i.e. the program will not execute anything below this line.
-	_client.connectApp("c1bc8d7d6bc38873");
+	_client.connectApp("3ddde2aa9832a038");
 
 	return 0;
 }
