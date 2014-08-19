@@ -57,6 +57,7 @@ muzzley::Client::Client() :
 			_client.__session_id.assign((string) _data["d"]["sessionId"]);
 			_client.__is_app_loggedin = true;
 			_client.__is_user_loggedin = false;
+			_client.createActivity(_client.__activity_id);
 		}
 		return true;
 	});
@@ -513,7 +514,7 @@ void muzzley::Client::loginUser(string _user_token) {
 	this->write(_message);
 }
 
-void muzzley::Client::createActivity() {
+void muzzley::Client::createActivity(string _activity_id) {
 	assertz(this->__is_app_loggedin, "activity can only be created by Activity Master, you must be logged in as as app (use connectApp method).", 500, 101);
 
 	muzzley::JSONObj _message;
@@ -523,6 +524,21 @@ void muzzley::Client::createActivity() {
 			"t" << 1
 			) <<
 		"a" << "create";
+
+
+	if (_activity_id.length() != 0) {
+		this->__activity_id.assign(_activity_id.data());
+	}
+	else {
+		_activity_id.assign(this->__activity_id.data());
+	}
+
+	if (_activity_id.length() != 0) {
+		_message <<
+			"d" << JSON(
+				"activityId" << _activity_id
+				);
+	}
 
 #ifdef MUZZLEY_DEBUG
 	{

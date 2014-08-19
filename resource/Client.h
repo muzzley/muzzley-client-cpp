@@ -88,7 +88,7 @@ namespace muzzley {
 			virtual void loginApp(string _app_token) final;
 			virtual void loginUser(string _user_token) final;
 
-			virtual void createActivity();
+			virtual void createActivity(string _activity_id = "");
 			virtual void joinActivity(string _activity_id = "");
 			virtual void quit();
 			virtual void participantQuit();
