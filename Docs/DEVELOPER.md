@@ -96,6 +96,8 @@ You can register handlers for the following events:
 ```
 #!c++
 enum EventType {
+	Connect,  // when the application finishes connecting the server
+	Handshake,  // when the application finishes handshaking the server
 	ActivityCreated, // when an activity is created with success
 	ActivityJoined,  // when a response to joinActivity is finished successfully
 	ActivityTerminated,  // when an Activity Master quits
@@ -104,6 +106,8 @@ enum EventType {
 	SignalingMessage,  // when a Signaling message is received
 	ChangeWidget, // when a change widget request is received
 	SetupComponent, // when a setup component request is received
+	AppLoggedIn,  // when this app is successfully logged in
+	UserLoggedIn, // when this user is successfully logged in
 	WidgetAction // when a widget action is received
 };
 ```
@@ -123,10 +127,8 @@ Callback register also uses ***Lambda-function***s, It could look something like
 #!c++
 muzzley::Client _client;
 
-...
-
-_client.changeWidget(participant_id, _widget_opts, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-	cout << "Widget successfully changed" << endl << flush;
+_client.particpantReady([] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	...
 	return true;
 });
 ```
@@ -154,21 +156,26 @@ int main(int argc, char* argv[]) {
 	// Create the Muzzley client
 	muzzley::Client _client;
 
-	// Register listener to be invoked when a participant joins our activity.
+	// Register listener to be invoked when activity is sucessfully created.
 	//
 	// Don't bother to store the returned activityId, the Client class already does that,
 	// access it through the 'getActivityId' method.
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::ParticipantJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		muzzley::JSONObj _s_data;
-		_s_data <<
-			"arg1"<< "value1" <<
-			"arg2"<< "value2";
+	_client.on(muzzley::ActivityCreated, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		if (!!_data["s"] && ((string) _data["d"]["activityId"]) != "121345") {
 
-		_client.sendSignal("myAction", _s_data, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-			cout << "Signal accepted by the user" << endl << flush;
-		});
+			muzzley::JSONObj _s_data;
+			_s_data <<
+				"w"<< "gamepad" <<
+				"c"<< "ba" <<
+				"v"<< "a" <<
+				"e"<< "press";
+
+			_client.sendSignal("changeWidget", _s_data, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+				cout << "signal accepted by server" << endl << flush;
+			});
+		}
 		return true;
 	});
 
@@ -176,6 +183,7 @@ int main(int argc, char* argv[]) {
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
 	_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		cout << (bool) _data["s"] << endl << flush;
 		cout << (string) _data["d"]["a"] << endl << flush;
 		return true;
 	});
@@ -192,7 +200,20 @@ int main(int argc, char* argv[]) {
 
 # REPLYING TO A MESSAGE
 
-Sometimes you'll need to reply to a received message. In order to do so, you may use the *reply* method:
+Sometimes you'll need to reply to a received message, especially when the received message is either of type *1* or *3*. The differents message types are:
+
+**1**: Request Initiated by an endpoint (Application or Controller)
+
+**2**: Reply to the endpoint
+
+**3**: Request Initiated by the Muzzley Core server
+
+**4**: Reply to the Muzzley Core server
+
+**5**: Signaling (Fire and forget) between endpoints
+
+
+In order to reply to a received message, you may use the *reply* method:
 	
 ```
 #!c++
@@ -200,13 +221,13 @@ Sometimes you'll need to reply to a received message. In order to do so, you may
 	virtual bool reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& _reply) final;
 ```
 
-This method receives the original received message and the data you want to reply with. The reply message fields are:
+This method receives the original received message (to check for the original message type) and the data you want to reply with. The reply message fields are:
 
 - **s**: A boolean representing whether the authentication request was successful *(mandatory)*
 - **m**: A textual message explaining the result of the operation *(optional)*
 - **d**: The aditional data *(optional)*
 
-The *reply* method returns *true* if a message were sent and *false* if not (if the received message was of a type that doesn't require a reply, for instance). 
+The *reply* method returns *true* if a message were sent and *false* if not (if the received message was of type *5*, for instance). 
 
 Hence, replying, for instance, to a Signaling Message could look like this:
 
@@ -219,7 +240,7 @@ _client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Clie
 			"s" << "true" <<
 			"m" << "this is a testing signal so is always successful!" <<
 			"d" << JSON(
-				"optionalArg" << "value"
+				"w" << "gamepad"
 			)
 		));
 		cout << "great, replied to a Signal Message" << endl << flush;
@@ -238,7 +259,7 @@ There are two classes that you have to learn how to use in order to adequatly us
 
 ## muzzley::Client
 
-This class aggregates a set of methods that will allow the interaction between your application and the Muzzley server. Basically, implements the Muzzley Message Protocol.
+This class aggregates a set of methods that will allow the interaction between your application and the Muzzley server. Basically, implements the performatives described in the Muzzley Message Protocol document. 
 
 This class methods are organized in the following way:
 
@@ -260,15 +281,15 @@ virtual bool reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& _reply) f
 #### Connection & Authentication
 ```
 #!c++	
-// Only need to provide `_activity_id` when using a static activity token as configured at muzzley.com
 virtual void connectApp(string _app_token, string _activity_id = "");
-
 virtual void connectUser(string _user_token, string _activity_id);
 ```
 
 #### Activity
 ```
 #!c++	
+virtual void createActivity();
+virtual void joinActivity(string _activity_id = "");
 virtual void quit();
 virtual void participantQuit();
 ```
@@ -276,6 +297,7 @@ virtual void participantQuit();
 #### Signaling
 ```
 #!c++	
+virtual void participantReady(muzzley::Callback _callback = NULL);
 virtual void changeWidget(long _participant_id, string _widget, muzzley::Callback _callback = NULL);
 virtual void changeWidget(long _participant_id, string _widget, muzzley::JSONObj& _options, muzzley::Callback _callback = NULL);
 virtual void changeWidget(long _participant_id, muzzley::JSONObj& _options, muzzley::Callback _callback);
