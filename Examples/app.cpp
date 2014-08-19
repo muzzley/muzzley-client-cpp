@@ -33,17 +33,6 @@ int main(int argc, char* argv[]) {
 	// Create the Muzzley client
 	muzzley::Client _client;
 
-	// Register listener to be invoked when app succesfully logs in.
-	//
-	// Don't bother to store the returned deviceId or sessionId, the Client class already does that,
-	// access it through the 'getDeviceId'  and 'getSessionId' method.
-	//
-	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::AppLoggedIn, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		_client.createActivity();
-		return true;
-	});
-
 	// Register listener to be invoked when activity is sucessfully created.
 	//
 	// Don't bother to store the returned activityId, the Client class already does that,
