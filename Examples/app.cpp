@@ -96,6 +96,18 @@ int main(int argc, char* argv[]) {
 		cout << "with data " << _data["d"]["d"] << endl << flush;
 		cout << "and isReplyNeeded " << _client.isReplyNeeded(_data) << endl << flush;
 
+		if (_client.isReplyNeeded(_data)) {
+			_client.reply(_data, JSON(
+				"s" << true <<
+				"m" << "this is a testing signal so is always successful!" <<
+				"d" << JSON(
+					"w" << "400" <<
+					"h" << "300"
+					)
+				));
+			cout << "great, replied to a Signal Message" << endl << flush;
+		}
+
 		// Switch on the Intel(R) Galileo LED 13
 		// (pure c++ version)
 		ofstream _export;

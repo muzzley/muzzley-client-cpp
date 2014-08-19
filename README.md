@@ -197,7 +197,7 @@ Sometimes you'll need to reply to a received message. In order to do so, you may
 ```
 #!c++
 
-	virtual bool reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& _reply) final;
+virtual bool reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& _reply) final;
 ```
 
 This method receives the original received message and the data you want to reply with. The reply message fields are:
@@ -216,7 +216,7 @@ Hence, replying, for instance, to a Signaling Message could look like this:
 _client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
 	if (_client.isReplyNeeded(_data)) {
 		_client.reply(_data, JSON(
-			"s" << "true" <<
+			"s" << true <<
 			"m" << "this is a testing signal so is always successful!" <<
 			"d" << JSON(
 				"optionalArg" << "value"
@@ -242,11 +242,10 @@ This class aggregates a set of methods that will allow the interaction between y
 
 This class methods are organized in the following way:
 
-### Event registering and triggering
+### Event registering
 ```
 #!c++	
 virtual void on(muzzley::EventType _type, muzzley::Handler _handler) final;
-virtual void trigger(muzzley::EventType _type, muzzley::JSONObj& _data) final;
 ```
 
 ### Message Handling
