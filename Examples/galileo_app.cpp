@@ -49,11 +49,6 @@ int main(int argc, char* argv[]) {
 	muzzley::Client _client;
 
 	// Register listener to be invoked when activity is sucessfully created.
-	//
-	// Don't bother to store the returned activityId, the Client class already does that,
-	// access it through the 'getActivityId' method.
-	//
-	// Return 'false' if you want to stop other listeners from being invoked.
 	_client.on(muzzley::ActivityCreated, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
 		cout << "Activity created with id " << _data["d"]["activityId"] << endl << flush;
 		cout << "You can now pair your smartphone, using the muzzley app, to the activity id " << _data["d"]["activityId"] << endl << flush;
@@ -61,67 +56,48 @@ int main(int argc, char* argv[]) {
 	});
 
 	_client.on(muzzley::ParticipantJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-
-		// string widget = "gamepad";
-		string widget = "webview";
 		long participant_id = _data["d"]["participant"]["id"];
 		string name = _data["d"]["participant"]["name"];
-
 		cout << "Participant " << name << "(" << participant_id << ")" << " joined." << endl << flush;
-		cout << "Chaning widget to a... " << widget << endl << flush;
 
-		string participant_string;
-		muzzley::tostr(participant_string, _data);
-		cout << "Participant string: " << participant_string << endl << flush;
-
-		// Change widget to the native gamepad
-		// _client.changeWidget(participant_id, widget, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		// 	cout << "Widget successfully changed" << endl << flush;
-		// });
-
-		// Change widget to a custom WebView widget
-		muzzley::JSONObj _widget_opts;
-		_widget_opts <<
-		  "widget" << widget <<
-		  "params" << JSON (
-				"uuid" << "58b54ae9-c94d-4c71-a4f1-6412b2376b1d" <<
-				"orientation" << "portrait"
-	  	);
-		_client.changeWidget(participant_id, _widget_opts, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		_client.changeWidget(participant_id, "switch", [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
 			cout << "Widget successfully changed" << endl << flush;
 		});
 		return true;
 	});
 
 	_client.on(muzzley::WidgetAction, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		string widget_data;
-		muzzley::tostr(widget_data, _data["d"]);
-		cout << "Native Widget action event fired: " << widget_data << endl << flush;
-		return true;
-	});
+		int _switch_value = (int) _data["d"]["v"];
+		cout << "User pressed the switch to " << (_switch_value ? "1 (On)" : "0 (Off)") << endl << flush;
 
-	// Register listener to be invoked when app receives a signal message.
-	//
-	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		// Switch on the Intel(R) Galileo LED 13
+		// (pure c++ version)
+		ofstream _export;
+		_export.open("/sys/class/gpio/export", ios::out | ios::trunc);
+		ofstream _direction;
+		_direction.open("/sys/class/gpio/gpio3/direction", ios::out | ios::trunc);
+		ofstream _value;
+		_value.open("/sys/class/gpio/gpio3/value", ios::out | ios::trunc);
 
-		string action;
-		action.assign((string) _data["d"]["a"]);
+		_export << "3" << flush;
+		_export.close();
 
-		cout << "Received signaling message for action " << action << endl << flush;
-		cout << "with data " << _data["d"]["d"] << endl << flush;
-		cout << "and isReplyNeeded " << _client.isReplyNeeded(_data) << endl << flush;
+		_direction << "out" << flush;
+		_direction.close();
 
-		if (_client.isReplyNeeded(_data)) {
-			_client.reply(_data, JSON(
-				"s" << true <<
-				"m" << "this is a testing signal so is always successful!" <<
-				"d" << JSON(
-					"w" << "400" <<
-					"h" << "300"
-					)
-				));
-			cout << "great, replied to a Signal Message" << endl << flush;
+		_value << to_string(_switch_value) << flush;
+		_value.close();
+
+		// Switch on the Intel(R) Galileo LED 13
+		// (syscall version)
+		if (system("echo 3 > /sys/class/gpio/export") == -1) {
+			cout << "error" << endl << flush;
+		}
+		if (system("echo out > /sys/class/gpio/gpio3/direction") == -1) {
+			cout << "error" << endl << flush;
+		}
+		if (system( ("echo " + to_string(_switch_value) + " > /sys/class/gpio/gpio3/value").c_str() ) == -1) {
+			cout << "error" << endl << flush;
 		}
 
 		return true;

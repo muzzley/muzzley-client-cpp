@@ -16,6 +16,16 @@ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 */
 
+//
+// You can compile this application with the following command:
+// g++ -std=c++0x -I/usr/include/muzzley Examples/user.cpp -o myuser -lmuzzley -lpthread
+//
+
+//
+// Usage instructions:
+// ./myuser <activity id to connect to>
+//
+
 #define DEBUG 1
 
 #include <signal.h>
