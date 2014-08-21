@@ -16,12 +16,16 @@ This library depends on:
 To install this library reproduce the following steps on a terminal:
 
 > $ curl -Lk -o muzzley-client-cpp.zip https://github.com/muzzley/muzzley-client-cpp/archive/master.zip
+
 > $ unzip muzzley-client-cpp.zip
+
 > $ cd muzzley-client-cpp-master/
+
 > $ make
+
 > $ sudo make install
 
-The library will be located in */usr/lib* and the header files (\*.h) will be located in */usr/include/muzzley*. 
+The library will be located in `/usr/lib` and the header files (\*.h) will be located in `/usr/include/muzzley`. 
 
 # EXAMPLE APPLICATIONS
 
@@ -34,15 +38,17 @@ In the `Examples` folder, you can find several examples of muzzley-enabled appli
 To compile and run the Galileo example, for instance, you'd execute the following commands:
 
 > $ g++ -std=c++0x -I/usr/include/muzzley Examples/galileo_app.cpp -o myapp -lmuzzley -lpthread
+
 > $ ./myapp
 
 Once running, the application will output the `Activity Id` code that can be used to pair your smartphone with it using the mobile muzzley application ([Android](https://play.google.com/store/apps/details?id=com.muzzley), [iPhone](https://itunes.apple.com/us/app/muzzley/id604133373), [Windows Phone](http://www.windowsphone.com/s?appid=b909cf49-9336-403c-b25d-039b5ec1bd4a&signin=true)).
 
 # LINKING AND INCLUDING
 
-You should include the *muzzley.h* header file in your program, so that you can access the Muzzley classes. Since the header file is installed in */usr/include/muzzley/*, you should use the *-I* flag when compiling.
+You should include the `muzzley.h` header file in your program, so that you can access the Muzzley classes. Since the header file is installed in `/usr/include/muzzley/`, you should use the `-I` flag when compiling.
 
 Assuming that your main.cpp C++ file looks something like this:
+
 ```
 #include <signal.h>
 #include <unistd.h>
