@@ -54,6 +54,21 @@ int main(int argc, char* argv[]) {
 			// Assuming we changed to a gamepad, send a "button b pressed" event
 			_client.sendWidgetData("gamepad", "ba", "press", "a");
 		}
+
+		muzzley::JSONObj _signal_data;
+		_signal_data <<
+		  "arg1" << JSON (
+				"subArg1" << "subValue1"
+	  	);
+		cout << "Sending a test signal..." << endl << flush;
+		_client.sendSignal("testSignal", _signal_data, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+			string signalresp_str;
+			muzzley::tostr(signalresp_str, _data);
+			cout << "...received the test signal's response:" << endl << flush;
+			cout << signalresp_str << endl << flush;
+			return true;
+		});
+
 		return true;
 	});
 
@@ -61,9 +76,9 @@ int main(int argc, char* argv[]) {
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
 	_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		cout << "Received a signaling message:" << endl << flush;
 		string signalobj_str;
-		muzzley::tostr(signalobj_str, _data["d"]);
+		muzzley::tostr(signalobj_str, _data);
+		cout << "Received a signaling message:" << endl << flush;
 		cout << signalobj_str << endl << flush;
 		return true;
 	});
