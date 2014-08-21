@@ -988,6 +988,13 @@ const muzzley::ParticipantList& muzzley::Client::getParticipants() const {
 	return __participants;
 }
 
+const string& muzzley::Client::getEndpointHost() const {
+	return __endpoint_host;
+}
+void muzzley::Client::setEndpointHost(string _endpoint_host) {
+	this->__endpoint_host.assign(_endpoint_host);
+}
+
 bool muzzley::Client::handshake(muzzley::Handler _callback) {
 	muzzley::JSONObj _message;
 	_message <<
@@ -1166,6 +1173,10 @@ void muzzley::printbits(unsigned char _b) {
 }
 
 void muzzley::Client::start() {
+	if (pthread_equal(pthread_self(), *this->__thr)) {
+		// Thread already started
+		return;
+	}
 	pthread_create(this->__thr, 0, &Client::launch, this);
 }
 

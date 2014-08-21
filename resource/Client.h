@@ -129,12 +129,15 @@ namespace muzzley {
 			bool isStaticActivity() const;
 			bool isUserLoggedin() const;
 
-			string __endpoint_host = "geoplatform.muzzley.com";
+			const string& getEndpointHost() const;
+			void setEndpointHost(string _endpoint_host);
 
 		private:
 			std::vector<muzzley::Handler> __handlers[N_EVENT_TYPES];
 			long __serial;
 			int __op_code;
+
+			string __endpoint_host = "geoplatform.muzzley.com";
 
 			string __app_token;
 			string __user_token;

@@ -39,38 +39,26 @@ int main(int argc, char* argv[]) {
 	// access it through the 'getDeviceId'  and 'getSessionId' method.
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::AppLoggedIn, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		_client.createActivity();
-		return true;
-	});
-
-	// Register listener to be invoked when activity is sucessfully created.
-	//
-	// Don't bother to store the returned activityId, the Client class already does that,
-	// access it through the 'getActivityId' method.
-	//
-	// Return 'false' if you want to stop other listeners from being invoked.
 	_client.on(muzzley::ActivityCreated, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		if (!!_data["s"] && ((string) _data["d"]["activityId"]) != "121345") {
-
-			_client.sendSignal("changeWidget", JSON(
-				"w"<< "gamepad" <<
-				"c"<< "ba" <<
-				"v"<< "a" <<
-				"e"<< "press"
-			),
-			[] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-				cout << "signal accepted by server" << endl << flush;
-			});
-		}
+		cout << "Activity created with id " << _data["d"]["activityId"] << endl << flush;
+		cout << "You can now pair your smartphone, using the muzzley app, to the activity id " << _data["d"]["activityId"] << endl << flush;
 		return true;
 	});
 
-	// Register listener to be invoked when app receives a signal message.
-	//
-	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		cout << _data << endl << flush;
+	_client.on(muzzley::ParticipantJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		long participant_id = _data["d"]["participant"]["id"];
+		string name = _data["d"]["participant"]["name"];
+		cout << "Participant " << name << "(" << participant_id << ")" << " joined." << endl << flush;
+
+		_client.changeWidget(participant_id, "switch", [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+			cout << "Widget successfully changed" << endl << flush;
+		});
+		return true;
+	});
+
+	_client.on(muzzley::WidgetAction, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		int _switch_value = (int) _data["d"]["v"];
+		cout << "User pressed the switch to " << (_switch_value ? "1 (On)" : "0 (Off)") << endl << flush;
 		return true;
 	});
 
@@ -84,6 +72,12 @@ int main(int argc, char* argv[]) {
 	// i.e. the program will continue to execute anything below this line,
 	// be sure that you keep it alive.
 	_client.connectApp("c1bc8d7d6bc38873");
+
+
+	while (true) {
+		cout << "At the main thread" << endl << flush; 
+		sleep(5);
+	}
 
 	return 0;
 }
