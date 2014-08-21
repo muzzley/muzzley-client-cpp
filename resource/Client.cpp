@@ -73,17 +73,31 @@ muzzley::Client::Client() :
 	});
 
 	this->on(muzzley::ActivityJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		if (!!_data["s"]) {
+		if ((bool)_data["s"] == true) {
 			_client.__participant_id = (long) _data["d"]["participant"]["id"];
 			_client.participantReady();
+			return true;
+		}
+		else if ((bool) _data["s"] == false && !!_data["d"]["connectTo"]) {
+			_client.disconnect();
+			_client.__endpoint_host.assign((string) _data["d"]["connectTo"]);
+			_client.connectUser(_client.__user_token, _client.__activity_id);
+			return true;
 		}
 		return true;
 	});
 
 	this->on(muzzley::ActivityCreated, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		if (!!_data["s"] && !!_data["d"]["activityId"]) {
+		if ((bool)_data["s"] == true && !!_data["d"]["activityId"]) {
 			_client.__activity_id.assign((string) _data["d"]["activityId"]);
 			_client.__is_initiating_master = true;
+			return true;
+		}
+		else if ((bool) _data["s"] == false && !!_data["d"]["connectTo"]) {
+			_client.disconnect();
+			_client.__endpoint_host.assign((string) _data["d"]["connectTo"]);
+			_client.connectApp(_client.__app_token, _client.__activity_id);
+			return false;
 		}
 		return true;
 	});
@@ -287,7 +301,7 @@ void muzzley::Client::reconnect() {
 	if (this->isConnected()) {
 		this->disconnect();
 	}
-	if (this->connect(MUZZLEY_ENDPOINT_ADDRESS, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
+	if (this->connect(this->__endpoint_host, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
 		this->__is_connected = true;
 		this->handshake(NULL);
 	}
@@ -416,9 +430,10 @@ bool muzzley::Client::reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& 
 }
 
 void muzzley::Client::connectApp(string _app_token, string _activity_id) {
+	this->__app_token.assign(_app_token.data());
 	this->__activity_id.assign(_activity_id.data());
 	this->__is_static_activity = _activity_id.length() != 0;
-	if (this->connect(MUZZLEY_ENDPOINT_ADDRESS, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
+	if (this->connect(this->__endpoint_host, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
 		this->__is_connected = true;
 		if (this->__is_loop_assynchronous) {
 			this->start();
@@ -443,9 +458,10 @@ void muzzley::Client::connectApp(string _app_token, string _activity_id) {
 
 void muzzley::Client::connectUser(string _user_token, string _activity_id) {
 	assertz(_activity_id.length() != 0, "when connecting a user, the '_activity_id' parameter must be instantiated with a non-empty string", 500, 100);
+	this->__user_token.assign(_user_token.data());
 	this->__activity_id.assign(_activity_id.data());
 	this->__is_static_activity = _activity_id.length() != 0;
-	if (this->connect(MUZZLEY_ENDPOINT_ADDRESS, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
+	if (this->connect(this->__endpoint_host, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
 		this->__is_connected = true;
 		if (this->__is_loop_assynchronous) {
 			this->start();
@@ -996,7 +1012,7 @@ bool muzzley::Client::handshake(muzzley::Handler _callback) {
 	return this->write(_message, _callback);
 }
 
-void muzzley::Client::process(muzzley::JSONObj& _received, muzzley::EventType* _type) {
+bool muzzley::Client::process(muzzley::JSONObj& _received, muzzley::EventType* _type) {
 	int _interaction = (int) _received["h"]["t"];
 	string _action;
 	string _signal_action;
@@ -1030,7 +1046,6 @@ void muzzley::Client::process(muzzley::JSONObj& _received, muzzley::EventType* _
 				this->__queue.erase(_req_data);
 				pthread_mutex_unlock(this->__mtx);
 			}
-			break;
 	}
 
 	if (_action == "handshake") {
@@ -1062,11 +1077,9 @@ void muzzley::Client::process(muzzley::JSONObj& _received, muzzley::EventType* _
 			*_type = muzzley::ParticipantJoined;
 		}
 		else if (_signal_action == "changeWidget") {
-			// {"c":"ba","e":"release","v":"a","w":"gamepad"}
 			*_type = muzzley::ChangeWidget;
 		}
 		else if (_signal_action == "setupComponent") {
-			// {"c":"ba","e":"release","v":"a","w":"gamepad"}
 			*_type = muzzley::SetupComponent;
 		}
 		else if (_signal_action == "" && !!_received["d"]["w"] && !!_received["d"]["c"]) {
@@ -1074,9 +1087,16 @@ void muzzley::Client::process(muzzley::JSONObj& _received, muzzley::EventType* _
 			*_type = muzzley::WidgetAction;
 		}
 		else {
+			if (_interaction == muzzley::ReplyToEndpoint) {
+				// Don't trigger a Signaling Message event
+				// if this is a reply to one we sent before.
+				return false;
+			}
 			*_type = muzzley::SignalingMessage;
 		}
 	}
+
+	return true;
 }
 
 void muzzley::Client::run() {
@@ -1106,9 +1126,12 @@ void muzzley::Client::run() {
 					case 0x01: {
 						muzzley::JSONObj _received;
 						muzzley::fromstr(this->__message, _received);
+						this->__message.clear();
+						this->__op_code = -1;
 						muzzley::EventType _type;
-						this->process(_received, &_type);
-						this->trigger(_type, _received);
+						if (this->process(_received, &_type)) {
+							this->trigger(_type, _received);
+						}
 						break;
 					}
 					case 0x02: {
@@ -1122,9 +1145,6 @@ void muzzley::Client::run() {
 						break;
 					}
 				}
-
-				this->__message.clear();
-				this->__op_code = -1;
 
 			}
 		}

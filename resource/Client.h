@@ -31,7 +31,6 @@
 using namespace std;
 using namespace __gnu_cxx;
 
-#define MUZZLEY_ENDPOINT_ADDRESS "geoplatform.muzzley.com"
 #define MUZZLEY_ENDPOINT_PORT 80
 #define MUZZLEY_ENDPOINT_PATH "/ws"
 
@@ -130,11 +129,15 @@ namespace muzzley {
 			bool isStaticActivity() const;
 			bool isUserLoggedin() const;
 
+			string __endpoint_host = "geoplatform.muzzley.com";
+
 		private:
 			std::vector<muzzley::Handler> __handlers[N_EVENT_TYPES];
 			long __serial;
 			int __op_code;
 
+			string __app_token;
+			string __user_token;
 			string __activity_id;
 			string __message;
 			string __session_id;
@@ -160,7 +163,7 @@ namespace muzzley {
 			pthread_mutexattr_t __attr;
 
 			bool handshake(muzzley::Handler _callback);
-			void process(muzzley::JSONObj& _received, muzzley::EventType* _type);
+			bool process(muzzley::JSONObj& _received, muzzley::EventType* _type);
 
 			void run();
 			static void* launch(void* thread);
