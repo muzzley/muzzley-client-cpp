@@ -22,7 +22,7 @@ To install this library reproduce the following steps on a terminal:
 
 > $ cd muzzley-client-cpp-master/
 
-> ./configure --prefix=/usr
+> $ ./configure --prefix=/usr
 
 > $ make
 
