@@ -1,0 +1,4 @@
+AM_CPPFLAGS = -O3 -Wall
+AM_CXXFLAGS = -O3 -Wall
+
+SUBDIRS = src
