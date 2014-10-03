@@ -23,7 +23,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #define JSONLexer_H_INCLUDED_
 
 // $insert baseclass_h
-#include "JSONLexerbase.h"
+#include <parsers/JSONLexerbase.h>
 
 // $insert namespace-open
 namespace muzzley

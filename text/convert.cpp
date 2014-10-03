@@ -157,7 +157,7 @@ time_t muzzley::timezone_offset() {
 	time_t t;
 	tm *ptr;
 	int day;
-	ulong num[2];
+	unsigned long num[2];
 	t = time(NULL);
 	ptr = gmtime(&t); // Standard UTC time
 	// Get difference in seconds

@@ -23,9 +23,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #define muzzleyJSONTokenizer_h_included
 
 // $insert baseclass
-#include "JSONTokenizerbase.h"
+#include <parsers/JSONTokenizerbase.h>
 // $insert scanner.h
-#include "JSONLexer.h"
+#include <parsers/JSONLexer.h>
 
 // $insert namespace-open
 namespace muzzley

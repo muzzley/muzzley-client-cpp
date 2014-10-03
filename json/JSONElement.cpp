@@ -265,10 +265,6 @@ muzzley::JSONElement::operator muzzley::JSONArrRef&() {
 	return this->getJSONArr();
 }
 
-muzzley::JSONElement::operator muzzley::JSONElement&() {
-	return *this;
-}
-
 muzzley::JSONElement& muzzley::JSONElement::operator<<(const char* _in) {
 	this->put(string(_in));
 	return *this;

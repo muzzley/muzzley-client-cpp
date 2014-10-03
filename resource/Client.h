@@ -29,7 +29,9 @@
 #include <vector>
 
 using namespace std;
+#if !defined __APPLE__
 using namespace __gnu_cxx;
+#endif
 
 #define MUZZLEY_ENDPOINT_PORT 80
 #define MUZZLEY_ENDPOINT_PATH "/ws"

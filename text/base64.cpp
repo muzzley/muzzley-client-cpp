@@ -23,7 +23,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <iomanip>
 
 using namespace std;
+#if !defined __APPLE__
 using namespace __gnu_cxx;
+#endif
 
 void muzzley::base64_encode(string& _out) {
 	istringstream in;

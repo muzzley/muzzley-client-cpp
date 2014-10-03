@@ -26,7 +26,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <string>
 
 using namespace std;
+#if !defined __APPLE__
 using namespace __gnu_cxx;
+#endif
 
 void muzzley::ltrim(std::string &_in_out) {
         _in_out.erase(_in_out.begin(), std::find_if(_in_out.begin(), _in_out.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));

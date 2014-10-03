@@ -27,7 +27,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <iostream>
 
 // $insert preincludes
-#include "JSONinc.h"
+#include <parsers/JSONinc.h>
 
 namespace // anonymous
 {

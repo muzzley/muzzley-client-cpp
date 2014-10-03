@@ -25,7 +25,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <base/str_map.h>
 
 using namespace std;
+#if !defined __APPLE__
 using namespace __gnu_cxx;
+#endif
 
 #define JSON(z) ((muzzley::JSONObj()) << z)
 #define JSON_ARRAY(z) ((muzzley::JSONArr()) << z)
@@ -103,7 +105,6 @@ namespace muzzley {
 			operator double();
 			operator JSONObjRef&();
 			operator JSONArrRef&();
-			operator JSONElement&();
 
 			JSONElement& operator<<(const char* _in);
 			JSONElement& operator<<(bool _in);

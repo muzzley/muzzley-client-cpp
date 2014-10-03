@@ -32,7 +32,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <exceptions/ClosedException.h>
 
 using namespace std;
+#if !defined __APPLE__
 using namespace __gnu_cxx;
+#endif
 
 namespace muzzley {
 
@@ -185,7 +187,7 @@ namespace muzzley {
 				else {
 					__buf.set_socket(_sd);
 				}
-				return *this;
+				return true;
 			}
 	};
 

@@ -22,7 +22,7 @@ PERFORMANCE OF THIS SOFTWARE.
     // Include this file in the sources of the class JSONTokenizer.
 
 // $insert class.h
-#include "JSONTokenizer.h"
+#include <parsers/JSONTokenizer.h>
 
 // $insert namespace-open
 namespace muzzley

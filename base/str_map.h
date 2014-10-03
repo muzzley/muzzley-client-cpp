@@ -32,7 +32,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #define HASH_SIZE 50
 
 using namespace std;
+#if !defined __APPLE__
 using namespace __gnu_cxx;
+#endif
 
 namespace muzzley {
 

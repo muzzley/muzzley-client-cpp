@@ -77,7 +77,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Upstream|Galileo|Examples|log|json|resource|parsers|text|base|http|stream|exceptions" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Docs|Upstream|Galileo|Examples|log|json|resource|parsers|text|base|http|stream|exceptions" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="base"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="exceptions"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="json"/>
@@ -159,7 +159,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Upstream|Galileo|Examples|log|json|resource|text|parsers|base|stream|http|exceptions" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Docs|Upstream|Galileo|Examples|log|json|resource|text|parsers|base|stream|http|exceptions" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="base"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="exceptions"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="json"/>
