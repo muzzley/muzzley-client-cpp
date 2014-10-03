@@ -91,6 +91,7 @@ int main(int argc, char* argv[]) {
 	  	);
 		_client.changeWidget(participant_id, _widget_opts, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
 			cout << "Widget successfully changed" << endl << flush;
+			return true;
 		});
 		return true;
 	});
