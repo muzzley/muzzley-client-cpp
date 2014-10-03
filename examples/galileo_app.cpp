@@ -18,7 +18,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 //
 // You can compile this application with the following command:
-// g++ -std=c++0x -I/usr/include/muzzley Examples/galileo_app.cpp -o myapp -lmuzzley -lpthread
+// g++ -std=c++0x -I/usr/include/muzzley examples/galileo_app.cpp -o myapp -lmuzzley -lpthread
 //
 // And run it like this:
 // ./myapp
