@@ -1,4 +1,3 @@
-AM_CPPFLAGS = -O3 -Wall
-AM_CXXFLAGS = -O3 -Wall
+ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = src
