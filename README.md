@@ -32,7 +32,7 @@ To install this library reproduce the following steps on a terminal:
 
 The library will be located in `/usr/lib` and the header files (\*.h) will be located in `/usr/include`.  
 
-If you want another target instalation directory, just pass it to the *./configure --prefix=<your prefix>* instalation command. Just don't forget to pass a *-I<your prefix>* flag to your compilation command.
+If you want another target instalation directory, just pass it to the *./configure --prefix=[your prefix]* instalation command. Just don't forget to pass a *-I[your prefix]* flag to your compilation command.
 
 # EXAMPLE APPLICATIONS
 
