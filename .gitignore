@@ -11,6 +11,17 @@ Makefile
 libtool
 config.log
 config.status
+aclocal.m4 
+compile 
+config.guess 
+config.sub 
+configure 
+depcomp 
+install-sh 
+ltmain.sh 
+Makefile 
+Makefile.in 
+missing
 *.deps
 *.dirstamp
 */**/Makefile
