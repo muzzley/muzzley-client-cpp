@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
 
 A compilation command could look something like this:
 
-> $ g++ -std=c++0x -I/usr/include/muzzley main.cpp -o mymuzzley -lpthread -lmuzzley
+> $ g++ -std=c++0x main.cpp -o mymuzzley -lpthread -lmuzzley
 
 # LAMBDA FUNCTIONS
 
