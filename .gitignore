@@ -7,6 +7,7 @@
 autom4te.cache
 .sublime-project
 .sublime-project.sublime-workspace
+Makefile.in
 Makefile
 libtool
 config.log
@@ -19,8 +20,6 @@ configure
 depcomp 
 install-sh 
 ltmain.sh 
-Makefile 
-Makefile.in 
 missing
 *.deps
 *.dirstamp
