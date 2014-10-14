@@ -17,12 +17,12 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <json/JSONObj.h>
+#include <muzzley/json/JSONObj.h>
 
 #include <iostream>
-#include <text/convert.h>
-#include <exceptions/CastException.h>
-#include <exceptions/NoAttributeNameException.h>
+#include <muzzley/text/convert.h>
+#include <muzzley/exceptions/CastException.h>
+#include <muzzley/exceptions/NoAttributeNameException.h>
 
 muzzley::JSONDblRef::JSONDblRef(double _in) : __value(_in) {
 }

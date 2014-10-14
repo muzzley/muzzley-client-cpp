@@ -25,7 +25,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <stdexcept>
 
 // $insert class_ih
-#include <parsers/JSONLexerimpl.h>
+#include <muzzley/parsers/JSONLexerimpl.h>
 
 // $insert namespace-open
 namespace muzzley

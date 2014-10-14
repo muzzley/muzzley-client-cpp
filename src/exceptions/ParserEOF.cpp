@@ -17,7 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <exceptions/ParserEOF.h>
+#include <muzzley/exceptions/ParserEOF.h>
 
 muzzley::ParserEOF::ParserEOF(string _in) : __what(_in){
 }

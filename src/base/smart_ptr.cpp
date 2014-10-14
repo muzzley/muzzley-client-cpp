@@ -17,7 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <base/smart_ptr.h>
+#include <muzzley/base/smart_ptr.h>
 
 namespace muzzley {
 	pthread_key_t __memory_key;

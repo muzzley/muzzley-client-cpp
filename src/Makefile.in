@@ -14,7 +14,6 @@
 
 @SET_MAKE@
 
-
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -82,7 +81,7 @@ host_triplet = @host@
 target_triplet = @target@
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(top_srcdir)/depcomp $(nobase_pkginclude_HEADERS)
+	$(top_srcdir)/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -120,7 +119,7 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgincludedir)"
+am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libmuzzley_la_DEPENDENCIES =
 am__dirstamp = $(am__leading_dot)dirstamp
@@ -196,7 +195,6 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-HEADERS = $(nobase_pkginclude_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -342,9 +340,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libmuzzley.la
 libmuzzley_la_LIBADD = -lpthread
-libmuzzley_la_CPPFLAGS = -std=c++0x
+libmuzzley_la_CPPFLAGS = -std=c++0x -I../include
 libmuzzley_la_SOURCES = ./base/smart_ptr.cpp ./base/str_map.cpp ./log/log.cpp ./exceptions/InterruptedException.cpp ./exceptions/CastException.cpp ./exceptions/ParserEOF.cpp ./exceptions/ClosedException.cpp ./exceptions/AssertionException.cpp ./exceptions/NoAttributeNameException.cpp ./exceptions/SyntaxErrorException.cpp ./parsers/JSONLexer.cpp ./parsers/json.cpp ./parsers/JSONTokenizer.cpp ./parsers/JSONTokenizerLexer.cpp ./parsers/JSONParser.cpp ./text/ascii.cpp ./text/utf8.cpp ./text/manip.cpp ./text/url.cpp ./text/convert.cpp ./text/base64.cpp ./stream/SocketStreams.cpp ./resource/Client.cpp ./json/JSONArr.cpp ./json/JSONBool.cpp ./json/JSONStr.cpp ./json/JSONInt.cpp ./json/JSONDbl.cpp ./json/JSONElement.cpp ./json/JSONObj.cpp 
-nobase_pkginclude_HEADERS = base/str_map.h base/smart_ptr.h base/assert.h log/log.h exceptions/CastException.h exceptions/SyntaxErrorException.h exceptions/ParserEOF.h exceptions/AssertionException.h exceptions/NoAttributeNameException.h exceptions/ClosedException.h exceptions/InterruptedException.h parsers/JSONLexerimpl.h parsers/JSONTokenizerbase.h parsers/JSONinc.h parsers/JSONParser.h parsers/JSONTokenizerLexer.h parsers/JSONLexerbase.h parsers/JSONLexer.h parsers/json.h parsers/JSONTokenizer.h parsers/JSONTokenizerimpl.h text/convert.h text/manip.h stream/SocketStreams.h muzzley.h resource/Client.h json/JSONObj.h 
 all: all-am
 
 .SUFFIXES:
@@ -832,30 +829,6 @@ clean-libtool:
 	-rm -rf ./resource/.libs ./resource/_libs
 	-rm -rf ./stream/.libs ./stream/_libs
 	-rm -rf ./text/.libs ./text/_libs
-install-nobase_pkgincludeHEADERS: $(nobase_pkginclude_HEADERS)
-	@$(NORMAL_INSTALL)
-	@list='$(nobase_pkginclude_HEADERS)'; test -n "$(pkgincludedir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(pkgincludedir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(pkgincludedir)" || exit 1; \
-	fi; \
-	$(am__nobase_list) | while read dir files; do \
-	  xfiles=; for file in $$files; do \
-	    if test -f "$$file"; then xfiles="$$xfiles $$file"; \
-	    else xfiles="$$xfiles $(srcdir)/$$file"; fi; done; \
-	  test -z "$$xfiles" || { \
-	    test "x$$dir" = x. || { \
-	      echo " $(MKDIR_P) '$(DESTDIR)$(pkgincludedir)/$$dir'"; \
-	      $(MKDIR_P) "$(DESTDIR)$(pkgincludedir)/$$dir"; }; \
-	    echo " $(INSTALL_HEADER) $$xfiles '$(DESTDIR)$(pkgincludedir)/$$dir'"; \
-	    $(INSTALL_HEADER) $$xfiles "$(DESTDIR)$(pkgincludedir)/$$dir" || exit $$?; }; \
-	done
-
-uninstall-nobase_pkgincludeHEADERS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(nobase_pkginclude_HEADERS)'; test -n "$(pkgincludedir)" || list=; \
-	$(am__nobase_strip_setup); files=`$(am__nobase_strip)`; \
-	dir='$(DESTDIR)$(pkgincludedir)'; $(am__uninstall_files_from_dir)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -941,9 +914,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(HEADERS)
+all-am: Makefile $(LTLIBRARIES)
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgincludedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1015,7 +988,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-nobase_pkgincludeHEADERS
+install-data-am:
 
 install-dvi: install-dvi-am
 
@@ -1061,8 +1034,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES \
-	uninstall-nobase_pkgincludeHEADERS
+uninstall-am: uninstall-libLTLIBRARIES
 
 .MAKE: install-am install-strip
 
@@ -1073,14 +1045,12 @@ uninstall-am: uninstall-libLTLIBRARIES \
 	html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
 	install-exec-am install-html install-html-am install-info \
-	install-info-am install-libLTLIBRARIES install-man \
-	install-nobase_pkgincludeHEADERS install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-libLTLIBRARIES \
-	uninstall-nobase_pkgincludeHEADERS
+	tags tags-am uninstall uninstall-am uninstall-libLTLIBRARIES
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

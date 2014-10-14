@@ -22,13 +22,17 @@ To install this library reproduce the following steps on a terminal:
 
 > $ cd muzzley-client-cpp-master/
 
+> $ autoreconf -fi
+
 > $ ./configure --prefix=/usr
 
 > $ make
 
 > $ sudo make install
 
-The library will be located in `/usr/lib` and the header files (\*.h) will be located in `/usr/include/muzzley`. 
+The library will be located in `/usr/lib` and the header files (\*.h) will be located in `/usr/include`.  
+
+If you want another target instalation directory, just pass it to the *./configure --prefix=<your prefix>* instalation command. Just don't forget to pass a *-I<your prefix>* flag to your compilation command.
 
 # EXAMPLE APPLICATIONS
 
@@ -40,7 +44,7 @@ In the `Examples` folder, you can find several examples of muzzley-enabled appli
 
 To compile and run the Galileo example, for instance, you'd execute the following commands:
 
-> $ g++ -std=c++0x -I/usr/include/muzzley examples/galileo_app.cpp -o myapp -lmuzzley -lpthread
+> $ g++ -std=c++0x examples/galileo_app.cpp -o myapp -lmuzzley -lpthread
 
 > $ ./myapp
 
@@ -48,7 +52,7 @@ Once running, the application will output the `Activity Id` code that can be use
 
 # LINKING AND INCLUDING
 
-You should include the `muzzley.h` header file in your program, so that you can access the Muzzley classes. Since the header file is installed in `/usr/include/muzzley/`, you should use the `-I` flag when compiling.
+You should include the `muzzley.h` header file in your program, so that you can access the Muzzley classes. 
 
 Assuming that your main.cpp C++ file looks something like this:
 
@@ -58,7 +62,7 @@ Assuming that your main.cpp C++ file looks something like this:
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <muzzley.h>
+#include <muzzley/muzzley.h>
 
 using namespace std;
 using namespace __gnu_cxx;
@@ -154,7 +158,7 @@ Hence, a basic program could look something like this:
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <muzzley.h>
+#include <muzzley/muzzley.h>
 
 using namespace std;
 using namespace __gnu_cxx;

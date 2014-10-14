@@ -38,7 +38,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <muzzley.h>
+#include <muzzley/muzzley.h>
 
 using namespace std;
 #if !defined __APPLE__

@@ -18,7 +18,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 
 #include <stddef.h>
-#include <text/manip.h>
+#include <muzzley/text/manip.h>
 #include <algorithm>
 #include <cctype>
 #include <functional>

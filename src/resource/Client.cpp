@@ -16,14 +16,14 @@
  PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <resource/Client.h>
-#include <base/smart_ptr.h>
-#include <base/assert.h>
-#include <parsers/json.h>
+#include <muzzley/resource/Client.h>
+#include <muzzley/base/smart_ptr.h>
+#include <muzzley/base/assert.h>
+#include <muzzley/parsers/json.h>
 #include <pthread.h>
 #include <iterator>
 #include <bitset>
-#include <log/log.h>
+#include <muzzley/log/log.h>
 
 muzzley::Client::Client() :
 	__serial(1) {

@@ -17,7 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <base/str_map.h>
+#include <muzzley/base/str_map.h>
 
 unsigned int muzzley::djb2(string key) {
     unsigned int hash = 5381;

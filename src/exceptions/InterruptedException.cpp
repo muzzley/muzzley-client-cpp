@@ -17,7 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <exceptions/InterruptedException.h>
+#include <muzzley/exceptions/InterruptedException.h>
 
 muzzley::InterruptedException::InterruptedException(string _in) : __what(_in){
 }

@@ -17,7 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <exceptions/NoAttributeNameException.h>
+#include <muzzley/exceptions/NoAttributeNameException.h>
 
 muzzley::NoAttributeNameException::NoAttributeNameException(string _in) : __what(_in){
 }

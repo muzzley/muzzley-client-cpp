@@ -17,5 +17,5 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <stream/SocketStreams.h>
+#include <muzzley/stream/SocketStreams.h>
 

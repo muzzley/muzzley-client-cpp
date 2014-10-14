@@ -17,7 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <parsers/JSONTokenizerLexer.h>
+#include <muzzley/parsers/JSONTokenizerLexer.h>
 
 muzzley::JSONTokenizerLexer::JSONTokenizerLexer(std::istream &_in, std::ostream &_out, muzzley::JSONObj* _rootobj, muzzley::JSONArr* _rootarr) :
 	muzzley::JSONLexer(_in, _out), __root_obj(_rootobj), __root_arr(_rootarr), __root_type(muzzley::JSObject), __value(NULL), __parent(NULL) {

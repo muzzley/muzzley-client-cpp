@@ -17,7 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <exceptions/CastException.h>
+#include <muzzley/exceptions/CastException.h>
 
 muzzley::CastException::CastException(string _in) : __what(_in){
 }

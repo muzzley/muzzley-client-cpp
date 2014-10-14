@@ -17,7 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <parsers/JSONParser.h>
+#include <muzzley/parsers/JSONParser.h>
 
 muzzley::JSONParser::JSONParser(std::istream &_in, std::ostream &_out, muzzley::JSONObj* _rootobj, muzzley::JSONArr* _rootarr) {
 	this->d_scanner.switchStreams(_in, _out);

@@ -17,9 +17,9 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <log/log.h>
+#include <muzzley/log/log.h>
 
-#include <text/convert.h>
+#include <muzzley/text/convert.h>
 
 namespace muzzley {
 	short int log_lvl = 5;

@@ -17,7 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <parsers/json.h>
+#include <muzzley/parsers/json.h>
 
 void muzzley::fromstream(istream& _in, JSONObj& _out) {
 	muzzley::JSONParser _p;

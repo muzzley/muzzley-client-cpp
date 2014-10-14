@@ -17,11 +17,11 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <json/JSONObj.h>
+#include <muzzley/json/JSONObj.h>
 
 #include <iostream>
-#include <exceptions/CastException.h>
-#include <exceptions/NoAttributeNameException.h>
+#include <muzzley/exceptions/CastException.h>
+#include <muzzley/exceptions/NoAttributeNameException.h>
 
 muzzley::JSONObjRef::JSONObjRef() {
 	this->__name = NULL;

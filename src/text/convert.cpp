@@ -17,7 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <text/convert.h>
+#include <muzzley/text/convert.h>
 
 #include <time.h>
 #include <sys/time.h>

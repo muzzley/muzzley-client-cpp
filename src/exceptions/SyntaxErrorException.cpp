@@ -17,7 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <exceptions/SyntaxErrorException.h>
+#include <muzzley/exceptions/SyntaxErrorException.h>
 
 muzzley::SyntaxErrorException::SyntaxErrorException(string _in) : __what(_in){
 }

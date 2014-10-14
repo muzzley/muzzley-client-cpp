@@ -17,10 +17,10 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <exceptions/AssertionException.h>
+#include <muzzley/exceptions/AssertionException.h>
 
 #include <sstream>
-#include <text/convert.h>
+#include <muzzley/text/convert.h>
 
 muzzley::AssertionException::AssertionException(string _in, int _http_code, int _code, string _desc, int _line, string _file) : __what(_in), __http_code(_http_code), __code(_code), __description(_desc), __line(_line), __file(_file){
 	this->__description.insert(0, "'");

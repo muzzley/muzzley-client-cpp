@@ -17,7 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 
-#include <exceptions/ClosedException.h>
+#include <muzzley/exceptions/ClosedException.h>
 
 muzzley::ClosedException::ClosedException(string _in) : __what(_in){
 }
