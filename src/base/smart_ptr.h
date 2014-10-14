@@ -282,3 +282,4 @@ namespace muzzley {
 
 }
 
+extern "C" int muzzley_lib();

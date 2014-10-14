@@ -27,3 +27,7 @@ unsigned int muzzley::djb2(string key) {
 
     return hash % HASH_SIZE;
 }
+
+extern "C" int muzzley_lib() {
+	return 1;
+}
