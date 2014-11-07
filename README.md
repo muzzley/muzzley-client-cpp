@@ -10,6 +10,10 @@ This library depends on:
 - pthread
 - autotools
 
+# VERSIONING
+
+Current version: [0.0.2][changelog]
+
 # INSTALL
 
 ## Linux & OSX
@@ -384,3 +388,4 @@ So, given the above example, you could use the following code:
 
 [muzzley_homepage]: https://www.muzzley.com
 [lambda_functions]: http://www.cprogramming.com/c++11/c++11-lambda-closures.html
+[changelog]: CHANGES.md
