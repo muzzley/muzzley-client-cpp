@@ -17,8 +17,6 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <muzzley/base/assert.h>
-#include <muzzley/base/str_map.h>
-#include <muzzley/base/smart_ptr.h>
 
 #include <muzzley/exceptions/AssertionException.h>
 #include <muzzley/exceptions/CastException.h>

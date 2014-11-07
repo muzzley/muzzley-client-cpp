@@ -123,8 +123,8 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libmuzzley_la_DEPENDENCIES =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_libmuzzley_la_OBJECTS = ./base/libmuzzley_la-smart_ptr.lo \
-	./base/libmuzzley_la-str_map.lo ./log/libmuzzley_la-log.lo \
+am_libmuzzley_la_OBJECTS = ./base/libmuzzley_la-assert.lo \
+	./log/libmuzzley_la-log.lo \
 	./exceptions/libmuzzley_la-InterruptedException.lo \
 	./exceptions/libmuzzley_la-CastException.lo \
 	./exceptions/libmuzzley_la-ParserEOF.lo \
@@ -142,18 +142,16 @@ am_libmuzzley_la_OBJECTS = ./base/libmuzzley_la-smart_ptr.lo \
 	./text/libmuzzley_la-convert.lo ./text/libmuzzley_la-base64.lo \
 	./stream/libmuzzley_la-SocketStreams.lo \
 	./resource/libmuzzley_la-Client.lo \
-	./json/libmuzzley_la-JSONArr.lo \
-	./json/libmuzzley_la-JSONBool.lo \
-	./json/libmuzzley_la-JSONStr.lo \
-	./json/libmuzzley_la-JSONInt.lo \
-	./json/libmuzzley_la-JSONDbl.lo \
-	./json/libmuzzley_la-JSONElement.lo \
 	./json/libmuzzley_la-JSONObj.lo
 libmuzzley_la_OBJECTS = $(am_libmuzzley_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+libmuzzley_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(AM_CXXFLAGS) $(CXXFLAGS) $(libmuzzley_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -340,8 +338,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libmuzzley.la
 libmuzzley_la_LIBADD = -lpthread
+libmuzzley_la_LDFLAGS = -version-info 0:2:0
 libmuzzley_la_CPPFLAGS = -std=c++0x -I../include
-libmuzzley_la_SOURCES = ./base/smart_ptr.cpp ./base/str_map.cpp ./log/log.cpp ./exceptions/InterruptedException.cpp ./exceptions/CastException.cpp ./exceptions/ParserEOF.cpp ./exceptions/ClosedException.cpp ./exceptions/AssertionException.cpp ./exceptions/NoAttributeNameException.cpp ./exceptions/SyntaxErrorException.cpp ./parsers/JSONLexer.cpp ./parsers/json.cpp ./parsers/JSONTokenizer.cpp ./parsers/JSONTokenizerLexer.cpp ./parsers/JSONParser.cpp ./text/ascii.cpp ./text/utf8.cpp ./text/manip.cpp ./text/url.cpp ./text/convert.cpp ./text/base64.cpp ./stream/SocketStreams.cpp ./resource/Client.cpp ./json/JSONArr.cpp ./json/JSONBool.cpp ./json/JSONStr.cpp ./json/JSONInt.cpp ./json/JSONDbl.cpp ./json/JSONElement.cpp ./json/JSONObj.cpp 
+libmuzzley_la_SOURCES = ./base/assert.cpp ./log/log.cpp ./exceptions/InterruptedException.cpp ./exceptions/CastException.cpp ./exceptions/ParserEOF.cpp ./exceptions/ClosedException.cpp ./exceptions/AssertionException.cpp ./exceptions/NoAttributeNameException.cpp ./exceptions/SyntaxErrorException.cpp ./parsers/JSONLexer.cpp ./parsers/json.cpp ./parsers/JSONTokenizer.cpp ./parsers/JSONTokenizerLexer.cpp ./parsers/JSONParser.cpp ./text/ascii.cpp ./text/utf8.cpp ./text/manip.cpp ./text/url.cpp ./text/convert.cpp ./text/base64.cpp ./stream/SocketStreams.cpp ./resource/Client.cpp ./json/JSONObj.cpp 
 all: all-am
 
 .SUFFIXES:
@@ -417,9 +416,7 @@ base/$(am__dirstamp):
 base/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) ./base/$(DEPDIR)
 	@: > base/$(DEPDIR)/$(am__dirstamp)
-./base/libmuzzley_la-smart_ptr.lo: base/$(am__dirstamp) \
-	base/$(DEPDIR)/$(am__dirstamp)
-./base/libmuzzley_la-str_map.lo: base/$(am__dirstamp) \
+./base/libmuzzley_la-assert.lo: base/$(am__dirstamp) \
 	base/$(DEPDIR)/$(am__dirstamp)
 log/$(am__dirstamp):
 	@$(MKDIR_P) ./log
@@ -511,23 +508,11 @@ json/$(am__dirstamp):
 json/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) ./json/$(DEPDIR)
 	@: > json/$(DEPDIR)/$(am__dirstamp)
-./json/libmuzzley_la-JSONArr.lo: json/$(am__dirstamp) \
-	json/$(DEPDIR)/$(am__dirstamp)
-./json/libmuzzley_la-JSONBool.lo: json/$(am__dirstamp) \
-	json/$(DEPDIR)/$(am__dirstamp)
-./json/libmuzzley_la-JSONStr.lo: json/$(am__dirstamp) \
-	json/$(DEPDIR)/$(am__dirstamp)
-./json/libmuzzley_la-JSONInt.lo: json/$(am__dirstamp) \
-	json/$(DEPDIR)/$(am__dirstamp)
-./json/libmuzzley_la-JSONDbl.lo: json/$(am__dirstamp) \
-	json/$(DEPDIR)/$(am__dirstamp)
-./json/libmuzzley_la-JSONElement.lo: json/$(am__dirstamp) \
-	json/$(DEPDIR)/$(am__dirstamp)
 ./json/libmuzzley_la-JSONObj.lo: json/$(am__dirstamp) \
 	json/$(DEPDIR)/$(am__dirstamp)
 
 libmuzzley.la: $(libmuzzley_la_OBJECTS) $(libmuzzley_la_DEPENDENCIES) $(EXTRA_libmuzzley_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) -rpath $(libdir) $(libmuzzley_la_OBJECTS) $(libmuzzley_la_LIBADD) $(LIBS)
+	$(AM_V_CXXLD)$(libmuzzley_la_LINK) -rpath $(libdir) $(libmuzzley_la_OBJECTS) $(libmuzzley_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -551,8 +536,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./base/$(DEPDIR)/libmuzzley_la-smart_ptr.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./base/$(DEPDIR)/libmuzzley_la-str_map.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./base/$(DEPDIR)/libmuzzley_la-assert.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./exceptions/$(DEPDIR)/libmuzzley_la-AssertionException.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./exceptions/$(DEPDIR)/libmuzzley_la-CastException.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./exceptions/$(DEPDIR)/libmuzzley_la-ClosedException.Plo@am__quote@
@@ -560,13 +544,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./exceptions/$(DEPDIR)/libmuzzley_la-NoAttributeNameException.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./exceptions/$(DEPDIR)/libmuzzley_la-ParserEOF.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./exceptions/$(DEPDIR)/libmuzzley_la-SyntaxErrorException.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./json/$(DEPDIR)/libmuzzley_la-JSONArr.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./json/$(DEPDIR)/libmuzzley_la-JSONBool.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./json/$(DEPDIR)/libmuzzley_la-JSONDbl.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./json/$(DEPDIR)/libmuzzley_la-JSONElement.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./json/$(DEPDIR)/libmuzzley_la-JSONInt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./json/$(DEPDIR)/libmuzzley_la-JSONObj.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./json/$(DEPDIR)/libmuzzley_la-JSONStr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./log/$(DEPDIR)/libmuzzley_la-log.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./parsers/$(DEPDIR)/libmuzzley_la-JSONLexer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./parsers/$(DEPDIR)/libmuzzley_la-JSONParser.Plo@am__quote@
@@ -606,19 +584,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LTCXXCOMPILE) -c -o $@ $<
 
-./base/libmuzzley_la-smart_ptr.lo: ./base/smart_ptr.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./base/libmuzzley_la-smart_ptr.lo -MD -MP -MF ./base/$(DEPDIR)/libmuzzley_la-smart_ptr.Tpo -c -o ./base/libmuzzley_la-smart_ptr.lo `test -f './base/smart_ptr.cpp' || echo '$(srcdir)/'`./base/smart_ptr.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ./base/$(DEPDIR)/libmuzzley_la-smart_ptr.Tpo ./base/$(DEPDIR)/libmuzzley_la-smart_ptr.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='./base/smart_ptr.cpp' object='./base/libmuzzley_la-smart_ptr.lo' libtool=yes @AMDEPBACKSLASH@
+./base/libmuzzley_la-assert.lo: ./base/assert.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./base/libmuzzley_la-assert.lo -MD -MP -MF ./base/$(DEPDIR)/libmuzzley_la-assert.Tpo -c -o ./base/libmuzzley_la-assert.lo `test -f './base/assert.cpp' || echo '$(srcdir)/'`./base/assert.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ./base/$(DEPDIR)/libmuzzley_la-assert.Tpo ./base/$(DEPDIR)/libmuzzley_la-assert.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='./base/assert.cpp' object='./base/libmuzzley_la-assert.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ./base/libmuzzley_la-smart_ptr.lo `test -f './base/smart_ptr.cpp' || echo '$(srcdir)/'`./base/smart_ptr.cpp
-
-./base/libmuzzley_la-str_map.lo: ./base/str_map.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./base/libmuzzley_la-str_map.lo -MD -MP -MF ./base/$(DEPDIR)/libmuzzley_la-str_map.Tpo -c -o ./base/libmuzzley_la-str_map.lo `test -f './base/str_map.cpp' || echo '$(srcdir)/'`./base/str_map.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ./base/$(DEPDIR)/libmuzzley_la-str_map.Tpo ./base/$(DEPDIR)/libmuzzley_la-str_map.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='./base/str_map.cpp' object='./base/libmuzzley_la-str_map.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ./base/libmuzzley_la-str_map.lo `test -f './base/str_map.cpp' || echo '$(srcdir)/'`./base/str_map.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ./base/libmuzzley_la-assert.lo `test -f './base/assert.cpp' || echo '$(srcdir)/'`./base/assert.cpp
 
 ./log/libmuzzley_la-log.lo: ./log/log.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./log/libmuzzley_la-log.lo -MD -MP -MF ./log/$(DEPDIR)/libmuzzley_la-log.Tpo -c -o ./log/libmuzzley_la-log.lo `test -f './log/log.cpp' || echo '$(srcdir)/'`./log/log.cpp
@@ -766,48 +737,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='./resource/Client.cpp' object='./resource/libmuzzley_la-Client.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ./resource/libmuzzley_la-Client.lo `test -f './resource/Client.cpp' || echo '$(srcdir)/'`./resource/Client.cpp
-
-./json/libmuzzley_la-JSONArr.lo: ./json/JSONArr.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./json/libmuzzley_la-JSONArr.lo -MD -MP -MF ./json/$(DEPDIR)/libmuzzley_la-JSONArr.Tpo -c -o ./json/libmuzzley_la-JSONArr.lo `test -f './json/JSONArr.cpp' || echo '$(srcdir)/'`./json/JSONArr.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ./json/$(DEPDIR)/libmuzzley_la-JSONArr.Tpo ./json/$(DEPDIR)/libmuzzley_la-JSONArr.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='./json/JSONArr.cpp' object='./json/libmuzzley_la-JSONArr.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ./json/libmuzzley_la-JSONArr.lo `test -f './json/JSONArr.cpp' || echo '$(srcdir)/'`./json/JSONArr.cpp
-
-./json/libmuzzley_la-JSONBool.lo: ./json/JSONBool.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./json/libmuzzley_la-JSONBool.lo -MD -MP -MF ./json/$(DEPDIR)/libmuzzley_la-JSONBool.Tpo -c -o ./json/libmuzzley_la-JSONBool.lo `test -f './json/JSONBool.cpp' || echo '$(srcdir)/'`./json/JSONBool.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ./json/$(DEPDIR)/libmuzzley_la-JSONBool.Tpo ./json/$(DEPDIR)/libmuzzley_la-JSONBool.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='./json/JSONBool.cpp' object='./json/libmuzzley_la-JSONBool.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ./json/libmuzzley_la-JSONBool.lo `test -f './json/JSONBool.cpp' || echo '$(srcdir)/'`./json/JSONBool.cpp
-
-./json/libmuzzley_la-JSONStr.lo: ./json/JSONStr.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./json/libmuzzley_la-JSONStr.lo -MD -MP -MF ./json/$(DEPDIR)/libmuzzley_la-JSONStr.Tpo -c -o ./json/libmuzzley_la-JSONStr.lo `test -f './json/JSONStr.cpp' || echo '$(srcdir)/'`./json/JSONStr.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ./json/$(DEPDIR)/libmuzzley_la-JSONStr.Tpo ./json/$(DEPDIR)/libmuzzley_la-JSONStr.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='./json/JSONStr.cpp' object='./json/libmuzzley_la-JSONStr.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ./json/libmuzzley_la-JSONStr.lo `test -f './json/JSONStr.cpp' || echo '$(srcdir)/'`./json/JSONStr.cpp
-
-./json/libmuzzley_la-JSONInt.lo: ./json/JSONInt.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./json/libmuzzley_la-JSONInt.lo -MD -MP -MF ./json/$(DEPDIR)/libmuzzley_la-JSONInt.Tpo -c -o ./json/libmuzzley_la-JSONInt.lo `test -f './json/JSONInt.cpp' || echo '$(srcdir)/'`./json/JSONInt.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ./json/$(DEPDIR)/libmuzzley_la-JSONInt.Tpo ./json/$(DEPDIR)/libmuzzley_la-JSONInt.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='./json/JSONInt.cpp' object='./json/libmuzzley_la-JSONInt.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ./json/libmuzzley_la-JSONInt.lo `test -f './json/JSONInt.cpp' || echo '$(srcdir)/'`./json/JSONInt.cpp
-
-./json/libmuzzley_la-JSONDbl.lo: ./json/JSONDbl.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./json/libmuzzley_la-JSONDbl.lo -MD -MP -MF ./json/$(DEPDIR)/libmuzzley_la-JSONDbl.Tpo -c -o ./json/libmuzzley_la-JSONDbl.lo `test -f './json/JSONDbl.cpp' || echo '$(srcdir)/'`./json/JSONDbl.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ./json/$(DEPDIR)/libmuzzley_la-JSONDbl.Tpo ./json/$(DEPDIR)/libmuzzley_la-JSONDbl.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='./json/JSONDbl.cpp' object='./json/libmuzzley_la-JSONDbl.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ./json/libmuzzley_la-JSONDbl.lo `test -f './json/JSONDbl.cpp' || echo '$(srcdir)/'`./json/JSONDbl.cpp
-
-./json/libmuzzley_la-JSONElement.lo: ./json/JSONElement.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./json/libmuzzley_la-JSONElement.lo -MD -MP -MF ./json/$(DEPDIR)/libmuzzley_la-JSONElement.Tpo -c -o ./json/libmuzzley_la-JSONElement.lo `test -f './json/JSONElement.cpp' || echo '$(srcdir)/'`./json/JSONElement.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ./json/$(DEPDIR)/libmuzzley_la-JSONElement.Tpo ./json/$(DEPDIR)/libmuzzley_la-JSONElement.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='./json/JSONElement.cpp' object='./json/libmuzzley_la-JSONElement.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ./json/libmuzzley_la-JSONElement.lo `test -f './json/JSONElement.cpp' || echo '$(srcdir)/'`./json/JSONElement.cpp
 
 ./json/libmuzzley_la-JSONObj.lo: ./json/JSONObj.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./json/libmuzzley_la-JSONObj.lo -MD -MP -MF ./json/$(DEPDIR)/libmuzzley_la-JSONObj.Tpo -c -o ./json/libmuzzley_la-JSONObj.lo `test -f './json/JSONObj.cpp' || echo '$(srcdir)/'`./json/JSONObj.cpp

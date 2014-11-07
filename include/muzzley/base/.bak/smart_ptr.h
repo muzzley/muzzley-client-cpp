@@ -90,7 +90,7 @@ namespace muzzley {
 			explicit smart_ptr(T* ptr = NULL) throw () {
 				this->__target = NULL;
 				this->set(ptr);
-			}
+			};
 
 			explicit smart_ptr(T& ptr) throw () {
 				this->__target = NULL;
@@ -116,7 +116,6 @@ namespace muzzley {
 			template<typename Y>
 			smart_ptr& operator=(smart_ptr<Y>& rhs) throw () {
 				this->set(rhs.__target);
-				return *this;
 			}
 
 			smart_ptr& operator=(T* rhs) throw () {

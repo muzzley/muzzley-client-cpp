@@ -16,315 +16,1069 @@ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 */
 
-
 #include <muzzley/json/JSONObj.h>
+#include <ostream>
 
-#include <iostream>
-#include <muzzley/exceptions/CastException.h>
-#include <muzzley/exceptions/NoAttributeNameException.h>
-
-muzzley::JSONObjRef::JSONObjRef() {
-	this->__name = NULL;
+namespace muzzley {
+	JSONPtr undefined;
+	JSONPtr nilptr = undefined;
 }
 
-muzzley::JSONObjRef::~JSONObjRef() {
-	if (this->__name != NULL) {
-		delete this->__name;
-		this->__name = NULL;
-	}
+muzzley::JSONElementT::JSONElementT() : __parent( nullptr ) {
+	this->type(muzzley::JSNil);
+	this->__target.__nil = nullptr;
 }
 
-muzzley::JSONType muzzley::JSONObjRef::type() {
-	return muzzley::JSObject;
-}
-
-void muzzley::JSONObjRef::unset(string _in) {
-	JSONObjRef::iterator _i;
-	if ((_i = this->find(_in)) != this->end()) {
-		return this->erase(_i);
-	}
-}
-
-void muzzley::JSONObjRef::unset(long long _in) {
-}
-
-void muzzley::JSONObjRef::put(int _in) {
-	if (this->__name == NULL) {
-		this->__name = new string();
-		muzzley::tostr(*this->__name, _in);
-		this->__name->insert(0, "_");
-	}
-	else {
-		JSONInt* _sp = new JSONInt(new JSONIntRef(_in));
-		this->insert(string(this->__name->data()), (smart_ptr<JSONElement>*) _sp);
-		delete this->__name;
-		this->__name = NULL;
-	}
-}
-
-void muzzley::JSONObjRef::put(long _in) {
-	if (this->__name == NULL) {
-		this->__name = new string();
-		muzzley::tostr(*this->__name, _in);
-		this->__name->insert(0, "_");
-	}
-	else {
-		JSONInt* _sp = new JSONInt(new JSONIntRef(_in));
-		this->insert(string(this->__name->data()), (smart_ptr<JSONElement>*) _sp);
-		delete this->__name;
-		this->__name = NULL;
+muzzley::JSONElementT::JSONElementT(JSONElementT& _element) : __parent( nullptr ) {
+	this->type( _element.type());
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			if (_element.obj().get() != nullptr) {
+				this->__target.__object = _element.obj();
+			}
+			break;
+		}
+		case muzzley::JSArray : {
+			if (_element.arr().get() != nullptr) {
+				this->__target.__array = _element.arr();
+			}
+			break;
+		}
+		case muzzley::JSString : {
+			this->__target.__string = make_shared<string>(_element.str());
+			break;
+		}
+		case muzzley::JSInteger : {
+			this->__target.__integer = _element.intr();
+			break;
+		}
+		case muzzley::JSDouble : {
+			this->__target.__double = _element.dbl();
+			break;
+		}
+		case muzzley::JSBoolean : {
+			this->__target.__boolean = _element.bln();
+			break;
+		}
+		case muzzley::JSNil : {
+			this->__target.__nil = nullptr;
+			break;
+		}
+		case muzzley::JSDate : {
+			this->__target.__date = _element.date();
+			break;
+		}
 	}
 }
 
-void muzzley::JSONObjRef::put(long long _in) {
-	if (this->__name == NULL) {
-		this->__name = new string();
-		muzzley::tostr(*this->__name, _in);
-		this->__name->insert(0, "_");
+muzzley::JSONElementT::JSONElementT(JSONObj& _value) : __parent( nullptr ) {
+	this->type( muzzley::JSObject);
+	if (_value.get() != nullptr) {
+		this->__target.__object = _value;
 	}
-	else {
-		JSONInt* _sp = new JSONInt(new JSONIntRef(_in));
-		this->insert(string(this->__name->data()), (smart_ptr<JSONElement>*) _sp);
-		delete this->__name;
-		this->__name = NULL;
+}
+
+muzzley::JSONElementT::JSONElementT(JSONArr& _value) : __parent( nullptr ) {
+	this->type( muzzley::JSArray);
+	if (_value.get() != nullptr) {
+		this->__target.__array = _value;
 	}
+}
+
+muzzley::JSONElementT::JSONElementT(string _value) : __parent( nullptr ) {
+	this->type( muzzley::JSString);
+	this->__target.__string = make_shared<string>(_value);
+}
+
+muzzley::JSONElementT::JSONElementT(const char* _value) : __parent( nullptr ) {
+	this->type( muzzley::JSString);
+	this->__target.__string = make_shared<string>(string(_value));
+}
+
+muzzley::JSONElementT::JSONElementT(long long _value) : __parent( nullptr ) {
+	this->type( muzzley::JSInteger);
+	this->__target.__integer = _value;
+}
+
+muzzley::JSONElementT::JSONElementT(double _value) : __parent( nullptr ) {
+	this->type( muzzley::JSDouble);
+	this->__target.__double = _value;
+}
+
+muzzley::JSONElementT::JSONElementT(bool _value) : __parent( nullptr ) {
+	this->type( muzzley::JSBoolean);
+	this->__target.__boolean = _value;
+}
+
+muzzley::JSONElementT::JSONElementT(time_t _value) : __parent( nullptr ) {
+	this->type( muzzley::JSDate);
+	this->__target.__date = _value;
+}
+
+muzzley::JSONElementT::JSONElementT(int _value) : __parent( nullptr ) {
+	this->type( muzzley::JSInteger);
+	this->__target.__integer = _value;
+}
+
+muzzley::JSONElementT::JSONElementT(size_t _value) : __parent( nullptr ) {
+	this->type( muzzley::JSInteger);
+	this->__target.__integer = _value;
 }
 
 #ifdef __LP64__
-void muzzley::JSONObjRef::put(unsigned int _in) {
-	if (this->__name == NULL) {
-		this->__name = new string();
-		muzzley::tostr(*this->__name, _in);
-		this->__name->insert(0, "_");
-	}
-	else {
-		JSONInt* _sp = new JSONInt(new JSONIntRef(_in));
-		this->insert(string(this->__name->data()), (smart_ptr<JSONElement>*) _sp);
-		delete this->__name;
-		this->__name = NULL;
-	}
+muzzley::JSONElementT::JSONElementT(unsigned int _value) : __parent( nullptr ) {
+	this->type( muzzley::JSInteger);
+	this->__target.__integer = _value;
 }
 #endif
 
-void muzzley::JSONObjRef::put(size_t _in) {
-	if (this->__name == NULL) {
-		this->__name = new string();
-		muzzley::tostr(*this->__name, _in);
-		this->__name->insert(0, "_");
-	}
-	else {
-		JSONInt* _sp = new JSONInt(new JSONIntRef(_in));
-		this->insert(string(this->__name->data()), (smart_ptr<JSONElement>*) _sp);
-		delete this->__name;
-		this->__name = NULL;
-	}
+muzzley::JSONElementT::~JSONElementT() {
 }
 
-void muzzley::JSONObjRef::put(double _in) {
-	if (this->__name == NULL) {
-		this->__name = new string();
-		muzzley::tostr(*this->__name, _in);
-		size_t dot = this->__name->find(".");
-		if (dot != string::npos) {
-			this->__name->erase(dot, 1);
-			this->__name->insert(dot, "_");
+muzzley::JSONType muzzley::JSONElementT::type() {
+	return (muzzley::JSONType)  this->__target.__type;
+}
+
+void muzzley::JSONElementT::type(JSONType _in) {
+	assertz(_in >= 0, "the type must be a valid value", 0, 0);
+	
+	if (_in == this->__target.__type) {
+		return;
+	}
+
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			this->__target.__object.~JSONObj();
+			//delete & this->__target.__object;
+			break;
 		}
-		this->__name->insert(0, "_");
-	}
-	else {
-		JSONDbl* _sp = new JSONDbl(new JSONDblRef(_in));
-		this->insert(string(this->__name->data()), (smart_ptr<JSONElement>*) _sp);
-		delete this->__name;
-		this->__name = NULL;
-	}
-}
-
-void muzzley::JSONObjRef::put(bool _in) {
-	if (this->__name == NULL) {
-		this->__name = new string();
-		muzzley::tostr(*this->__name, _in);
-		this->__name->insert(0, "_");
-	}
-	else {
-		JSONBool* _sp = new JSONBool(new JSONBoolRef(_in));
-		this->insert(string(this->__name->data()), (smart_ptr<JSONElement>*) _sp);
-		delete this->__name;
-		this->__name = NULL;
-	}
-}
-
-void muzzley::JSONObjRef::put(string _in) {
-	if (this->__name == NULL) {
-		this->__name = new string(_in);
-	}
-	else {
-		JSONStr* _sp = new JSONStr(new JSONStrRef(_in));
-		this->insert(string(this->__name->data()), (smart_ptr<JSONElement>*) _sp);
-		delete this->__name;
-		this->__name = NULL;
-	}
-}
-
-void muzzley::JSONObjRef::put(JSONObj& _in) {
-	if (this->__name == NULL) {
-		throw muzzley::NoAttributeNameException("can't create attribute name from JS Object");
-	}
-	else {
-		JSONObj* _sp = new JSONObj(_in.get());
-		this->insert(string(this->__name->data()), (smart_ptr<JSONElement>*) _sp);
-		delete this->__name;
-		this->__name = NULL;
-	}
-}
-
-void muzzley::JSONObjRef::put(JSONArr& _in) {
-	if (this->__name == NULL) {
-		throw muzzley::NoAttributeNameException("can't create attribute name from JS Array");
-	}
-	else {
-		JSONArr* _sp = new JSONArr(_in.get());
-		this->insert(string(this->__name->data()), (smart_ptr<JSONElement>*) _sp);
-		delete this->__name;
-		this->__name = NULL;
-	}
-}
-
-void muzzley::JSONObjRef::put(JSONBool& _in) {
-	this->put((bool) *_in.get());
-}
-
-void muzzley::JSONObjRef::put(JSONInt& _in) {
-	this->put((long long) *_in.get());
-}
-
-void muzzley::JSONObjRef::put(JSONDbl& _in) {
-	this->put((double) *_in.get());
-}
-
-void muzzley::JSONObjRef::put(JSONStr& _in) {
-	this->put((string) *_in.get());
-}
-
-void muzzley::JSONObjRef::put(JSONNil& _in) {
-	if (this->__name == NULL) {
-		this->__name = new string("null");
-	}
-	else {
-		JSONNil* _sp = new JSONNil(new JSONNilRef());
-		this->insert(string(this->__name->data()), (smart_ptr<JSONElement>*) _sp);
-		delete this->__name;
-		this->__name = NULL;
-	}
-}
-
-bool muzzley::JSONObjRef::compare(JSONElement& _in) {
-	return this->type() == _in.type() && this == &_in;
-}
-
-muzzley::JSONElement& muzzley::JSONObjRef::get(size_t _idx) {
-	if(_idx < this->size()) {
-		return *this->at(_idx)->get();
-	}
-	return JSON_NIL;
-}
-
-muzzley::JSONElement& muzzley::JSONObjRef::get(const char* _idx) {
-	JSONObjRef::iterator i;
-	if ((i = this->find(_idx)) != this->end()) {
-		return *((*i)->second->get());
-	}
-	return JSON_NIL;
-}
-
-int muzzley::JSONObjRef::getInt() {
-	return this->size();
-}
-
-long muzzley::JSONObjRef::getLong() {
-	return this->size();
-}
-
-long muzzley::JSONObjRef::getLongLong() {
-	return this->size();
-}
-
-unsigned int muzzley::JSONObjRef::getUnsignedInt() {
-	return this->size();
-}
-
-double muzzley::JSONObjRef::getDouble() {
-	return this->size();
-}
-
-bool muzzley::JSONObjRef::getBool() {
-	return true;
-}
-
-string muzzley::JSONObjRef::getString() {
-	string _ret;
-	this->stringify(_ret, this->__flags);
-	return _ret;
-}
-
-muzzley::JSONObjRef& muzzley::JSONObjRef::getJSONObj() {
-	return *this;
-}
-
-muzzley::JSONArrRef& muzzley::JSONObjRef::getJSONArr() {
-	throw CastException("can not convert from JSONObj to JSONArr");
-}
-
-void muzzley::JSONObjRef::stringify(ostream& _out, short _flags, string _tabs) {
-	string _ret;
-	this->stringify(_ret, _flags, _tabs);
-	_out << _ret << flush;
-}
-
-void muzzley::JSONObjRef::stringify(string& _out, short _flags, string _tabs) {
-	_out.insert(_out.length(),  "{");
-	if (_flags & muzzley::pretty) {
-		_tabs.insert(_tabs.length(), "\t");
-	}
-	bool first = true;
-	for (JSONObjRef::iterator i = this->begin(); i != this->end(); i++) {
-		if (!first) {
-			_out.insert(_out.length(),  ",");
+		case muzzley::JSArray : {
+			this->__target.__array.~JSONArr();
+			//delete & this->__target.__array;
+			break;
 		}
-		first = false;
-		if (_flags & muzzley::pretty) {
-			_out.insert(_out.length(),  "\n");
+		case muzzley::JSString : {
+			this->__target.__string.~JSONStr();
+			//delete & this->__target.__string;
+			break;
 		}
-		_out.insert(_out.length(),  _tabs);
-		_out.insert(_out.length(),  "\"");
-		_out.insert(_out.length(),  (*i)->first);
-		_out.insert(_out.length(),  (_flags & muzzley::pretty ? "\" : " : "\":"));
-		(*i)->second->get()->stringify(_out, _flags, _tabs);
+		default : {
+			break;
+		}
 	}
-	if (_flags & muzzley::pretty) {
-		_out.insert(_out.length(),  "\n");
-		_tabs .erase(_tabs.length() - 1, 1);
+	switch(_in) {
+		case muzzley::JSObject : {
+			new(& this->__target.__object) JSONObj();
+			break;
+		}
+		case muzzley::JSArray : {
+			new(& this->__target.__array) JSONArr();
+			break;
+		}
+		case muzzley::JSString : {
+			new(& this->__target.__string) JSONStr();
+			break;
+		}
+		default : {
+			break;
+		}
+		
 	}
-	_out.insert(_out.length(),  _tabs);
-	_out.insert(_out.length(),  "}");
+
+	this->__target.__type = _in;
 }
 
-muzzley::JSONElement& muzzley::JSONObjRef::operator[](int _idx) {
-	return this->get(_idx);
+muzzley::JSONUnion& muzzley::JSONElementT::value() {
+	return this->__target;
 }
 
-muzzley::JSONElement& muzzley::JSONObjRef::operator[](size_t _idx) {
-	return this->get(_idx);
+bool muzzley::JSONElementT::ok() {
+	return this->__target.__type != muzzley::JSNil;
 }
 
-muzzley::JSONElement& muzzley::JSONObjRef::operator[](const char* _idx) {
-	return this->get(_idx);
+bool muzzley::JSONElementT::empty() {
+	return this->__target.__type == muzzley::JSNil;
+}
+
+bool muzzley::JSONElementT::nil() {
+	return this->__target.__type == muzzley::JSNil;
+}
+
+void muzzley::JSONElementT::assign(JSONElementT& _rhs) {
+	this->type( _rhs.type());
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			if (_rhs.obj().get() != nullptr) {
+				this->__target.__object = _rhs.obj();
+			}
+			break;
+		}
+		case muzzley::JSArray : {
+			if (_rhs.arr().get() != nullptr) {
+				this->__target.__array = _rhs.arr();
+			}
+			break;
+		}
+		case muzzley::JSString : {
+			this->__target.__string = make_shared<string>(_rhs.str());
+			break;
+		}
+		case muzzley::JSInteger : {
+			this->__target.__integer = _rhs.intr();
+			break;
+		}
+		case muzzley::JSDouble : {
+			this->__target.__double = _rhs.dbl();
+			break;
+		}
+		case muzzley::JSBoolean : {
+			this->__target.__boolean = _rhs.bln();
+			break;
+		}
+		case muzzley::JSNil : {
+			this->__target.__nil = nullptr;
+			break;
+		}
+		case muzzley::JSDate : {
+			this->__target.__date = _rhs.date();
+			break;
+		}
+	}
+}
+
+muzzley::JSONElementT * muzzley::JSONElementT::parent() {
+	return this->__parent;
+}
+
+void muzzley::JSONElementT::parent(JSONElementT* _parent) {
+	this->__parent = _parent;
+}
+
+muzzley::JSONObj& muzzley::JSONElementT::obj() {
+	assertz(this->__target.__type == muzzley::JSObject, "this element is not of type JSObject", 0, 0);
+	return this->__target.__object;
+}
+
+muzzley::JSONArr& muzzley::JSONElementT::arr() {
+	assertz(this->__target.__type == muzzley::JSArray, "this element is not of type JSArray", 0, 0);
+	return this->__target.__array;
+}
+
+string muzzley::JSONElementT::str() {
+	assertz(this->__target.__type == muzzley::JSString, "this element is not of type JSString", 0, 0);
+	return *(this->__target.__string.get());
+}
+
+long long muzzley::JSONElementT::intr() {
+	assertz(this->__target.__type == muzzley::JSInteger, "this element is not of type JSInteger", 0, 0);
+	return this->__target.__integer;
+}
+
+double muzzley::JSONElementT::dbl() {
+	assertz(this->__target.__type == muzzley::JSDouble, "this element is not of type JSDouble", 0, 0);
+	return this->__target.__double;
+}
+
+bool muzzley::JSONElementT::bln() {
+	assertz(this->__target.__type == muzzley::JSBoolean, "this element is not of type JSBoolean", 0, 0);
+	return this->__target.__boolean;
+}
+
+time_t muzzley::JSONElementT::date() {
+	assertz(this->__target.__type == muzzley::JSDate, "this element is not of type JSDate", 0, 0);
+	return this->__target.__date;
+}
+
+double muzzley::JSONElementT::number() {
+	assertz(this->__target.__type == muzzley::JSInteger || this->__target.__type == muzzley::JSDouble || this->__target.__type == muzzley::JSBoolean, "this element is not of type JSInteger, JSDouble or JSBoolean", 0, 0);
+	switch(this->__target.__type) {
+		case muzzley::JSInteger : {
+			return (double) this->__target.__integer;
+		}
+		case muzzley::JSDouble : {
+			return this->__target.__double;
+		}
+		case muzzley::JSBoolean : {
+			return (double) this->__target.__boolean;
+		}
+	}
+	return 0;
+}
+
+muzzley::JSONElementT& muzzley::JSONElementT::operator<<(const char* _in) {
+	(*this) << string(_in);
+	return * this;
+}
+
+muzzley::JSONElementT& muzzley::JSONElementT::operator<<(string _in) {
+	assertz(this->__target.__type >= 0, "the type must be a valid value", 0, 0);
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			this->__target.__object->push(_in);
+			break;
+		}
+		case muzzley::JSArray : {
+			this->__target.__array->push(new muzzley::JSONElementT(string(_in)));
+			break;
+		}
+		default : {
+			this->__target.__string.get()->assign(_in);
+			this->type( muzzley::JSString);
+			assertz(this->__target.__type >= 0, "the type must be a valid value", 0, 0);
+			break;
+		}
+	}
+	return * this;
+}
+
+muzzley::JSONElementT& muzzley::JSONElementT::operator<<(JSONElementT* _in) {
+	assertz(this->__target.__type >= 0, "the type must be a valid value", 0, 0);
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			this->__target.__object->push(_in);
+			break;
+		}
+		case muzzley::JSArray : {
+			this->__target.__array->push(_in);
+			break;
+		}
+		default : {
+			assertz(this->__target.__type == muzzley::JSObject || this->__target.__type == muzzley::JSArray, "the type must be a JSObject or JSArray in order to push JSONElementT*", 0, 0);
+			break;
+		}
+	}
+	return * this;
+}
+
+bool muzzley::JSONElementT::operator==(muzzley::JSONElementT& _in) {
+	assertz(this->__target.__type >= 0, "the type must be a valid value", 0, 0);
+	if (this->__target.__type !=  _in.type()) {
+		return false;
+	}
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			return this->__target.__object == _in.obj();
+		}
+		case muzzley::JSArray : {
+			return this->__target.__array == _in.arr();
+		}
+		case muzzley::JSString : {
+			return *(this->__target.__string.get()) == _in.str();
+		}
+		case muzzley::JSInteger : {
+			return this->__target.__integer == _in.intr();
+		}
+		case muzzley::JSDouble : {
+			return this->__target.__double == _in.dbl();
+		}
+		case muzzley::JSBoolean : {
+			return this->__target.__boolean == _in.bln();
+		}
+		case muzzley::JSNil : {
+			return true;
+		}
+		case muzzley::JSDate : {
+			return this->__target.__date == _in.date();
+		}
+	}
+	return false;
+}
+
+bool muzzley::JSONElementT::operator!=(JSONElementT& _in) {
+	assertz(this->__target.__type >= 0, "the type must be a valid value", 0, 0);
+	if (this->__target.__type != _in.type()) {
+		return true;
+	}
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			return this->__target.__object != _in.obj();
+		}
+		case muzzley::JSArray : {
+			return this->__target.__array != _in.arr();
+		}
+		case muzzley::JSString : {
+			return *(this->__target.__string.get()) != _in.str();
+		}
+		case muzzley::JSInteger : {
+			return this->__target.__integer != _in.intr();
+		}
+		case muzzley::JSDouble : {
+			return this->__target.__double != _in.dbl();
+		}
+		case muzzley::JSBoolean : {
+			return this->__target.__boolean != _in.bln();
+		}
+		case muzzley::JSNil : {
+			return true;
+		}
+		case muzzley::JSDate : {
+			return this->__target.__date != _in.date();
+		}
+	}
+	return false;
+}
+
+void muzzley::JSONElementT::stringify(ostream& _out) {
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			this->__target.__object->stringify(_out);
+			break;
+		}
+		case muzzley::JSArray : {
+			this->__target.__array->stringify(_out);
+			break;
+		}
+		case muzzley::JSString : {
+			_out << "\"" << this->str() << "\"" << flush;
+			break;
+		}
+		case muzzley::JSInteger : {
+			_out << this->__target.__integer << flush;
+			break;
+		}
+		case muzzley::JSDouble : {
+			_out << this->__target.__double << flush;
+			break;
+		}
+		case muzzley::JSBoolean : {
+			_out << this->__target.__boolean << flush;
+			break;
+		}
+		case muzzley::JSNil : {
+			_out <<  "undefined" << flush;
+			break;
+		}
+		case muzzley::JSDate : {
+			string _date;
+			muzzley::tostr(_date, this->__target.__date, "%Y-%m-%dT%H:%M:%S.000Z");
+			_out << "\"" << _date << "\"" << flush;
+			break;
+		}
+	}
+}
+
+void muzzley::JSONElementT::stringify(string& _out) {
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			this->__target.__object->stringify(_out);
+			break;
+		}
+		case muzzley::JSArray : {
+			this->__target.__array->stringify(_out);
+			break;
+		}
+		case muzzley::JSString : {
+			_out.insert(_out.length(), "\"");
+			_out.insert(_out.length(), this->str());
+			_out.insert(_out.length(), "\"");
+			break;
+		}
+		case muzzley::JSInteger : {
+			muzzley::tostr(_out, this->__target.__integer);
+			break;
+		}
+		case muzzley::JSDouble : {
+			muzzley::tostr(_out, this->__target.__double);
+			break;
+		}
+		case muzzley::JSBoolean : {
+			muzzley::tostr(_out, this->__target.__boolean);
+			break;
+		}
+		case muzzley::JSNil : {
+			_out.insert(_out.length(), "undefined");
+			break;
+		}
+		case muzzley::JSDate : {
+			_out.insert(_out.length(), "\"");
+			muzzley::tostr(_out, this->__target.__date, "%Y-%m-%dT%H-%M-%S.000Z");
+			_out.insert(_out.length(), "\"");
+			break;
+		}
+	}
+}
+
+/*JSON OBJECT*/
+muzzley::JSONObjT::JSONObjT() {
+}
+
+muzzley::JSONObjT::~JSONObjT(){
+}
+
+void muzzley::JSONObjT::push(string _name) {
+	if (this->__name.length() == 0) {
+		this->__name.assign(_name);
+	}
+	else {
+		this->insert(pair<string, JSONPtr>(string(this->__name.data()), JSONPtr(new JSONElementT(_name))));
+		this->__name.clear();
+	}
+}
+
+void muzzley::JSONObjT::push(JSONElementT& _value) {
+	assertz(this->__name.length() != 0, "you must pass a field name first", 0, 0);
+	this->insert(pair<string, JSONPtr>(this->__name, JSONPtr(new JSONElementT(_value))));
+	this->__name.clear();
+}
+
+void muzzley::JSONObjT::push(JSONElementT* _value) {
+	assertz(this->__name.length() != 0, "you must pass a field name first", 0, 0);
+	this->insert(pair<string, JSONPtr>(this->__name, JSONPtr(_value)));
+	this->__name.clear();
+}
+
+void muzzley::JSONObjT::pop(int _name) {
+	this->pop(to_string(_name));
+}
+
+void muzzley::JSONObjT::pop(size_t _name) {
+	this->pop(to_string(_name));
+}
+
+void muzzley::JSONObjT::pop(const char* _name) {
+	this->pop(string(_name));
+}
+
+void muzzley::JSONObjT::pop(string _name) {
+	auto _found = this->find(_name);
+	if (_found != this->end()) {
+		this->erase(_found);
+	}
+}
+
+bool muzzley::JSONObjT::operator==(muzzley::JSONObjT& _rhs) {
+	return false;
+}
+
+bool muzzley::JSONObjT::operator!=(JSONObjT& _rhs) {
+	return false;
+}
+
+muzzley::JSONPtr& muzzley::JSONObjT::operator[](int _idx) {
+	return (* this)[(size_t) _idx];
+}
+
+muzzley::JSONPtr& muzzley::JSONObjT::operator[](size_t _idx) {
+	return (* this)[to_string(_idx)];
+}
+
+muzzley::JSONPtr& muzzley::JSONObjT::operator[](const char* _idx) {
+	return (* this)[string(_idx)];
+}
+
+muzzley::JSONPtr& muzzley::JSONObjT::operator[](string _idx) {
+	auto _found = this->find(_idx);
+	if (_found != this->end()) {
+		return _found->second;
+	}
+	return muzzley::undefined;
 }
 
 
+void muzzley::JSONObjT::stringify(string& _out) {
+	_out.insert(_out.length(), "{");
+	bool _first = true;
+	for (auto _i : * this) {
+		if (!_first) {
+			_out.insert(_out.length(), ", ");
+		}
+		_first = false;
+		_out.insert(_out.length(), "\"");
+		_out.insert(_out.length(), _i.first);
+		_out.insert(_out.length(), "\" : ");
+		_i.second->stringify(_out);
+	}
+	_out.insert(_out.length(), "}");
+}
 
+void muzzley::JSONObjT::stringify(ostream& _out) {
+	_out << "{" << flush;
+	bool _first = true;
+	for (auto _i : * this) {
+		if (!_first) {
+			_out << ", ";
+		}
+		_first = false;
+		_out << "\"" << _i.first << "\" : " << flush;
+		_i.second->stringify(_out);
+	}
+	_out << "}" << flush;
+}
 
+/*JSON ARRAY*/
+muzzley::JSONArrT::JSONArrT() {
+}
 
+muzzley::JSONArrT::~JSONArrT(){
+}
 
+void muzzley::JSONArrT::push(JSONElementT& _value) {
+	this->push_back(JSONPtr(new JSONElementT(_value)));
+}
 
+void muzzley::JSONArrT::push(JSONElementT* _value) {
+	this->push_back(JSONPtr(_value));
+}
 
+void muzzley::JSONArrT::pop(int _idx) {
+	this->pop((size_t) _idx);
+}
 
+void muzzley::JSONArrT::pop(const char* _idx) {
+	this->pop(string(_idx));
+}
+
+void muzzley::JSONArrT::pop(string _idx) {
+	size_t _i = 0;
+	muzzley::fromstr(_idx, &_i);
+
+	assertz(_i >= 0, "the index of the element you want to remove must be higher then 0", 0, 0);
+	assertz(_i < this->size(), "the index of the element you want to remove must be lower than the array size", 0, 0);
+	this->erase(this->begin() + _i);
+}
+
+void muzzley::JSONArrT::pop(size_t _idx) {
+	assertz(_idx >= 0, "the index of the element you want to remove must be higher then 0", 0, 0);
+	assertz(_idx < this->size(), "the index of the element you want to remove must be lower than the array size", 0, 0);
+	this->erase(this->begin() + _idx);
+}
+
+bool muzzley::JSONArrT::operator==(muzzley::JSONArrT& _rhs) {
+	return false;
+}
+
+bool muzzley::JSONArrT::operator!=(JSONArrT& _rhs) {
+	return false;
+}
+
+muzzley::JSONPtr& muzzley::JSONArrT::operator[](int _idx) {
+	return (* this)[(size_t) _idx];
+}
+
+muzzley::JSONPtr& muzzley::JSONArrT::operator[](size_t _idx) {
+	assertz(_idx >= 0, "the index of the element you want to remove must be higher then 0", 0, 0);
+	assertz(_idx < this->size(), "the index of the element you want to remove must be lower than the array size", 0, 0);
+	return this->at(_idx);
+}
+
+muzzley::JSONPtr& muzzley::JSONArrT::operator[](const char* _idx) {
+	return (* this)[string(_idx)];
+}
+
+muzzley::JSONPtr& muzzley::JSONArrT::operator[](string _idx) {
+	size_t _i = 0;
+	muzzley::fromstr(_idx, &_i);
+
+	assertz(_i >= 0, "the index of the element you want to remove must be higher then 0", 0, 0);
+	assertz(_i < this->size(), "the index of the element you want to remove must be lower than the array size", 0, 0);
+
+	return this->at(_i);
+}
+
+void muzzley::JSONArrT::stringify(string& _out) {
+	_out.insert(_out.length(), "[");
+	bool _first = true;
+	for (auto _i : * this) {
+		if (!_first) {
+			_out.insert(_out.length(), ", ");
+		}
+		_first = false;
+		_i->stringify(_out);
+	}
+	_out.insert(_out.length(), "]");
+}
+
+void muzzley::JSONArrT::stringify(ostream& _out) {
+	_out << "[" << flush;
+	bool _first = true;
+	for (auto _i : * this) {
+		if (!_first) {
+			_out << ", ";
+		}
+		_first = false;
+		_i->stringify(_out);
+	}
+	_out << "]" << flush;
+}
+
+/*JSON POINTER TO ELEMENT*/
+muzzley::JSONPtr::JSONPtr()  : shared_ptr<JSONElementT>(make_shared<JSONElementT>()) {
+}
+
+muzzley::JSONPtr::JSONPtr(JSONElementT* _target) : shared_ptr<JSONElementT>(_target) {
+}
+
+muzzley::JSONPtr::~JSONPtr(){
+}
+
+muzzley::JSONElementT& muzzley::JSONPtr::value() {
+	if (this->get() == nullptr) {
+		*(muzzley::undefined.get());
+	}
+	return *(this->get());
+}
+
+muzzley::JSONPtr::operator string() {
+	if (this->get() == nullptr) {
+		return "";
+	}
+	string _out;
+	switch(this->get()->type()) {
+		case muzzley::JSObject : {
+			this->get()->obj()->stringify(_out);
+			break;
+		}
+		case muzzley::JSArray : {
+			this->get()->arr()->stringify(_out);
+			break;
+		}
+		case muzzley::JSString : {
+			_out.assign(this->get()->str().data());
+			break;
+		}
+		case muzzley::JSInteger : {
+			muzzley::tostr(_out, this->get()->intr());
+			break;
+		}
+		case muzzley::JSDouble : {
+			muzzley::tostr(_out, this->get()->dbl());
+			break;
+		}
+		case muzzley::JSBoolean : {
+			muzzley::tostr(_out, this->get()->bln());
+			break;
+		}
+		case muzzley::JSNil : {
+			_out.assign("");
+			break;
+		}
+		case muzzley::JSDate : {
+			muzzley::tostr(_out, this->get()->date(), "%Y-%m-%dT%H-%M-%S.000Z");
+			break;
+		}
+	}
+	return _out;
+}
+
+muzzley::JSONPtr::operator bool() {
+	if (this->get() == nullptr) {
+		return false;
+	}
+	switch(this->get()->type()) {
+		case muzzley::JSObject : {
+			return true;
+		}
+		case muzzley::JSArray : {
+			return true;
+		}
+		case muzzley::JSString : {
+			return this->get()->str().length() != 0;
+		}
+		case muzzley::JSInteger : {
+			return (bool) this->get()->intr();
+		}
+		case muzzley::JSDouble : {
+			return (bool) this->get()->dbl();
+		}
+		case muzzley::JSBoolean : {
+			return this->get()->bln();
+		}
+		case muzzley::JSNil : {
+			return false;
+		}
+		case muzzley::JSDate : {
+			return (bool) this->get()->date();
+		}
+	}
+	return false;
+}
+
+muzzley::JSONPtr::operator int() {
+	if (this->get() == nullptr) {
+		return 0;
+	}
+	switch(this->get()->type()) {
+		case muzzley::JSObject : {
+			return this->get()->obj()->size();;
+		}
+		case muzzley::JSArray : {
+			return this->get()->arr()->size();;
+		}
+		case muzzley::JSString : {
+			int _n = 0;
+			string _s(this->get()->str().data());
+			muzzley::fromstr(_s, &_n);
+			return _n;
+		}
+		case muzzley::JSInteger : {
+			return (int) this->get()->intr();
+		}
+		case muzzley::JSDouble : {
+			return (int) this->get()->dbl();
+		}
+		case muzzley::JSBoolean : {
+			return (int) this->get()->bln();
+		}
+		case muzzley::JSNil : {
+			return 0;
+		}
+		case muzzley::JSDate : {
+			return (int) this->get()->date();
+		}
+	}
+	return 0;
+}
+
+muzzley::JSONPtr::operator long() {
+	if (this->get() == nullptr) {
+		return 0;
+	}
+	switch(this->get()->type()) {
+		case muzzley::JSObject : {
+			return this->get()->obj()->size();;
+		}
+		case muzzley::JSArray : {
+			return this->get()->arr()->size();;
+		}
+		case muzzley::JSString : {
+			long _n = 0;
+			string _s(this->get()->str().data());
+			muzzley::fromstr(_s, &_n);
+			return _n;
+		}
+		case muzzley::JSInteger : {
+			return (long) this->get()->intr();
+		}
+		case muzzley::JSDouble : {
+			return (long) this->get()->dbl();
+		}
+		case muzzley::JSBoolean : {
+			return (long) this->get()->bln();
+		}
+		case muzzley::JSNil : {
+			return 0;
+		}
+		case muzzley::JSDate : {
+			return (long) this->get()->date();
+		}
+	}
+	return 0;
+}
+
+muzzley::JSONPtr::operator long long() {
+	if (this->get() == nullptr) {
+		return 0;
+	}
+	switch(this->get()->type()) {
+		case muzzley::JSObject : {
+			return this->get()->obj()->size();;
+		}
+		case muzzley::JSArray : {
+			return this->get()->arr()->size();;
+		}
+		case muzzley::JSString : {
+			long long _n = 0;
+			string _s(this->get()->str().data());
+			muzzley::fromstr(_s, &_n);
+			return _n;
+		}
+		case muzzley::JSInteger : {
+			return (long long) this->get()->intr();
+		}
+		case muzzley::JSDouble : {
+			return (long long) this->get()->dbl();
+		}
+		case muzzley::JSBoolean : {
+			return (long long) this->get()->bln();
+		}
+		case muzzley::JSNil : {
+			return 0;
+		}
+		case muzzley::JSDate : {
+			return (long long) this->get()->date();
+		}
+	}
+	return 0;
+}
+
+#ifdef __LP64__
+muzzley::JSONPtr::operator unsigned int() {
+	if (this->get() == nullptr) {
+		return 0;
+	}
+	switch(this->get()->type()) {
+		case muzzley::JSObject : {
+			return this->get()->obj()->size();;
+		}
+		case muzzley::JSArray : {
+			return this->get()->arr()->size();;
+		}
+		case muzzley::JSString : {
+			unsigned int _n = 0;
+			string _s(this->get()->str().data());
+			muzzley::fromstr(_s, &_n);
+			return _n;
+		}
+		case muzzley::JSInteger : {
+			return (unsigned int) this->get()->intr();
+		}
+		case muzzley::JSDouble : {
+			return (unsigned int) this->get()->dbl();
+		}
+		case muzzley::JSBoolean : {
+			return (unsigned int) this->get()->bln();
+		}
+		case muzzley::JSNil : {
+			return 0;
+		}
+		case muzzley::JSDate : {
+			return (unsigned int) this->get()->date();
+		}
+	}
+	return 0;
+}
+#endif
+
+muzzley::JSONPtr::operator size_t() {
+	if (this->get() == nullptr) {
+		return 0;
+	}
+	switch(this->get()->type()) {
+		case muzzley::JSObject : {
+			return this->get()->obj()->size();;
+		}
+		case muzzley::JSArray : {
+			return this->get()->arr()->size();;
+		}
+		case muzzley::JSString : {
+			size_t _n = 0;
+			string _s(this->get()->str().data());
+			muzzley::fromstr(_s, &_n);
+			return _n;
+		}
+		case muzzley::JSInteger : {
+			return (size_t) this->get()->intr();
+		}
+		case muzzley::JSDouble : {
+			return (size_t) this->get()->dbl();
+		}
+		case muzzley::JSBoolean : {
+			return (size_t) this->get()->bln();
+		}
+		case muzzley::JSNil : {
+			return 0;
+		}
+		case muzzley::JSDate : {
+			return (size_t) this->get()->date();
+		}
+	}
+	return 0;
+}
+
+muzzley::JSONPtr::operator double() {
+	if (this->get() == nullptr) {
+		return 0;
+	}
+	switch(this->get()->type()) {
+		case muzzley::JSObject : {
+			return (double) this->get()->obj()->size();;
+		}
+		case muzzley::JSArray : {
+			return (double) this->get()->arr()->size();;
+		}
+		case muzzley::JSString : {
+			double _n = 0;
+			string _s(this->get()->str().data());
+			muzzley::fromstr(_s, &_n);
+			return _n;
+		}
+		case muzzley::JSInteger : {
+			return (double) this->get()->intr();
+		}
+		case muzzley::JSDouble : {
+			return (double) this->get()->dbl();
+		}
+		case muzzley::JSBoolean : {
+			return (double) this->get()->bln();
+		}
+		case muzzley::JSNil : {
+			return 0;
+		}
+		case muzzley::JSDate : {
+			return (double) this->get()->date();
+		}
+	}
+	return 0;
+}
+
+muzzley::JSONPtr::operator JSONObj() {
+	assertz(this->get() != nullptr && this->get()->type() == muzzley::JSObject, "this element is not of type JSObject", 0, 0);
+	return this->get()->obj();
+}
+
+muzzley::JSONPtr::operator JSONArr() {
+	assertz(this->get() != nullptr && this->get()->type() == muzzley::JSArray, "this element is not of type JSArray", 0, 0);
+	return this->get()->arr();
+}
+
+muzzley::JSONPtr::operator JSONObj&() {
+	assertz(this->get() != nullptr && this->get()->type() == muzzley::JSObject, "this element is not of type JSObject", 0, 0);
+	return this->get()->obj();
+}
+
+muzzley::JSONPtr::operator JSONArr&() {
+	assertz(this->get() != nullptr && this->get()->type() == muzzley::JSArray, "this element is not of type JSArray", 0, 0);
+	return this->get()->arr();
+}
+
+/*JSON POINTER TO OBJECT*/
+muzzley::JSONObj::JSONObj() : shared_ptr<JSONObjT>(make_shared<JSONObjT>(JSONObjT())) {
+}
+
+muzzley::JSONObj::JSONObj(JSONObj& _rhs)  : shared_ptr<JSONObjT>(_rhs) {
+}
+
+muzzley::JSONObj::JSONObj(JSONObjT* _target) : shared_ptr<JSONObjT>(_target) {
+}
+
+muzzley::JSONObj::~JSONObj(){
+}
+
+muzzley::JSONObjT::iterator muzzley::JSONObj::begin() {
+	return (* this)->begin();
+}
+
+muzzley::JSONObjT::iterator muzzley::JSONObj::end() {
+	return (* this)->end();
+}
+
+muzzley::JSONObj& muzzley::JSONObj::operator<<(string _in) {
+	(* this)->push(_in);
+	return * this;
+}
+
+muzzley::JSONObj& muzzley::JSONObj::operator<<(const char* _in) {
+	(* this)->push(_in);
+	return * this;
+}
+
+/*JSON POINTER TO ARRAY*/
+muzzley::JSONArr::JSONArr() : shared_ptr<JSONArrT>(make_shared<JSONArrT>(JSONArrT())) {
+}
+
+muzzley::JSONArr::JSONArr(JSONArr& _rhs)  : shared_ptr<JSONArrT>(_rhs){
+}
+
+muzzley::JSONArr::JSONArr(JSONArrT* _target) : shared_ptr<JSONArrT>(_target) {
+}
+
+muzzley::JSONArr::~JSONArr(){
+}
+
+muzzley::JSONArrT::iterator muzzley::JSONArr::begin() {
+	return (* this)->begin();
+}
+
+muzzley::JSONArrT::iterator muzzley::JSONArr::end() {
+	return (* this)->end();
+}

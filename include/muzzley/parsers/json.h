@@ -34,11 +34,11 @@ namespace muzzley {
 
 	void fromfile(ifstream& _in, JSONObj& _out) ;
 	void fromfile(ifstream& _in, JSONArr& _out) ;
-	void fromfile(ifstream& _in, JSONElement** _out, muzzley::JSONType* type ) ;
+	JSONPtr fromfile(ifstream& _in);
 
 	void fromstr(string& _in, JSONObj& _out) ;
 	void fromstr(string& _in, JSONArr& _out) ;
-	void fromstr(string& _in, JSONElement** _out, muzzley::JSONType* type ) ;
+	JSONPtr fromstr(string& _in);
 
 	void tostr(string& _out, JSONElement& _in) ;
 	void tostr(string& _out, JSONObj& _in) ;

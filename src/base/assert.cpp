@@ -16,27 +16,8 @@ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <muzzley/base/assert.h>
 
-#pragma once
-
-#include <muzzley/exceptions/AssertionException.h>
-
-/**
- * Compact form for throwing exceptions when validating logical requirements and input/output validation
- * @param x a boolean expression to be validated
- * @param y the error message
- * @param z the HTTP status code to be replied to the invoking HTTP client
- */
-#define assertz(x,y,z,c) if (! (x)) { throw muzzley::AssertionException(y, z, c, #x, __LINE__, __FILE__); }
-
-namespace muzzley {
-	enum JSONType {
-		JSObject, JSArray, JSString, JSInteger, JSDouble, JSBoolean, JSNil, JSDate
-	};
-
-	enum ObjectOp {
-		pretty = 1, minified = 2, json = 4,  xml = 8,  nil = 16,  headers = 32,  params = 64,  body = 128
-	};
+extern "C" int muzzley_lib() {
+	return 1;
 }
-
-extern "C" int muzzley_lib();

@@ -17,7 +17,6 @@
  */
 
 #include <muzzley/resource/Client.h>
-#include <muzzley/base/smart_ptr.h>
 #include <muzzley/base/assert.h>
 #include <muzzley/parsers/json.h>
 #include <pthread.h>
@@ -27,7 +26,6 @@
 
 muzzley::Client::Client() :
 	__serial(1) {
-	pthread_key_create(&muzzley::__memory_key, NULL);
 	this->__mtx = new pthread_mutex_t();
 	this->__thr = new pthread_t();
 	pthread_mutexattr_init(&this->__attr);

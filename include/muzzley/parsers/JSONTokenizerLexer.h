@@ -26,10 +26,10 @@ namespace muzzley {
 
 	class JSONTokenizerLexer: public JSONLexer {
 		public:
-			JSONTokenizerLexer(std::istream &_in = std::cin, std::ostream &_out = std::cout, JSONObj* _rootobj = NULL, JSONArr* _rootarr = NULL);
+			JSONTokenizerLexer(std::istream &_in = std::cin, std::ostream &_out = std::cout);
 			virtual ~JSONTokenizerLexer();
 
-			void switchRoots(JSONObj* _rootobj, JSONArr* _rootarr);
+			void switchRoots(JSONPtr& _root);
 
 			void result(muzzley::JSONType _in);
 			void finish(muzzley::JSONType _in);
@@ -43,12 +43,10 @@ namespace muzzley {
 
 			void add();
 
-			JSONObj* __root_obj;
-			JSONArr* __root_arr;
+			JSONElementT* __root;
 			JSONType __root_type;
-			JSONElement* __value;
-			JSONElement* __parent;
-			vector<JSONElement*> __context;
+			JSONPtr __value;
+			JSONElementT* __parent;
 	};
 
 }

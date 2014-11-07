@@ -43,5 +43,8 @@ namespace muzzley {
 	};
 
 	void log(string __text, muzzley::LogLevel _level);
+	void process_mem_usage(double& vm_usage, double& resident_set);
+	void log_mem_usage();
+	
 }
 

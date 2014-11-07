@@ -42,3 +42,45 @@ void muzzley::log(string _text, muzzley::LogLevel _level) {
 		(*muzzley::log_fd) << muzzley::log_lvl_names[_level] << "\033[1;37m" << _time << "\033[0m | " << _text << endl << flush;
 	}
 }
+
+void muzzley::process_mem_usage(double& vm_usage, double& resident_set) {
+	using std::ios_base;
+	using std::ifstream;
+	using std::string;
+
+	vm_usage = 0.0;
+	resident_set = 0.0;
+
+	ifstream stat_stream("/proc/self/stat", ios_base::in);
+
+	string pid, comm, state, ppid, pgrp, session, tty_nr;
+	string tpgid, flags, minflt, cminflt, majflt, cmajflt;
+	string utime, stime, cutime, cstime, priority, nice;
+	string O, itrealvalue, starttime;
+
+	unsigned long vsize;
+	long rss;
+
+	stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
+			>> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
+			>> utime >> stime >> cutime >> cstime >> priority >> nice
+			>> O >> itrealvalue >> starttime >> vsize >> rss; // don't care about the rest
+
+	stat_stream.close();
+
+	long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
+	vm_usage = vsize / 1024.0;
+	resident_set = rss * page_size_kb;
+}
+
+void muzzley::log_mem_usage() {
+	double _vm;
+	double _resident;
+	muzzley::process_mem_usage(_vm, _resident);
+	string _text("virtual_memory: ");
+	muzzley::tostr(_text, _vm);
+	_text.insert(_text.length(), "kb | resident_memory: ");
+	muzzley::tostr(_text, _resident);
+	_text.insert(_text.length(), "kb");
+	muzzley::log(_text, muzzley::debug);
+}

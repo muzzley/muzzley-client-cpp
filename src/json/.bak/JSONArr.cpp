@@ -209,3 +209,16 @@ muzzley::JSONElement& muzzley::JSONArrRef::operator[](int _idx) {
 muzzley::JSONElement& muzzley::JSONArrRef::operator[](size_t _idx) {
 	return this->get(_idx);
 }
+
+muzzley::JSONElement& muzzley::JSONArrRef::operator[](const char* _idx) {
+	int _iidx;
+	string _sidx(_idx);
+	muzzley::fromstr(_sidx, &_iidx);
+	return this->get(_iidx);
+}
+
+muzzley::JSONElement& muzzley::JSONArrRef::operator[](string& _idx) {
+	int _iidx;
+	muzzley::fromstr(_idx, &_iidx);
+	return this->get(_iidx);
+}
