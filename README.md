@@ -44,7 +44,8 @@ In the `Examples` folder, you can find several examples of muzzley-enabled appli
 
 * **`app.cpp`**: A generic muzzley-enabled application.
 * **`galileo_app.cpp`**: A Intel Galileo specific example that can be used to turn an LED on and off using your smartphone.
-* **`user.cpp`**: An example of how to connect to an activity as a user and thus simulate being the muzzley smartphone applicatoin.
+* **`user.cpp`**: An example of how to connect to an activity as a user and thus simulate being the muzzley smartphone application.
+* **`app_pubsub.cpp`** and **`user_pubsub.cpp`**: An example of how to use the Pub/Sub communication pattern.
 
 To compile and run the Galileo example, for instance, you'd execute the following commands:
 
