@@ -242,11 +242,96 @@ Hence, replying, for instance, to a Signaling Message could look like this:
       return true;
     });
 
-# SUBSCRIBING TO A CHANNEL
+# PUB/SUB COMMUNICATION PATTERN
 
+The [Pub/Sub message pattern][wiki_pubsub] is a powerful communication mechanism that allows you to send and/or receive messages without knowing the communication actors and, therefore, not having to deal programming messages to be sent directly to specific peers.
 
-# PUBLISHING TO A CHANNEL
+For further reading on this pattern, read the [wiki page][wiki_pubsub].
 
+## Subscribing to a channel
+
+In order to subscribe for the messages of a given channel, an event callback must be registered for the *muzzley::Published* event:
+
+```
+ 
+    muzzley::Subscription _s1;
+    _s1.setNamespace("iot");
+    _s1.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
+    _s1.setChannel("2183hroqw89");
+    _s1.setComponent("switch");
+    _s1.setProperty("status");
+    _client.on(muzzley::Published, _s1, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+      ...
+      return true;
+    });
+```
+
+The **muzzley::Subscription** class is used to pass the channel identifying information. The initializing values for this class should be the same for the subscriber and the publisher.
+
+The callback will be invoked whenever a message is published to the given channel. 
+
+## Publishing to a channel
+
+In order to publish to a given channel, an event must be triggered for the *muzzley::Publish* event:
+
+```
+
+    muzzley::Subscription _s1;
+    _s1.setNamespace("iot");
+    _s1.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
+    _s1.setChannel("2183hroqw89");
+    _s1.setComponent("bulb");
+    _s1.setProperty("intensity");
+
+    muzzley::Message _m1;
+    _m1.setData(JSON(
+      "io" << "w" <<
+      "data" << JSON(
+        "value" << 125 << 
+        "unit" << "lm"
+      )
+    ));
+    _client.trigger(muzzley::Publish, _s1, _m1);
+```
+
+The **muzzley::Message** class is used to pass on the payload to be published to the given channel.
+
+The **muzzley::Subscription** class is used to pass the channel identifying information. The initializing values for this class should be the same for the subscriber and the publisher.
+
+## Publishing to a channel and expecting for a response
+
+Altough it falls a bit outside the Pub/Sub messaging pattern, this library provides the functionality for a message to be returned by a given subscriber (usefull for making request for a given property value, for instance), allowing you to use the Pub/Sub pattern to make RPC calls.
+
+All you have to do is to pass a callback to the publish event triggering:
+
+```
+
+    muzzley::Subscription _s1;
+    _s1.setNamespace("iot");
+    _s1.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
+    _s1.setChannel("2183hroqw89");
+    _s1.setComponent("bulb");
+    _s1.setProperty("intensity");
+
+    muzzley::Message _m1;
+    _m1.setData(JSON(
+      "io" << "w" <<
+      "data" << JSON(
+        "value" << 125 << 
+        "unit" << "lm"
+      )
+    ));
+    _client.trigger(muzzley::Publish, _s1, _m1, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+      ...
+      return true;
+    }); 
+```
+
+The **muzzley::Message** class is used to pass on the payload to be published to the given channel.
+
+The **muzzley::Subscription** class is used to pass the channel identifying information. The initializing values for this class should be the same for the subscriber and the publisher.
+
+The callback will be invoked if some subscriber responds to the publish.
 
 #MAIN CLASSES
 
@@ -428,7 +513,7 @@ For instance, given the following object initialization:
 
 one could iterate over this object, using standard techniques;
   
-    for (auto _field : *_o) { // don't forget the * since you want to iterate over the pointed object
+    for (auto _field : *_o) { // dont forget the * since you want to iterate over the pointed object
         cout << " field named " << _field.first << " has the following value " << _field.second << endl << flush;
     }
 
@@ -444,13 +529,13 @@ For instance, given the following object initialization:
 
 one could iterate over this object, using standard techniques;
   
-    for (auto _field : *_a) { // don't forget the * since you want to iterate over the pointed object
+    for (auto _field : *_a) { // dont forget the * since you want to iterate over the pointed object
         cout << " array element is " << _field << endl << flush;
     }
 
 or 
 
-    for (size_t _i = 0; _i != _a->size(); _i++) { // don't forget the * since you want to iterate over the pointed object
+    for (size_t _i = 0; _i != _a->size(); _i++) { 
         cout << " array element " << _i << " is " << _a[_i] << endl << flush;
     }
 
@@ -521,4 +606,4 @@ This class methods are organized in the following way:
 [cpp_smart_pointers]: http://en.cppreference.com/w/cpp/memory/shared_ptr
 [cpp_map]: http://en.cppreference.com/w/cpp/container/map
 [cpp_vector]: http://en.cppreference.com/w/cpp/container/vector
-
+[wiki_pubsub]: http://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern

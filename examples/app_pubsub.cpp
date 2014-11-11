@@ -69,6 +69,7 @@ int main(int argc, char* argv[]) {
 		_client.on(muzzley::Published, _s1, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 			_data->prettify(cout);
 			cout << endl << flush;
+			return true;
 		});
 
 		muzzley::Subscription _s2;
@@ -93,6 +94,7 @@ int main(int argc, char* argv[]) {
 				_data.getSubscriptionInfo(_s);
 				_client.off(muzzley::Published, _s);
 			}
+			return true;			
 		});
 		return true;
 	});

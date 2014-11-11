@@ -75,6 +75,7 @@ int main(int argc, char* argv[]) {
 		_client.trigger(muzzley::Publish, _s1, _m2, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 			_data->prettify(cout);
 			cout << endl << flush;			
+			return true;
 		}); 
 		return true;
 	});
