@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
 
   muzzley::Client _client;
 
-  _client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+  _client.on(muzzley::SignalingMessage, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
     ...
     return true;
   });
@@ -101,7 +101,7 @@ Let's look at an example:
 
     muzzley::Client _client;
 
-    _client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+    _client.on(muzzley::SignalingMessage, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
       ...
       return true;
     });
@@ -134,7 +134,7 @@ An event register could look something like this:
 
     muzzley::Client _client;
 
-    _client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+    _client.on(muzzley::SignalingMessage, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
       ...
       return true;
     });
@@ -145,7 +145,7 @@ Callback register also uses ***Lambda-function***s, It could look something like
 
     ...
 
-    _client.changeWidget(participant_id, _widget_opts, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+    _client.changeWidget(participant_id, _widget_opts, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
       cout << "Widget successfully changed" << endl << flush;
       return true;
     });
@@ -178,13 +178,13 @@ int main(int argc, char* argv[]) {
   // access it through the 'getActivityId' method.
   //
   // Return 'false' if you want to stop other listeners from being invoked.
-  _client.on(muzzley::ParticipantJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+  _client.on(muzzley::ParticipantJoined, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
     muzzley::JSONObj _s_data;
     _s_data <<
       "arg1"<< "value1" <<
       "arg2"<< "value2";
 
-    _client.sendSignal("myAction", _s_data, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+    _client.sendSignal("myAction", _s_data, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
       cout << "Signal accepted by the user" << endl << flush;
     });
     return true;
@@ -193,7 +193,7 @@ int main(int argc, char* argv[]) {
   // Register listener to be invoked when app receives a signal message.
   //
   // Return 'false' if you want to stop other listeners from being invoked.
-  _client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+  _client.on(muzzley::SignalingMessage, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
     cout << (string) _data[ "d" ]["a"] << endl << flush;
     return true;
   });
@@ -226,7 +226,7 @@ The *reply* method returns *true* if a message were sent and *false* if not (if 
 
 Hence, replying, for instance, to a Signaling Message could look like this:
 
-    _client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+    _client.on(muzzley::SignalingMessage, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
       if (_client.isReplyNeeded(_data)) {
         _client.reply(_data, JSON(
           "s" << true <<
@@ -246,6 +246,8 @@ There are two classes that you have to learn how to use in order to adequatly us
 
 - **muzzley::Client**: will allow you to interact with the Muzzley server, as well as with other applications and users.
 - **muzzley::JSONObj**; will allow you to easly manage data, either when sending it or receiving it.
+- **muzzley::Message**; extends from *muzzley::JSONObj* and abstract the communication protocol.
+- **muzzley::Subscription**; extends from *muzzley::JSONObj* and abstract the pub-sub protocol channel property definitions.
 
 
 ## muzzley::Client
@@ -260,7 +262,7 @@ This class methods are organized in the following way:
 
 ### Message Handling
 
-    virtual bool reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& _reply) final;
+    virtual bool reply(muzzley::Message& _data_received, muzzley::Message& _reply) final;
 
 ### Protocol performatives
 
@@ -289,6 +291,12 @@ This class methods are organized in the following way:
     virtual void sendSignal(string _type, muzzley::JSONObj& _data, muzzley::Callback _callback = NULL);
     virtual void sendWidgetData(string _widget, string _component, string _event_type, string _event_value);
 
+#### Pub/Sub communication pattern
+
+    virtual void subscribe(muzzley::Subscription& _to_property, muzzley::Callback _callback);
+    virtual void unsubscribe(muzzley::Subscription& _from_property);
+    virtual void publish(muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback = nullptr);
+
 ### Getters and Setters
 
     void setLoopAssynchronous(bool _assync);
@@ -300,7 +308,7 @@ This class methods are organized in the following way:
 
 ### Flag testing
 
-    bool isReplyNeeded(muzzley::JSONObj& _data_received) const;
+    bool isReplyNeeded(muzzley::Message& _data_received) const;
     bool isAppLoggedin() const;
     bool isInitiatingMaster() const;
     bool isConnected() const;
@@ -315,6 +323,10 @@ This class stores JSON based message and aggregates a set of methods that allow 
 ### Smart pointers
 
 The *muzzley::JSONObj* class is a smart pointer and that means that ou don't have to bother yourself with memory issues, once your done with your *muzzley::JSONObj* object just let it go out of it's context and thats it.
+
+To obtain the reference for the pointed object, you may use **\*** or **->**. This means that some of *muzzley::JSONObj* methods are accessed through **->** and others (the ones that reference the smart pointer itself) are accessed through **.**.
+
+For further reading on smart pointers, please read [this C++ Reference section][cpp_smart_pointers].
 
 ### '<<'' operator
 
@@ -385,7 +397,11 @@ So, given the above example, you could use the following code:
     int _first_number = (int) _o[ "numbers" ][0];
     string _country = (string) _o["location"]["country"];
 
+### Iterating over *muzzley::JSONObj* properties
+
+The *muzzley::JSONObj* is a smart pointer that references an extended *std::map*. 
 
 [muzzley_homepage]: https://www.muzzley.com
 [lambda_functions]: http://www.cprogramming.com/c++11/c++11-lambda-closures.html
 [changelog]: CHANGES.md
+[cpp_smart_pointers]: http://en.cppreference.com/w/cpp/memory/shared_ptr

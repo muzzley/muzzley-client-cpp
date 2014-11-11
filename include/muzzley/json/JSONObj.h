@@ -33,7 +33,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <muzzley/text/manip.h>
 
 using namespace std;
+#if !defined __APPLE__
 using namespace __gnu_cxx;
+#endif
 
 namespace muzzley {
 
@@ -88,6 +90,9 @@ namespace muzzley {
 		virtual void stringify(string& _out);
 		virtual void stringify(ostream& _out);
 
+		virtual void prettify(string& _out, uint _n_tabs = 0);
+		virtual void prettify(ostream& _out, uint _n_tabs = 0);
+
 		virtual void push(string _name);
 		virtual void push(JSONElementT& _value);
 		virtual void push(JSONElementT* _value);
@@ -98,11 +103,13 @@ namespace muzzley {
 		virtual void pop(string _idx);
 
 		bool operator==(JSONObjT& _in);
+		bool operator==(JSONObj& _in);
 		template <typename T>
 		bool operator==(T _in) {
 			return false;
 		};
 		bool operator!=(JSONObjT& _in);
+		bool operator!=(JSONObj& _in);
 		template <typename T>
 		bool operator!=(T _in) {
 			return true;
@@ -130,6 +137,9 @@ namespace muzzley {
 		virtual void stringify(string& _out);
 		virtual void stringify(ostream& _out);
 
+		virtual void prettify(string& _out, uint _n_tabs = 0);
+		virtual void prettify(ostream& _out, uint _n_tabs = 0);
+
 		virtual void push(JSONElementT& _value);
 		virtual void push(JSONElementT* _value);
 
@@ -139,11 +149,13 @@ namespace muzzley {
 		virtual void pop(string _idx);
 
 		bool operator==(JSONArrT& _in);
+		bool operator==(JSONArr& _in);
 		template <typename T>
 		bool operator==(T _in) {
 			return false;
 		};
 		bool operator!=(JSONArrT& _in);
+		bool operator!=(JSONArr& _in);
 		template <typename T>
 		bool operator!=(T _in) {
 			return true;
@@ -285,6 +297,7 @@ namespace muzzley {
 	public:
 		JSONElementT();
 		JSONElementT(JSONElementT& _element);
+		JSONElementT(JSONPtr& _value);
 		JSONElementT(JSONObj& _value);
 		JSONElementT(JSONArr& _value);
 		JSONElementT(string _value);
@@ -371,12 +384,14 @@ namespace muzzley {
 			return muzzley::undefined;
 		};
 		bool operator==(JSONElementT& _in);
+		bool operator==(JSONPtr& _rhs);
 		template <typename T>
 		bool operator==(T _in) {
 			JSONElementT _rhs(_in);
 			return (* this) == _rhs;
 		};
 		bool operator!=(JSONElementT& _in);
+		bool operator!=(JSONPtr& _rhs);
 		template <typename T>
 		bool operator!=(T _in) {
 			JSONElementT _rhs(_in);
@@ -390,6 +405,9 @@ namespace muzzley {
 
 		virtual void stringify(string& _out);
 		virtual void stringify(ostream& _out);
+
+		virtual void prettify(string& _out, uint _n_tabs = 0);
+		virtual void prettify(ostream& _out, uint _n_tabs = 0);
 
 	private:
 		JSONUnion __target;

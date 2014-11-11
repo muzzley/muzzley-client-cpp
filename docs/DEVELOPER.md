@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 
 	muzzley::Client _client;
 
-	_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	_client.on(muzzley::SignalingMessage, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		...
 		return true;
 	});
@@ -76,7 +76,7 @@ Let's look at an example:
 #!c++
 muzzley::Client _client;
 
-_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+_client.on(muzzley::SignalingMessage, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 	...
 	return true;
 });
@@ -117,7 +117,7 @@ An event register could look something like this:
 #!c++
 muzzley::Client _client;
 
-_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+_client.on(muzzley::SignalingMessage, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 	...
 	return true;
 });
@@ -127,7 +127,7 @@ Callback register also uses ***Lambda-function***s, It could look something like
 #!c++
 muzzley::Client _client;
 
-_client.particpantReady([] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+_client.particpantReady([] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 	...
 	return true;
 });
@@ -162,7 +162,7 @@ int main(int argc, char* argv[]) {
 	// access it through the 'getActivityId' method.
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::ActivityCreated, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	_client.on(muzzley::ActivityCreated, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		if (!!_data["s"] && ((string) _data["d"]["activityId"]) != "121345") {
 
 			muzzley::JSONObj _s_data;
@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
 				"v"<< "a" <<
 				"e"<< "press";
 
-			_client.sendSignal("changeWidget", _s_data, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+			_client.sendSignal("changeWidget", _s_data, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 				cout << "signal accepted by server" << endl << flush;
 			});
 		}
@@ -182,7 +182,7 @@ int main(int argc, char* argv[]) {
 	// Register listener to be invoked when app receives a signal message.
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	_client.on(muzzley::SignalingMessage, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		cout << (bool) _data["s"] << endl << flush;
 		cout << (string) _data["d"]["a"] << endl << flush;
 		return true;
@@ -234,7 +234,7 @@ Hence, replying, for instance, to a Signaling Message could look like this:
 ```
 #!c++
 
-_client.on(muzzley::SignalingMessage, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+_client.on(muzzley::SignalingMessage, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 	if (_client.isReplyNeeded(_data)) {
 		_client.reply(_data, JSON(
 			"s" << "true" <<
@@ -255,6 +255,7 @@ There are two classes that you have to learn how to use in order to adequatly us
 
 - **muzzley::Client**: will allow you to interact with the Muzzley server, as well as with other applications and users.
 - **muzzley::JSONObj**; will allow you to easly manage data, either when sending it or receiving it.
+- **muzzley::Message**; extends from *muzzley::JSONObj* and abstract the communication protocol.
 
 
 ## muzzley::Client
@@ -273,7 +274,7 @@ virtual void trigger(muzzley::EventType _type, muzzley::JSONObj& _data) final;
 ### Message Handling
 ```
 #!c++	
-virtual bool reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& _reply) final;
+virtual bool reply(muzzley::Message& _data_received, muzzley::Message& _reply) final;
 ```
 
 ### Protocol performatives
@@ -324,7 +325,7 @@ const ParticipantList& getParticipants() const;
 ### Flag testing
 ```
 #!c++	
-bool isReplyNeeded(muzzley::JSONObj& _data_received) const;
+bool isReplyNeeded(muzzley::Message& _data_received) const;
 bool isAppLoggedin() const;
 bool isInitiatingMaster() const;
 bool isConnected() const;

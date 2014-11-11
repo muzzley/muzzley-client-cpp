@@ -37,20 +37,28 @@ muzzley::Client::Client() :
 	this->__is_app_loggedin = false;
 	this->__is_user_loggedin = false;
 	this->__is_initiating_master = false;
+	this->__is_running = false;
+	this->__is_one_step_initialization = false;
 	this->__has_handshake = false;
 
 	this->__participant_id = -1;
 
 	muzzley::log_fd = &cout;
 
-	this->on(muzzley::Connect, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	this->on(muzzley::Connect, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+		if (_client.__is_one_step_initialization) {
+			return true;
+		}
 		if (!!_data["s"] && !!_data["d"]["deviceId"]) {
 			_client.__device_id.assign((string) _data["d"]["deviceId"]);
 		}
 		return true;
 	});
 
-	this->on(muzzley::AppLoggedIn, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	this->on(muzzley::AppLoggedIn, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+		if (_client.__is_one_step_initialization) {
+			return true;
+		}
 		if (!!_data["s"] && !!_data["d"]["sessionId"]) {
 			_client.__session_id.assign((string) _data["d"]["sessionId"]);
 			_client.__is_app_loggedin = true;
@@ -60,7 +68,10 @@ muzzley::Client::Client() :
 		return true;
 	});
 
-	this->on(muzzley::UserLoggedIn, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	this->on(muzzley::UserLoggedIn, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+		if (_client.__is_one_step_initialization) {
+			return true;
+		}
 		if (!!_data["s"] && !!_data["d"]["sessionId"]) {
 			_client.__session_id.assign((string) _data["d"]["sessionId"]);
 			_client.__is_app_loggedin = false;
@@ -70,7 +81,10 @@ muzzley::Client::Client() :
 		return true;
 	});
 
-	this->on(muzzley::ActivityJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	this->on(muzzley::ActivityJoined, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+		if (_client.__is_one_step_initialization) {
+			return true;
+		}
 		if ((bool)_data["s"] == true) {
 			_client.__participant_id = (long) _data["d"]["participant"]["id"];
 			_client.participantReady();
@@ -85,8 +99,16 @@ muzzley::Client::Client() :
 		return true;
 	});
 
-	this->on(muzzley::ActivityCreated, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
-		if ((bool)_data["s"] == true && !!_data["d"]["activityId"]) {
+	this->on(muzzley::ActivityCreated, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+		if (_client.__is_one_step_initialization) {
+			return true;
+		}
+		if ((bool)_data["s"] == true && !!_data["d"]["activity"]["activityId"]) {
+			_client.__activity_id.assign((string) _data["d"]["activity"]["activityId"]);
+			_client.__is_initiating_master = true;
+			return true;
+		}
+		else if ((bool)_data["s"] == true && !!_data["d"]["activityId"]) {
 			_client.__activity_id.assign((string) _data["d"]["activityId"]);
 			_client.__is_initiating_master = true;
 			return true;
@@ -100,18 +122,19 @@ muzzley::Client::Client() :
 		return true;
 	});
 
-	this->on(muzzley::ActivityTerminated, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	this->on(muzzley::ActivityTerminated, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		_client.__activity_id.assign("");
 		_client.__is_initiating_master = false;
 		if (_client.isReplyNeeded(_data)) {
-			_client.reply(_data, JSON(
-					"s" << true
-				));
+			muzzley::Message _m(JSON(
+				"s" << true
+			));
+			_client.reply(_data, _m);
 		}
 		return true;
 	});
 
-	this->on(muzzley::ParticipantQuit, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	this->on(muzzley::ParticipantQuit, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		if (!!_data["d"]["participantId"]) {
 			pthread_mutex_lock(_client.__mtx);
 			muzzley::ParticipantList::iterator _found = _client.__participants.find((long) _data["d"]["participantId"]);
@@ -121,50 +144,53 @@ muzzley::Client::Client() :
 			pthread_mutex_unlock(_client.__mtx);
 
 			if (_client.isReplyNeeded(_data)) {
-				_client.reply(_data, JSON(
-						"s" << true
-					));
+				muzzley::Message _m(JSON(
+					"s" << true
+				));
+				_client.reply(_data, _m);
 			}
 		}
 		else if (_client.isReplyNeeded(_data)) {
-			_client.reply(_data, JSON(
-					"s" << false
-				));
+			muzzley::Message _m(JSON(
+				"s" << false
+			));
+			_client.reply(_data, _m);
 		}
 		return true;
 	});
 
-	this->on(muzzley::ParticipantJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	this->on(muzzley::ParticipantJoined, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		if (!!_data["h"]["pid"] && !!_data["d"]) {
 			long _pid = (long) _data["h"]["pid"];
 
 			pthread_mutex_lock(_client.__mtx);
 			muzzley::ParticipantList::iterator _found = _client.__participants.find(_pid);
 			if (_found != _client.__participants.end()) {
-				muzzley::JSONObj _participant;
-				muzzley::fromstr(_found->second, _participant);
+				muzzley::JSONObj _participant = (muzzley::JSONObj&) muzzley::fromstr(_found->second);
 				((muzzley::JSONObj) _data) << "d" << _participant;
 			}
 			pthread_mutex_unlock(_client.__mtx);
 
 			if (_client.isReplyNeeded(_data)) {
-				_client.reply(_data, JSON(
-						"h" << JSON (
-							"pid" << _pid
-						) <<
-						"s" << true
-					));
+				muzzley::Message _m(JSON(
+					"h" << JSON (
+						"pid" << _pid
+					) <<
+					"s" << true
+				));
+				_client.reply(_data, _m);
 			}
 		}
 		else {
-			_client.reply(_data, JSON(
-					"s" << false
-				));
+			muzzley::Message _m(JSON(
+				"s" << false
+			));
+			_client.reply(_data, _m);
 		}
 		return true;
 	});
 
-	this->on(muzzley::__INTERNAL_ParticipantJoined__, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	this->on(muzzley::__INTERNAL_ParticipantJoined__, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		if (!!_data["d"]["participant"]["id"]) {
 			if (((string) _data["d"]["participant"]["deviceId"]) == _client.__device_id) {
 				_client.__participant_id = (long) _data["d"]["participant"]["id"];
@@ -174,33 +200,45 @@ muzzley::Client::Client() :
 			pthread_mutex_unlock(_client.__mtx);
 
 			if (_client.isReplyNeeded(_data)) {
-				_client.reply(_data, JSON(
-						"s" << true
-					));
+				muzzley::Message _m(JSON(
+					"s" << true
+				));
+				_client.reply(_data, _m);
 			}
 		}
 		else if (_client.isReplyNeeded(_data)) {
-			_client.reply(_data, JSON(
-					"s" << false
-				));
+			muzzley::Message _m(JSON(
+				"s" << false
+			));
+			_client.reply(_data, _m);
 		}
 		return true;
 	});
 
-	this->on(muzzley::ChangeWidget, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	this->on(muzzley::ChangeWidget, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		if (_client.isReplyNeeded(_data)) {
-			_client.reply(_data, JSON(
-					"s" << true
-				));
+			muzzley::Message _m(JSON(
+				"s" << true
+			));
+			_client.reply(_data, _m);
 		}
 		return true;
 	});
 
-	this->on(muzzley::SetupComponent, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	this->on(muzzley::SetupComponent, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		if (_client.isReplyNeeded(_data)) {
-			_client.reply(_data, JSON(
-					"s" << true
-				));
+			muzzley::Message _m(JSON(
+				"s" << true
+			));
+			_client.reply(_data, _m);
+		}
+		return true;
+	});
+
+	this->on(muzzley::__INTERNAL_PublishUpdate__, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+		auto _found = _client.__stack.find((string) _data["h"]["ch"]);
+		if (_found != _client.__stack.end()) {
+			return _found->second(_data, _client);
 		}
 		return true;
 	});
@@ -212,7 +250,7 @@ muzzley::Client::~Client() {
 	pthread_mutex_destroy(this->__mtx);
 	delete this->__mtx;
 	delete this->__thr;
-	pthread_exit(NULL);
+	pthread_exit(nullptr);
 }
 
 #if __cplusplus >= 201103L
@@ -220,7 +258,7 @@ void muzzley::Client::on(muzzley::EventType _type, muzzley::Handler _handler) {
 	this->__handlers[_type].push_back(_handler);
 }
 
-void muzzley::Client::trigger(muzzley::EventType _type, muzzley::JSONObj& _data) {
+void muzzley::Client::trigger(muzzley::EventType _type, muzzley::Message& _data) {
 	if (_type < 0 || _type > N_EVENT_TYPES) {
 		return;
 	}
@@ -301,7 +339,7 @@ void muzzley::Client::reconnect() {
 	}
 	if (this->connect(this->__endpoint_host, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
 		this->__is_connected = true;
-		this->handshake(NULL);
+		this->handshake(nullptr);
 	}
 }
 
@@ -352,7 +390,7 @@ bool muzzley::Client::read() {
 	return _fin;
 }
 
-bool muzzley::Client::write(muzzley::JSONObj& _message, muzzley::Callback _callback) {
+bool muzzley::Client::write(muzzley::Message& _message, muzzley::Callback _callback) {
 	if ((muzzley::MessageType) ((int) _message["h"]["t"]) == muzzley::RequestInitiatedByEndpoint && !!_message["h"]["cid"]) {
 		string _action = (string) _message["a"];
 		pthread_mutex_lock(this->__mtx);
@@ -383,10 +421,10 @@ bool muzzley::Client::write(muzzley::JSONObj& _message, muzzley::Callback _callb
 	return true;
 }
 
-bool muzzley::Client::reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& _reply) {
+bool muzzley::Client::reply(muzzley::Message& _data_received, muzzley::Message& _reply) {
 	assertz(!!_reply["s"], "attribute 's' is mandatory, in the '_data_received' argument", 500, 108);
 	assertz(!!_data_received["h"]["t"], "there is no message type in the '_data_received' argument", 500, 107);
-	assertz(!!_data_received["h"]["cid"], "there is no message ide ('cid') in the '_data_received' argument", 500, 107);
+	assertz(!!_data_received["h"]["cid"], "there is no message correlation id ('cid') in the '_data_received' argument", 500, 107);
 	muzzley::MessageType _type = (muzzley::MessageType) ((int) _data_received["h"]["t"]);
 
 	switch (_type) {
@@ -401,7 +439,7 @@ bool muzzley::Client::reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& 
 					"h" << JSON(
 						"t" << (int) muzzley::ReplyToEndpoint <<
 						"cid" << (string) _data_received["h"]["cid"]
-						);
+					);
 			}
 			break;
 		}
@@ -416,7 +454,7 @@ bool muzzley::Client::reply(muzzley::JSONObj& _data_received, muzzley::JSONObj& 
 					"h" << JSON(
 						"t" << (int) muzzley::ReplyToMuzzleyCore <<
 						"cid" << (string) _data_received["h"]["cid"]
-						);
+					);
 			}
 			break;
 		}
@@ -435,7 +473,7 @@ void muzzley::Client::connectApp(string _app_token, string _activity_id) {
 		this->__is_connected = true;
 		if (this->__is_loop_assynchronous) {
 			this->start();
-			this->handshake([ _app_token ] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+			this->handshake([ _app_token ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 				_client.__has_handshake = true;
 				_client.trigger(muzzley::Connect, _data);
 				_client.loginApp(_app_token);
@@ -443,7 +481,7 @@ void muzzley::Client::connectApp(string _app_token, string _activity_id) {
 			});
 		}
 		else {
-			this->handshake([ _app_token ] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+			this->handshake([ _app_token ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 				_client.__has_handshake = true;
 				_client.trigger(muzzley::Connect, _data);
 				_client.loginApp(_app_token);
@@ -463,7 +501,7 @@ void muzzley::Client::connectUser(string _user_token, string _activity_id) {
 		this->__is_connected = true;
 		if (this->__is_loop_assynchronous) {
 			this->start();
-			this->handshake([ _user_token ] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+			this->handshake([ _user_token ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 				_client.__has_handshake = true;
 				_client.trigger(muzzley::Connect, _data);
 				_client.loginUser(_user_token);
@@ -471,7 +509,7 @@ void muzzley::Client::connectUser(string _user_token, string _activity_id) {
 			});
 		}
 		else {
-			this->handshake([ _user_token ] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+			this->handshake([ _user_token ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 				_client.__has_handshake = true;
 				_client.trigger(muzzley::Connect, _data);
 				_client.loginUser(_user_token);
@@ -483,16 +521,16 @@ void muzzley::Client::connectUser(string _user_token, string _activity_id) {
 }
 
 void muzzley::Client::loginApp(string _app_token) {
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-			) <<
+		) <<
 		"a" << "loginApp" <<
 		"d" << JSON(
 			"token" << _app_token
-			);
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -506,16 +544,16 @@ void muzzley::Client::loginApp(string _app_token) {
 }
 
 void muzzley::Client::loginUser(string _user_token) {
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-			) <<
+		) <<
 		"a" << "loginUser" <<
 		"d" << JSON(
 			"token" << _user_token
-			);
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -528,17 +566,193 @@ void muzzley::Client::loginUser(string _user_token) {
 	this->write(_message);
 }
 
+void muzzley::Client::initApp(string _app_token, string _activity_id) {
+	this->__app_token.assign(_app_token.data());
+	this->__activity_id.assign(_activity_id.data());
+	this->__is_static_activity = _activity_id.length() != 0;
+	this->__is_one_step_initialization = true;
+	if (this->connect(this->__endpoint_host, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
+		this->__is_connected = true;
+		muzzley::Callback _callback = [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+			if ((bool) _data["s"] == false) {
+				if (!!_data["d"]["connectTo"]) {
+					_client.disconnect();
+					_client.__endpoint_host.assign((string) _data["d"]["connectTo"]);
+					_client.initApp(_client.__app_token, _client.__activity_id);
+				}
+				return false;
+			}
+			_client.__has_handshake = true;
+			if (!!_data["d"]["handshake"]["deviceId"]) {
+				_client.__device_id.assign((string) _data["d"]["handshake"]["deviceId"]);
+				muzzley::Message _d(JSON( "d" << (muzzley::JSONObj&) _data["d"]["handshake"]));
+				_client.trigger(muzzley::Connect, _d);
+			}
+			if (!!_data["d"]["loginApp"]["sessionId"]) {
+				_client.__session_id.assign((string) _data["d"]["loginApp"]["sessionId"]);
+				_client.__is_app_loggedin = true;
+				_client.__is_user_loggedin = false;
+				muzzley::Message _d(JSON( "d" << (muzzley::JSONObj&) _data["d"]["loginApp"]));
+				_client.trigger(muzzley::AppLoggedIn, _d);
+			}
+			if (!!_data["d"]["create"]["channel"]["id"]) {
+				_client.__channel_id.assign((string) _data["d"]["create"]["channel"]["id"]);
+			}
+			if (!!_data["d"]["create"]["activity"]["activityId"]) {
+				_client.__activity_id.assign((string) _data["d"]["create"]["activity"]["activityId"]);
+				_client.__is_initiating_master = true;
+				muzzley::Message _d(JSON( "d" << (muzzley::JSONObj&) _data["d"]["create"]["activity"]));
+				_client.trigger(muzzley::ActivityCreated, _d);
+			}
+			return true;
+		};
+
+		muzzley::Message _message(JSON(
+			"h" << JSON(
+				"cid" << this->__serial <<
+				"t" << 1
+			) <<
+			"a" << "init" <<
+			"d" << JSON(
+				"handshake"<< JSON(
+					"protocolVersion" << "2.0" <<
+					"lib" << "C++ 0.1.0" <<
+					"userAgent" << "C++ Lib"
+					//<< "deviceId" << "68748e45-36ef-422b-bcc2-d6edcea7ce75"
+				) <<
+				"loginApp" << JSON(
+					"token" << _app_token
+				) <<
+				"create" << JSON(
+					"activityId" << _activity_id
+				)
+			)
+		));
+
+#ifdef MUZZLEY_DEBUG
+		{
+			string _log("login app:\n-> ");
+			muzzley::tostr(_log, _message);
+			muzzley::log(_log, muzzley::sys);
+		}
+#endif
+
+		if (this->__is_loop_assynchronous) {
+			if (!this->__is_running) {
+				this->__is_running = true;
+				this->start();
+			}
+			this->write(_message, _callback);
+		}
+		else {
+			this->write(_message, _callback);
+			if (!this->__is_running) {
+				this->__is_running = true;
+				this->run();
+			}
+		}
+	}
+}
+
+void muzzley::Client::initUser(string _user_token, string _activity_id) {
+	assertz(_activity_id.length() != 0, "when connecting a user, the '_activity_id' parameter must be instantiated with a non-empty string", 500, 100);
+	this->__user_token.assign(_user_token.data());
+	this->__activity_id.assign(_activity_id.data());
+	this->__is_static_activity = _activity_id.length() != 0;
+	this->__is_one_step_initialization = true;
+	if (this->connect(this->__endpoint_host, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
+		this->__is_connected = true;
+		muzzley::Callback _callback = [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+			if ((bool) _data["s"] == false) {
+				if (!!_data["d"]["connectTo"]) {
+					_client.disconnect();
+					_client.__endpoint_host.assign((string) _data["d"]["connectTo"]);
+					_client.initUser(_client.__user_token, _client.__activity_id);
+				}
+				return false;
+			}
+			_client.__has_handshake = true;
+			if (!!_data["d"]["handshake"]["deviceId"]) {
+				_client.__device_id.assign((string) _data["d"]["handshake"]["deviceId"]);
+				muzzley::Message _d(JSON( "d" << (muzzley::JSONObj&) _data["d"]["handshake"]));
+				_client.trigger(muzzley::Connect, _d);
+			}
+			if (!!_data["d"]["loginUser"]["sessionId"]) {
+				_client.__session_id.assign((string) _data["d"]["loginUser"]["sessionId"]);
+				_client.__is_app_loggedin = false;
+				_client.__is_user_loggedin = true;
+				muzzley::Message _d(JSON( "d" << (muzzley::JSONObj&) _data["d"]["loginUser"]));
+				_client.trigger(muzzley::UserLoggedIn, _d);
+			}
+			if (!!_data["d"]["join"]["channel"]["id"]) {
+				_client.__channel_id.assign((string) _data["d"]["join"]["channel"]["id"]);
+			}
+			if (!!_data["d"]["join"]["participant"]["id"]) {
+				_client.__participant_id = (long) _data["d"]["join"]["participant"]["id"];
+				_client.participantReady();
+				muzzley::Message _d(JSON( "d" << (muzzley::JSONObj&) _data["d"]["join"]["participant"]));
+				_client.trigger(muzzley::ActivityJoined, _d);
+			}
+			return true;
+		};
+
+		muzzley::Message _message(JSON(
+			"h" << JSON(
+				"cid" << this->__serial <<
+				"t" << 1
+			) <<
+			"a" << "init" <<
+			"d" << JSON(
+				"handshake"<< JSON(
+					"protocolVersion" << "2.0" <<
+					"lib" << "C++ 0.1.0" <<
+					"userAgent" << "C++ Lib"
+					//<< "deviceId" << "68748e45-36ef-422b-bcc2-d6edcea7ce75"
+				) <<
+				"loginUser" << JSON(
+					"token" << _user_token
+				) <<
+				"join" << JSON(
+					"activityId" << _activity_id
+				)
+			)
+		));
+
+#ifdef MUZZLEY_DEBUG
+		{
+			string _log("login app:\n-> ");
+			muzzley::tostr(_log, _message);
+			muzzley::log(_log, muzzley::sys);
+		}
+#endif
+
+		if (this->__is_loop_assynchronous) {
+			if (!this->__is_running) {
+				this->__is_running = true;
+				this->start();
+			}
+			this->write(_message, _callback);
+		}
+		else {
+			this->write(_message, _callback);
+			if (!this->__is_running) {
+				this->__is_running = true;
+				this->run();
+			}
+		}
+	}	
+}
+
 void muzzley::Client::createActivity(string _activity_id) {
 	assertz(this->__is_app_loggedin, "activity can only be created by Activity Master, you must be logged in as as app (use connectApp method).", 500, 101);
 
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-			) <<
-		"a" << "create";
-
+		) <<
+		"a" << "create"
+	));
 
 	if (_activity_id.length() != 0) {
 		this->__activity_id.assign(_activity_id.data());
@@ -576,16 +790,16 @@ void muzzley::Client::joinActivity(string _activity_id) {
 		_activity_id.assign(this->__activity_id.data());
 	}
 
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-			) <<
+		) <<
 		"a" << "join" <<
 		"d" << JSON(
 			"activityId" << _activity_id
-			);
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -600,16 +814,18 @@ void muzzley::Client::joinActivity(string _activity_id) {
 	this->write(_message);
 }
 
+
+
 void muzzley::Client::quit() {
 	assertz(this->__is_initiating_master, "quit can only be invoked by the initiating Activity Master, you must create the activity before quiting (use createActivity method) or use participantQuit method instead.", 500, 102);
 
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-			) <<
-		"a" << "quit";
+		) <<
+		"a" << "quit"
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -625,16 +841,16 @@ void muzzley::Client::quit() {
 void muzzley::Client::participantQuit() {
 	assertz(this->__participant_id != -1, "in order to quit you must have joined first (use joinActivity method)", 500, 105);
 
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-			) <<
+		) <<
 		"a" << "participantQuit" <<
 		"d" << JSON(
 			"participantId" << this->__participant_id
-			);
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -650,16 +866,16 @@ void muzzley::Client::participantQuit() {
 void muzzley::Client::participantReady(muzzley::Callback _callback) {
 	assertz(this->__participant_id != -1, "in order to be ready you must have joined first (use joinActivity method)", 500, 106);
 
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-			) <<
+		) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << "ready"
-			);
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -695,18 +911,18 @@ void muzzley::Client::changeWidget(long _participant_id, muzzley::JSONObj& _opti
 
 	assertz(_found, "the provided participantId has not yet joined or already quit", 500, 104);
 
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1 <<
 			"pid" << _participant_id
-			) <<
+		) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << "changeWidget" <<
 			"d" << _options
-			);
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -728,13 +944,12 @@ void muzzley::Client::setupComponent(long _participant_id, string _component, st
 
 	assertz(_found, "the provided participantId has not yet joined or already quit", 500, 104);
 
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1 <<
 			"pid" << _participant_id
-			) <<
+		) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << "setupComponent" <<
@@ -742,8 +957,9 @@ void muzzley::Client::setupComponent(long _participant_id, string _component, st
 				"c" << _component <<
 				"id" << _component_id <<
 				"a" << _action
-				)
-			);
+			)
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -765,13 +981,12 @@ void muzzley::Client::setupComponent(long _participant_id, string _component, st
 
 	assertz(_found, "the provided participantId has not yet joined or already quit", 500, 104);
 
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1 <<
 			"pid" << _participant_id
-			) <<
+		) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << "setupComponent" <<
@@ -780,8 +995,9 @@ void muzzley::Client::setupComponent(long _participant_id, string _component, st
 				"id" << _component_id <<
 				"a" << _action <<
 				"p" << _options
-				)
-			);
+			)
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -803,17 +1019,17 @@ void muzzley::Client::sendSignal(long _participant_id, string _type, muzzley::Ca
 
 	assertz(_found, "the provided participantId has not yet joined or already quit", 500, 104);
 
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1 <<
 			"pid" << _participant_id
-			) <<
+		) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << _type
-			);
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -835,18 +1051,18 @@ void muzzley::Client::sendSignal(long _participant_id, string _type, muzzley::JS
 
 	assertz(_found, "the provided participantId has not yet joined or already quit", 500, 104);
 
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1 <<
 			"pid" << _participant_id
-			) <<
+		) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << _type <<
 			"d" << _data
-			);
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -862,16 +1078,16 @@ void muzzley::Client::sendSignal(long _participant_id, string _type, muzzley::JS
 }
 
 void muzzley::Client::sendSignal(string _type, muzzley::Callback _callback) {
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-			) <<
+		) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << _type
-			);
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -885,17 +1101,17 @@ void muzzley::Client::sendSignal(string _type, muzzley::Callback _callback) {
 }
 
 void muzzley::Client::sendSignal(string _type, muzzley::JSONObj& _data, muzzley::Callback _callback) {
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-			) <<
+		) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << _type <<
 			"d" << _data
-			);
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -909,18 +1125,18 @@ void muzzley::Client::sendSignal(string _type, muzzley::JSONObj& _data, muzzley:
 }
 
 void muzzley::Client::sendWidgetData(string _widget, string _component, string _event_type, string _event_value) {
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"t" << 5
-			) <<
+		) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"w" << _widget <<
 			"c" << _component <<
 			"e" << _event_type <<
 			"v" << _event_value
-			);
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -931,6 +1147,166 @@ void muzzley::Client::sendWidgetData(string _widget, string _component, string _
 #endif
 
 	this->write(_message);
+}
+
+
+void muzzley::Client::subscribe(muzzley::Subscription& _to_property, muzzley::Callback _callback) {
+	assertz(!!_to_property["namespace"], "field 'namespace' must be included in '_to_property' parameter (e.g., _to_proprety << \"namespace\" << \"iot\").", 500, 200);
+	assertz(!!_to_property["profile"], "field 'profile' must be included in '_to_property' parameter (e.g., _to_proprety << \"profile\" << \"internal-profile-id\").", 500, 201);
+	assertz(!!_to_property["channel"], "field 'channel' must be included in '_to_property' parameter (e.g., _to_proprety << \"channel\" << \"remote-channel-id\").", 500, 202);
+	assertz(!!_to_property["component"], "field 'component' must be included in '_to_property' parameter (e.g., _to_proprety << \"component\" << \"component-1\").", 500, 203);
+	assertz(!!_to_property["property"], "field 'property' must be included in '_to_property' parameter (e.g., _to_proprety << \"property\" << \"prop-1\").", 500, 204);
+
+	muzzley::Message _message(JSON(
+		"h" << JSON(
+			"cid" << this->__serial <<
+			"t" << 1
+		) <<
+		"a" << "subscribe" <<
+		"d" << JSON(
+			"ns" << (string) _to_property["namespace"] <<
+			"p" << JSON(
+				"profile" << (string) _to_property["profile"] <<
+				"channel" << (string) _to_property["channel"] <<
+				"component" << (string) _to_property["component"] <<
+				"property" << (string) _to_property["property"]
+			)
+		)
+	));
+
+	string _ns_channel("mc:");
+	_ns_channel.insert(_ns_channel.length(), (string) _to_property["namespace"]);
+	_ns_channel.insert(_ns_channel.length(), ":ps:");
+	_ns_channel.insert(_ns_channel.length(), (string) _to_property["profile"]);
+	_ns_channel.insert(_ns_channel.length(), ":");
+	_ns_channel.insert(_ns_channel.length(), (string) _to_property["channel"]);
+	_ns_channel.insert(_ns_channel.length(), ":");
+	_ns_channel.insert(_ns_channel.length(), (string) _to_property["component"]);
+	_ns_channel.insert(_ns_channel.length(), ":");
+	_ns_channel.insert(_ns_channel.length(), (string) _to_property["property"]);
+	_ns_channel.insert(_ns_channel.length(), ":");
+
+#ifdef MUZZLEY_DEBUG
+	{
+		string _log("sending widget data:\n-> ");
+		muzzley::tostr(_log, _message);
+		muzzley::log(_log, muzzley::sys);
+	}
+#endif
+	this->write(_message,  [ _ns_channel, _callback ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+		if (!!_data["s"]) {
+			_client.__stack.insert(pair<string, muzzley::Callback>((string) _data["d"]["channel"]["id"], _callback));
+			auto _found = _client.__namespaces.find(_ns_channel);
+			if (_found == _client.__namespaces.end()) {
+				_client.__namespaces.insert(pair< string, vector< string > >(_ns_channel, vector<string>()));
+				_found = _client.__namespaces.find(_ns_channel);
+			}
+			_found->second.push_back((string) _data["d"]["channel"]["id"]);
+		}
+	});
+}
+
+void muzzley::Client::unsubscribe(muzzley::Subscription& _to_property) {
+	assertz(!!_to_property["namespace"], "field 'namespace' must be included in '_to_property' parameter (e.g., _to_proprety << \"namespace\" << \"iot\").", 500, 200);
+	assertz(!!_to_property["profile"], "field 'profile' must be included in '_to_property' parameter (e.g., _to_proprety << \"profile\" << \"internal-profile-id\").", 500, 201);
+	assertz(!!_to_property["channel"], "field 'channel' must be included in '_to_property' parameter (e.g., _to_proprety << \"channel\" << \"remote-channel-id\").", 500, 202);
+	assertz(!!_to_property["component"], "field 'component' must be included in '_to_property' parameter (e.g., _to_proprety << \"component\" << \"component-1\").", 500, 203);
+	assertz(!!_to_property["property"], "field 'property' must be included in '_to_property' parameter (e.g., _to_proprety << \"property\" << \"prop-1\").", 500, 204);
+
+	string _ns_channel("mc:");
+	_ns_channel.insert(_ns_channel.length(), (string) _to_property["namespace"]);
+	_ns_channel.insert(_ns_channel.length(), ":ps:");
+	_ns_channel.insert(_ns_channel.length(), (string) _to_property["profile"]);
+	_ns_channel.insert(_ns_channel.length(), ":");
+	_ns_channel.insert(_ns_channel.length(), (string) _to_property["channel"]);
+	_ns_channel.insert(_ns_channel.length(), ":");
+	_ns_channel.insert(_ns_channel.length(), (string) _to_property["component"]);
+	_ns_channel.insert(_ns_channel.length(), ":");
+	_ns_channel.insert(_ns_channel.length(), (string) _to_property["property"]);
+	_ns_channel.insert(_ns_channel.length(), ":");
+
+	auto _found = this->__namespaces.find(_ns_channel);
+	assertz(_found != this->__namespaces.end(), "this property has not been subscribed", 500, 205);
+
+	for (auto _ns : _found->second) {
+		muzzley::Message _message(JSON(
+			"h" << JSON(
+				"cid" << this->__serial <<
+				"t" << 1 <<
+				"ch" << _ns
+			) <<
+			"a" << "unsubscribe" <<
+			"d" << JSON(
+				"ns" << (string) _to_property["namespace"] <<
+				"p" << JSON(
+					"profile" << (string) _to_property["profile"] <<
+					"channel" << (string) _to_property["channel"] <<
+					"component" << (string) _to_property["component"] <<
+					"property" << (string) _to_property["property"]
+				)
+			)
+		));
+
+#ifdef MUZZLEY_DEBUG
+		{
+			string _log("sending widget data:\n-> ");
+			muzzley::tostr(_log, _message);
+			muzzley::log(_log, muzzley::sys);
+		}
+#endif
+		this->write(_message,  [ _ns ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+			if (!!_data["s"]) {
+				auto _ch = _client.__stack.find(_ns);
+				if (_ch != _client.__stack.end()) {
+					_client.__stack.erase(_ch);
+				}
+			}
+		});
+	}
+	this->__namespaces.erase(_found);
+}
+
+void muzzley::Client::publish(muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback) {
+	assertz(!!_to_property["namespace"], "field 'namespace' must be included in '_to_property' parameter (e.g., _to_proprety << \"namespace\" << \"iot\").", 500, 200);
+	assertz(!!_to_property["profile"], "field 'profile' must be included in '_to_property' parameter (e.g., _to_proprety << \"profile\" << \"internal-profile-id\").", 500, 201);
+	assertz(!!_to_property["channel"], "field 'channel' must be included in '_to_property' parameter (e.g., _to_proprety << \"channel\" << \"remote-channel-id\").", 500, 202);
+	assertz(!!_to_property["component"], "field 'component' must be included in '_to_property' parameter (e.g., _to_proprety << \"component\" << \"component-1\").", 500, 203);
+	assertz(!!_to_property["property"], "field 'property' must be included in '_to_property' parameter (e.g., _to_proprety << \"property\" << \"prop-1\").", 500, 204);
+
+	assertz(!!_payload["d"]["io"], "field 'io' must be included in '_payload' parameter (e.g., _payload.setData(JSON(\"io\" << \"w\")) ).", 500, 206);
+
+	muzzley::Message _message(JSON(
+		"h" << JSON(
+			"t" << 5
+		) <<
+		"a" << "publish" <<
+		"d" << JSON(
+			"ns" << (string) _to_property["namespace"] <<
+			"p" << JSON(
+				"io" << (string) _payload["d"]["io"] <<
+				"profile" << (string) _to_property["profile"] <<
+				"channel" << (string) _to_property["channel"] <<
+				"component" << (string) _to_property["component"] <<
+				"property" << (string) _to_property["property"]
+			)
+		)
+	));
+	if (!!_payload["d"]["data"]) {
+		_message["d"]["p"] << "data" << _payload["d"]["data"];
+	}
+
+	if (_callback != nullptr) {
+		_message["h"] << "cid" << this->__serial << "t" << 1;
+	}
+
+#ifdef MUZZLEY_DEBUG
+	{
+		string _log("sending widget data:\n-> ");
+		muzzley::tostr(_log, _message);
+		muzzley::log(_log, muzzley::sys);
+	}
+#endif
+	this->write(_message, _callback);
 }
 
 void muzzley::Client::setLoopAssynchronous(bool _assync) {
@@ -949,11 +1325,15 @@ const string& muzzley::Client::getSessionId() const {
 	return __session_id;
 }
 
+const string& muzzley::Client::getChannelId() const {
+	return __channel_id;
+}
+
 const long muzzley::Client::getParticipantId() const {
 	return __participant_id;
 }
 
-bool muzzley::Client::isReplyNeeded(muzzley::JSONObj& _data_received) const {
+bool muzzley::Client::isReplyNeeded(muzzley::Message& _data_received) const {
 	muzzley::MessageType _type = (muzzley::MessageType) ((int) _data_received["h"]["t"]);
 	return _type == muzzley::RequestInitiatedByEndpoint || _type == muzzley::RequestInitiatedMuzzleyCore;
 }
@@ -994,17 +1374,17 @@ void muzzley::Client::setEndpointHost(string _endpoint_host) {
 }
 
 bool muzzley::Client::handshake(muzzley::Handler _callback) {
-	muzzley::JSONObj _message;
-	_message <<
+	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-			) <<
+		) <<
 		"a" << "handshake" <<
 		"d" << JSON(
-			"protocolVersion" << "1.2.0" <<
+			"protocolVersion" << "2.0" <<
 			"lib" << "C++ 0.1.0"
-			);
+		)
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -1017,7 +1397,7 @@ bool muzzley::Client::handshake(muzzley::Handler _callback) {
 	return this->write(_message, _callback);
 }
 
-bool muzzley::Client::process(muzzley::JSONObj& _received, muzzley::EventType* _type) {
+bool muzzley::Client::process(muzzley::Message& _received, muzzley::EventType* _type) {
 	int _interaction = (int) _received["h"]["t"];
 	string _action;
 	string _signal_action;
@@ -1029,7 +1409,7 @@ bool muzzley::Client::process(muzzley::JSONObj& _received, muzzley::EventType* _
 			// Fall through
 		case muzzley::Signaling:
 			_action.assign((string) _received["a"]);
-			if (_action == "signal" && !!_received["d"] && !!!!_received["d"]["a"]) {
+			if (_action == "signal" && !!_received["d"] && !!_received["d"]["a"]) {
 				_signal_action.assign((string) _received["d"]["a"]);
 			}
 			break;
@@ -1043,7 +1423,7 @@ bool muzzley::Client::process(muzzley::JSONObj& _received, muzzley::EventType* _
 
 			if (_req_data != this->__queue.end()) {
 				_action.assign(_req_data->second.first);
-				if (_req_data->second.second != NULL) {
+				if (_req_data->second.second != nullptr) {
 					(_req_data->second.second)(_received, *this);
 				}
 
@@ -1076,6 +1456,9 @@ bool muzzley::Client::process(muzzley::JSONObj& _received, muzzley::EventType* _
 	}
 	else if (_action == "participantQuit") {
 		*_type = muzzley::ParticipantQuit;
+	}
+	else if (_action == "publish") {
+		*_type = muzzley::__INTERNAL_PublishUpdate__;
 	}
 	else if (_action == "signal") {
 		if (_signal_action == "ready") {
@@ -1129,8 +1512,7 @@ void muzzley::Client::run() {
 						break;
 					}
 					case 0x01: {
-						muzzley::JSONObj _received;
-						muzzley::fromstr(this->__message, _received);
+						muzzley::Message _received((muzzley::JSONObj&) muzzley::fromstr(this->__message));
 						this->__message.clear();
 						this->__op_code = -1;
 						muzzley::EventType _type;
@@ -1181,5 +1563,178 @@ void muzzley::Client::start() {
 void* muzzley::Client::launch(void* _thread) {
 	Client* _running = static_cast<Client*>(_thread);
 	_running->run();
-	return NULL;
+	return nullptr;
 }
+
+muzzley::Message::Message() : muzzley::JSONObj() {
+}
+
+muzzley::Message::Message(muzzley::JSONObj& _rhs) : muzzley::JSONObj(_rhs) {
+}
+
+muzzley::Message::~Message(){
+}
+
+muzzley::MessageType muzzley::Message::getMessageType(){
+	return (muzzley::MessageType) ((int) (* this)["h"]["t"]);
+}
+
+string muzzley::Message::getCorrelationID(){
+	return (string) (* this)["h"]["cid"];
+}
+
+string muzzley::Message::getParticipantID(){
+	return (string) (* this)["h"]["pid"];
+}
+
+string muzzley::Message::getChannelID(){
+	return (string) (* this)["h"]["ch"];
+}
+
+string muzzley::Message::getAction(){
+	return (string) (* this)["a"];
+}
+
+muzzley::JSONObj& muzzley::Message::getData(){
+	return (muzzley::JSONObj&) (* this)["d"];
+}
+
+bool muzzley::Message::getStatus(){
+	return (bool) (* this)["s"];
+}
+
+string muzzley::Message::getStatusMessage(){
+	return (string) (* this)["m"];
+}
+
+void muzzley::Message::getSubscriptionInfo(muzzley::Subscription& _out){
+	if (((string) (* this)["a"]) == "publish") {
+		_out.setNamespace((string) (* this)["d"]["ns"]);
+		_out.setProfile((string) (* this)["d"]["p"]["profile"]);
+		_out.setChannel((string) (* this)["d"]["p"]["channel"]);
+		_out.setComponent((string) (* this)["d"]["p"]["component"]);
+		_out.setProperty((string) (* this)["d"]["p"]["property"]);
+	}
+}
+
+void muzzley::Message::setMessageType(muzzley::MessageType _in){
+	if (!(* this)["h"]) {
+		(* this) << "h" << JSON( "t" << (int) _in);
+	}
+	else {
+		(* this)["h"] <<  "t" << (int) _in;
+	}
+}
+
+void muzzley::Message::setCorrelationID(string _in){
+	if (!(* this)["h"]) {
+		(* this) << "h" << JSON( "cid" << _in);
+	}
+	else {
+		(* this)["h"] <<  "cid" << _in;
+	}
+}
+
+void muzzley::Message::setParticipantID(string _in){
+	if (!(* this)["h"]) {
+		(* this) << "h" << JSON( "pid" << _in);
+	}
+	else {
+		(* this)["h"] <<  "pid" << _in;
+	}
+}
+
+void muzzley::Message::setChannelID(string _in){
+	if (!(* this)["h"]) {
+		(* this) << "h" << JSON( "ch" << _in);
+	}
+	else {
+		(* this)["h"] <<  "ch" << _in;
+	}
+}
+
+void muzzley::Message::setAction(string _in){
+	(* this) <<  "a" << _in;
+}
+
+void muzzley::Message::setData(muzzley::JSONObj& _in){
+	(* this) <<  "d" << _in;
+}
+
+void muzzley::Message::setStatus(bool _in){
+	(* this) <<  "s" << (bool) _in;
+}
+
+void muzzley::Message::setStatusMessage(string _in){
+	(* this) <<  "m" << _in;
+}
+
+bool muzzley::Message::isError(){
+	auto _found = (* this)->find("s");
+	if (_found == (* this)->end()) {
+		return false;
+	}
+	return (bool) (* this)["s"];
+}
+
+bool muzzley::Message::isRequest(){
+	return (this->getMessageType() == RequestInitiatedByEndpoint) || (this->getMessageType() == RequestInitiatedMuzzleyCore) || (this->getMessageType() == Signaling);
+}
+
+bool muzzley::Message::isReponse(){
+	return (this->getMessageType() == ReplyToEndpoint) || (this->getMessageType() == ReplyToMuzzleyCore);
+}
+
+bool muzzley::Message::isReplyNeeded(){
+	return (this->getMessageType() == RequestInitiatedByEndpoint) || (this->getMessageType() == RequestInitiatedMuzzleyCore);
+}
+
+muzzley::Subscription::Subscription() : muzzley::JSONObj() {
+}
+
+muzzley::Subscription::Subscription(muzzley::JSONObj& _rhs) : muzzley::JSONObj(_rhs) {
+}
+
+muzzley::Subscription::~Subscription() {
+}
+
+string muzzley::Subscription::getNamespace() {
+	return (string) (* this)["namespace"];
+}
+
+string muzzley::Subscription::getProfile() {
+	return (string) (* this)["profile"];
+}
+
+string muzzley::Subscription::getChannel() {
+	return (string) (* this)["channel"];
+}
+
+string muzzley::Subscription::getComponent() {
+	return (string) (* this)["component"];
+}
+
+string muzzley::Subscription::getProperty() {
+	return (string) (* this)["property"];
+}
+
+void muzzley::Subscription::setNamespace(string _in) {
+	(* this) << "namespace" << _in;
+}
+
+void muzzley::Subscription::setProfile(string _in) {
+	(* this) << "profile" << _in;
+}
+
+void muzzley::Subscription::setChannel(string _in) {
+	(* this) << "channel" << _in;
+}
+
+void muzzley::Subscription::setComponent(string _in) {
+	(* this) << "component" << _in;
+}
+
+void muzzley::Subscription::setProperty(string _in) {
+	(* this) << "property" << _in;
+}
+

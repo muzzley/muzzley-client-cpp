@@ -71,6 +71,9 @@ muzzley::JSONElementT::JSONElementT(JSONElementT& _element) : __parent( nullptr 
 	}
 }
 
+muzzley::JSONElementT::JSONElementT(JSONPtr& _value) : muzzley::JSONElementT(*(_value.get())) {
+}
+
 muzzley::JSONElementT::JSONElementT(JSONObj& _value) : __parent( nullptr ) {
 	this->type( muzzley::JSObject);
 	if (_value.get() != nullptr) {
@@ -357,10 +360,10 @@ bool muzzley::JSONElementT::operator==(muzzley::JSONElementT& _in) {
 	}
 	switch(this->__target.__type) {
 		case muzzley::JSObject : {
-			return this->__target.__object == _in.obj();
+			return *(this->__target.__object) == *(_in.obj());
 		}
 		case muzzley::JSArray : {
-			return this->__target.__array == _in.arr();
+			return *(this->__target.__array) == *(_in.arr());
 		}
 		case muzzley::JSString : {
 			return *(this->__target.__string.get()) == _in.str();
@@ -382,6 +385,10 @@ bool muzzley::JSONElementT::operator==(muzzley::JSONElementT& _in) {
 		}
 	}
 	return false;
+}
+
+bool muzzley::JSONElementT::operator==(muzzley::JSONPtr& _rhs) {
+	return * this == * _rhs;
 }
 
 bool muzzley::JSONElementT::operator!=(JSONElementT& _in) {
@@ -418,6 +425,10 @@ bool muzzley::JSONElementT::operator!=(JSONElementT& _in) {
 	return false;
 }
 
+bool muzzley::JSONElementT::operator!=(muzzley::JSONPtr& _rhs) {
+	return * this != * _rhs;
+}
+
 void muzzley::JSONElementT::stringify(ostream& _out) {
 	switch(this->__target.__type) {
 		case muzzley::JSObject : {
@@ -441,7 +452,7 @@ void muzzley::JSONElementT::stringify(ostream& _out) {
 			break;
 		}
 		case muzzley::JSBoolean : {
-			_out << this->__target.__boolean << flush;
+			_out << (this->__target.__boolean ? "true" : "false") << flush;
 			break;
 		}
 		case muzzley::JSNil : {
@@ -498,6 +509,87 @@ void muzzley::JSONElementT::stringify(string& _out) {
 	}
 }
 
+void muzzley::JSONElementT::prettify(ostream& _out, uint _n_tabs) {
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			this->__target.__object->prettify(_out, _n_tabs);
+			break;
+		}
+		case muzzley::JSArray : {
+			this->__target.__array->prettify(_out, _n_tabs);
+			break;
+		}
+		case muzzley::JSString : {
+			_out << "\"" << this->str() << "\"" << flush;
+			break;
+		}
+		case muzzley::JSInteger : {
+			_out << this->__target.__integer << flush;
+			break;
+		}
+		case muzzley::JSDouble : {
+			_out << this->__target.__double << flush;
+			break;
+		}
+		case muzzley::JSBoolean : {
+			_out << (this->__target.__boolean ? "true" : "false") << flush;
+			break;
+		}
+		case muzzley::JSNil : {
+			_out <<  "undefined" << flush;
+			break;
+		}
+		case muzzley::JSDate : {
+			string _date;
+			muzzley::tostr(_date, this->__target.__date, "%Y-%m-%dT%H:%M:%S.000Z");
+			_out << "\"" << _date << "\"" << flush;
+			break;
+		}
+	}
+}
+
+void muzzley::JSONElementT::prettify(string& _out, uint _n_tabs) {
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			this->__target.__object->prettify(_out, _n_tabs);
+			break;
+		}
+		case muzzley::JSArray : {
+			this->__target.__array->prettify(_out, _n_tabs);
+			break;
+		}
+		case muzzley::JSString : {
+			_out.insert(_out.length(), "\"");
+			_out.insert(_out.length(), this->str());
+			_out.insert(_out.length(), "\"");
+			break;
+		}
+		case muzzley::JSInteger : {
+			muzzley::tostr(_out, this->__target.__integer);
+			break;
+		}
+		case muzzley::JSDouble : {
+			muzzley::tostr(_out, this->__target.__double);
+			break;
+		}
+		case muzzley::JSBoolean : {
+			muzzley::tostr(_out, this->__target.__boolean);
+			break;
+		}
+		case muzzley::JSNil : {
+			_out.insert(_out.length(), "undefined");
+			break;
+		}
+		case muzzley::JSDate : {
+			_out.insert(_out.length(), "\"");
+			muzzley::tostr(_out, this->__target.__date, "%Y-%m-%dT%H-%M-%S.000Z");
+			_out.insert(_out.length(), "\"");
+			break;
+		}
+	}
+}
+
+
 /*JSON OBJECT*/
 muzzley::JSONObjT::JSONObjT() {
 }
@@ -510,6 +602,7 @@ void muzzley::JSONObjT::push(string _name) {
 		this->__name.assign(_name);
 	}
 	else {
+		this->pop(this->__name);
 		this->insert(pair<string, JSONPtr>(string(this->__name.data()), JSONPtr(new JSONElementT(_name))));
 		this->__name.clear();
 	}
@@ -517,12 +610,14 @@ void muzzley::JSONObjT::push(string _name) {
 
 void muzzley::JSONObjT::push(JSONElementT& _value) {
 	assertz(this->__name.length() != 0, "you must pass a field name first", 0, 0);
+	this->pop(this->__name);
 	this->insert(pair<string, JSONPtr>(this->__name, JSONPtr(new JSONElementT(_value))));
 	this->__name.clear();
 }
 
 void muzzley::JSONObjT::push(JSONElementT* _value) {
 	assertz(this->__name.length() != 0, "you must pass a field name first", 0, 0);
+	this->pop(this->__name);
 	this->insert(pair<string, JSONPtr>(this->__name, JSONPtr(_value)));
 	this->__name.clear();
 }
@@ -547,11 +642,38 @@ void muzzley::JSONObjT::pop(string _name) {
 }
 
 bool muzzley::JSONObjT::operator==(muzzley::JSONObjT& _rhs) {
-	return false;
+	for (auto _f : * this) {
+		auto _found = _rhs.find(_f.first);
+		if (_found == _rhs.end()) {
+			return false;
+		}
+		if (_found->second == _f.second) {
+			continue;
+		}
+		return false;
+	}
+	return true;
+}
+
+bool muzzley::JSONObjT::operator==(muzzley::JSONObj& _rhs) {
+	return * this == * _rhs;
 }
 
 bool muzzley::JSONObjT::operator!=(JSONObjT& _rhs) {
+	for (auto _f : * this) {
+		auto _found = _rhs.find(_f.first);
+		if (_found == _rhs.end()) {
+			return true;
+		}
+		if (_found->second != _f.second) {
+			return true;
+		}
+	}
 	return false;
+}
+
+bool muzzley::JSONObjT::operator!=(muzzley::JSONObj& _rhs) {
+	return * this != * _rhs;
 }
 
 muzzley::JSONPtr& muzzley::JSONObjT::operator[](int _idx) {
@@ -573,7 +695,6 @@ muzzley::JSONPtr& muzzley::JSONObjT::operator[](string _idx) {
 	}
 	return muzzley::undefined;
 }
-
 
 void muzzley::JSONObjT::stringify(string& _out) {
 	_out.insert(_out.length(), "{");
@@ -603,6 +724,39 @@ void muzzley::JSONObjT::stringify(ostream& _out) {
 		_i.second->stringify(_out);
 	}
 	_out << "}" << flush;
+}
+
+void muzzley::JSONObjT::prettify(string& _out, uint _n_tabs) {
+	_out.insert(_out.length(), "{\n");
+	bool _first = true;
+	for (auto _i : * this) {
+		if (!_first) {
+			_out.insert(_out.length(), ",\n");
+		}
+		_first = false;
+		_out.insert(_out.length(), string(_n_tabs + 1, '\t'));
+		_out.insert(_out.length(), "\"");
+		_out.insert(_out.length(), _i.first);
+		_out.insert(_out.length(), "\" : ");
+		_i.second->prettify(_out, _n_tabs + 1);
+	}
+	_out.insert(_out.length(), "\n");
+	_out.insert(_out.length(), string(_n_tabs + 1, '\t'));
+	_out.insert(_out.length(), "}");
+}
+
+void muzzley::JSONObjT::prettify(ostream& _out, uint _n_tabs) {
+	_out << "{\n" << flush;
+	bool _first = true;
+	for (auto _i : * this) {
+		if (!_first) {
+			_out << ",\n ";
+		}
+		_first = false;
+		_out << string(_n_tabs + 1, '\t') << "\"" << _i.first << "\" : " << flush;
+		_i.second->prettify(_out, _n_tabs + 1);
+	}
+	_out << "\n" << string(_n_tabs, '\t') << "}" << flush;
 }
 
 /*JSON ARRAY*/
@@ -644,11 +798,30 @@ void muzzley::JSONArrT::pop(size_t _idx) {
 }
 
 bool muzzley::JSONArrT::operator==(muzzley::JSONArrT& _rhs) {
-	return false;
+	for (size_t _f  = 0; _f != this->size(); _f++) {
+		if ((* this)[_f]  == _rhs[_f]) {
+			continue;
+		}
+		return false;
+	}
+	return true;
+}
+
+bool muzzley::JSONArrT::operator==(muzzley::JSONArr& _rhs) {
+	return * this == * _rhs;
 }
 
 bool muzzley::JSONArrT::operator!=(JSONArrT& _rhs) {
+	for (size_t _f  = 0; _f != this->size(); _f++) {
+		if ((* this)[_f]  != _rhs[_f]) {
+			return true;
+		}
+	}
 	return false;
+}
+
+bool muzzley::JSONArrT::operator!=(muzzley::JSONArr& _rhs) {
+	return * this != * _rhs;
 }
 
 muzzley::JSONPtr& muzzley::JSONArrT::operator[](int _idx) {
@@ -699,6 +872,36 @@ void muzzley::JSONArrT::stringify(ostream& _out) {
 		_i->stringify(_out);
 	}
 	_out << "]" << flush;
+}
+
+void muzzley::JSONArrT::prettify(string& _out, uint _n_tabs) {
+	_out.insert(_out.length(), "[\n");
+	bool _first = true;
+	for (auto _i : * this) {
+		if (!_first) {
+			_out.insert(_out.length(), ",\n");
+		}
+		_first = false;
+		_out.insert(_out.length(), string(_n_tabs + 1, '\t'));
+		_i->prettify(_out, _n_tabs + 1);
+	}
+	_out.insert(_out.length(), "\n]");
+	_out.insert(_out.length(), string(_n_tabs + 1, '\t'));
+	_out.insert(_out.length(), "]");
+}
+
+void muzzley::JSONArrT::prettify(ostream& _out, uint _n_tabs) {
+	_out << "[\n" << flush;
+	bool _first = true;
+	for (auto _i : * this) {
+		if (!_first) {
+			_out << ",\n ";
+		}
+		_first = false;
+		_out << string(_n_tabs + 1, '\t')<< flush;
+		_i->prettify(_out, _n_tabs + 1);
+	}
+	_out << "\n" << string(_n_tabs, '\t') << "]" << flush;
 }
 
 /*JSON POINTER TO ELEMENT*/

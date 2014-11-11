@@ -16,57 +16,7 @@ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 */
 
-
 #include <muzzley/parsers/json.h>
-
-void muzzley::fromstream(istream& _in, JSONObj& _out) {
-	muzzley::JSONParser _p;
-	JSONPtr _root(new JSONElementT(_out));
-	_p.switchRoots(_root);
-	_p.switchStreams(_in);
-	_p.parse();
-}
-
-void muzzley::fromstr(string& _in, JSONObj& _out) {
-	istringstream _ss;
-	_ss.str(_in);
-	muzzley::JSONParser _p;
-	JSONPtr _root(new JSONElementT(_out));
-	_p.switchRoots(_root);
-	_p.switchStreams(_ss);
-	_p.parse();
-
-}
-
-void muzzley::fromstr(string& _in, JSONArr& _out) {
-	istringstream _ss;
-	_ss.str(_in);
-	muzzley::JSONParser _p;
-	JSONPtr _root(new JSONElementT(_out));
-	_p.switchRoots(_root);
-	_p.switchStreams(_ss);
-	_p.parse();
-}
-
-void muzzley::fromfile(ifstream& _in, JSONObj& _out) {
-	if (_in.is_open()) {
-		muzzley::JSONParser _p;
-		JSONPtr _root(new JSONElementT(_out));
-		_p.switchRoots(_root);
-		_p.switchStreams(_in);
-		_p.parse();
-	}
-}
-
-void muzzley::fromfile(ifstream& _in, JSONArr& _out) {
-	if (_in.is_open()) {
-		muzzley::JSONParser _p;
-		JSONPtr _root(new JSONElementT(_out));
-		_p.switchRoots(_root);
-		_p.switchStreams(_in);
-		_p.parse();
-	}
-}
 
 muzzley::JSONPtr muzzley::fromstr(string& _in) {
 	istringstream _ss;
@@ -90,6 +40,14 @@ muzzley::JSONPtr muzzley::fromfile(ifstream& _in) {
 	return _root;
 }
 
+muzzley::JSONPtr muzzley::fromstream(istream& _in) {
+	JSONPtr _root;
+	muzzley::JSONParser _p;
+	_p.switchRoots(_root);
+	_p.switchStreams(_in);
+	_p.parse();
+	return _root;
+}
 void muzzley::tostr(string& _out, JSONElement& _in)  {
 	_in->stringify(_out);
 }

@@ -92,7 +92,7 @@ void muzzley::tostr(string& s, time_t i, const char* f){
 	bzero(_buffer_date, 80);
 	localtime_r(&i, &_ptm);
 	strftime(_buffer_date, 80, f, &_ptm);
-	s.assign(_buffer_date);
+	s.insert(s.length(), _buffer_date);
 }
 
 void muzzley::fromstr(string& s, int* i){
@@ -149,7 +149,7 @@ void muzzley::fromstr(string& s, time_t* i, const char* f){
 		tm->tm_isdst = _current_tz.tz_dsttime;
 		tm->tm_gmtoff = muzzley::timezone_offset();
 		tm->tm_zone =_current_tz.tz_dsttime == 0 ? tzname[0] : tzname[1];
-	}
+	} 
 	*i = mktime(tm);
 }
 

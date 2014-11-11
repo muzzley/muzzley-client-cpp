@@ -41,24 +41,24 @@ int main(int argc, char* argv[]) {
 	// access it through the 'getDeviceId'  and 'getSessionId' method.
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::ActivityCreated, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	_client.on(muzzley::ActivityCreated, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		cout << "Activity created with id " << _data["d"]["activityId"] << endl << flush;
 		cout << "You can now pair your smartphone, using the muzzley app, to the activity id " << _data["d"]["activityId"] << endl << flush;
 		return true;
 	});
 
-	_client.on(muzzley::ParticipantJoined, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	_client.on(muzzley::ParticipantJoined, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		long participant_id = _data["d"]["participant"]["id"];
 		string name = _data["d"]["participant"]["name"];
 		cout << "Participant " << name << "(" << participant_id << ")" << " joined." << endl << flush;
 
-		_client.changeWidget(participant_id, "switch", [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+		_client.changeWidget(participant_id, "switch", [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 			cout << "Widget successfully changed" << endl << flush;
 		});
 		return true;
 	});
 
-	_client.on(muzzley::WidgetAction, [] (muzzley::JSONObj& _data, muzzley::Client& _client) -> bool {
+	_client.on(muzzley::WidgetAction, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		int _switch_value = (int) _data["d"]["v"];
 		cout << "User pressed the switch to " << (_switch_value ? "1 (On)" : "0 (Off)") << endl << flush;
 		return true;

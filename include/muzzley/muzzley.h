@@ -38,3 +38,5 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <muzzley/text/manip.h>
 
 #include <muzzley/log/log.h>
+
+typedef int semid_t;
