@@ -66,12 +66,7 @@ int main(int argc, char* argv[]) {
 		_s1.setChannel("2183hroqw89");
 		_s1.setComponent("switch");
 		_s1.setProperty("status");
-		_client.subscribe(_s1, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-			_data->prettify(cout);
-			cout << endl << flush;
-		});
-
-		_client.subscribe(_s1, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+		_client.on(muzzley::Published, _s1, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 			_data->prettify(cout);
 			cout << endl << flush;
 		});
@@ -82,9 +77,10 @@ int main(int argc, char* argv[]) {
 		_s2.setChannel("2183hroqw89");
 		_s2.setComponent("bulb");
 		_s2.setProperty("intensity");
-		_client.subscribe(_s2, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+		_client.on(muzzley::Published, _s2, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 			_data->prettify(cout);
 			cout << endl << flush;
+
 			if (_data.isReplyNeeded()) {
 				muzzley::Message _m;
 				_m.setStatus(true);
@@ -95,81 +91,13 @@ int main(int argc, char* argv[]) {
 				_client.reply(_data, _m);
 				muzzley::Subscription _s;
 				_data.getSubscriptionInfo(_s);
-				_client.unsubscribe(_s);
+				_client.off(muzzley::Published, _s);
 			}
 		});
 		return true;
 	});
 
-	_client.on(muzzley::ParticipantJoined, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-
-		// string widget = "gamepad";
-		string widget = "webview";
-		long participant_id = _data["d"]["participant"]["id"];
-		string name = _data["d"]["participant"]["name"];
-
-		cout << "Participant " << name << "(" << participant_id << ")" << " joined." << endl << flush;
-		cout << "Chaning widget to a... " << widget << endl << flush;
-
-		string participant_string;
-		muzzley::tostr(participant_string, _data);
-		cout << "Participant string: " << participant_string << endl << flush;
-
-		// Change widget to the native gamepad
-		// _client.changeWidget(participant_id, widget, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-		// 	cout << "Widget successfully changed" << endl << flush;
-		// });
-
-		// Change widget to a custom WebView widget
-		muzzley::JSONObj _widget_opts;
-		_widget_opts <<
-			"widget" << widget <<
-			"params" << JSON (
-				"uuid" << "58b54ae9-c94d-4c71-a4f1-6412b2376b1d" <<
-				"orientation" << "portrait"
-			);
-		_client.changeWidget(participant_id, _widget_opts, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-			cout << "Widget successfully changed" << endl << flush;
-			return true;
-		});
-		return true;
-	});
-
-	_client.on(muzzley::WidgetAction, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-		string widget_data;
-		muzzley::tostr(widget_data, _data["d"]);
-		cout << "Native Widget action event fired: " << widget_data << endl << flush;
-		return true;
-	});
-
-	// Register listener to be invoked when app receives a signal message.
-	//
-	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::SignalingMessage, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-
-		string action;
-		action.assign((string) _data["d"]["a"]);
-
-		cout << "Received signaling message for action " << action << endl << flush;
-		cout << "with data " << _data["d"]["d"] << endl << flush;
-		cout << "and isReplyNeeded " << _client.isReplyNeeded(_data) << endl << flush;
-
-		if (_data.isReplyNeeded()) {
-			muzzley::Message _m;
-			_m.setStatus(true);
-			_m.setStatusMessage("this is a testing signal so is always successful!");
-			_m.setData(JSON(
-				"w" << "400" <<
-				"h" << "300"
-			));
-			_client.reply(_data, _m);
-			cout << "great, replied to a Signal Message" << endl << flush;
-		}
-
-		return true;
-	});
-
-	// Connects the application to the Muzzley server.
+	// Connects the application to the Muzzley server, using the one-step-initialization process.
 	//
 	// It will start the application loop synchronously,
 	// i.e. the program will not execute anything below this line.

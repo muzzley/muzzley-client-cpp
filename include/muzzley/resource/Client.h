@@ -59,7 +59,9 @@ namespace muzzley {
 		UserLoggedIn = 11,
 		WidgetAction = 12,
 		__INTERNAL_ParticipantJoined__ = 13,
-		__INTERNAL_PublishUpdate__ = 14
+		__INTERNAL_PublishUpdate__ = 14,
+		Published = 15,
+		Publish = 16
 	};
 	enum MessageType {
 		RequestInitiatedByEndpoint = 1,
@@ -138,6 +140,11 @@ namespace muzzley {
 	#if __cplusplus >= 201103L
 		virtual void on(muzzley::EventType _type, muzzley::Handler _handler) final;
 		virtual void trigger(muzzley::EventType _type, muzzley::Message& _data) final;
+
+		virtual void on(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Callback _callback) final;
+		virtual void off(muzzley::EventType _type, muzzley::Subscription& _from_property) final;
+		virtual void trigger(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback = nullptr) final;
+
 	#endif
 		virtual void start() final;
 
@@ -166,10 +173,6 @@ namespace muzzley {
 		virtual void sendSignal(string _type, muzzley::JSONObj& _data, muzzley::Callback _callback = nullptr);
 
 		virtual void sendWidgetData(string _widget, string _component, string _event_type, string _event_value);
-
-		virtual void subscribe(muzzley::Subscription& _to_property, muzzley::Callback _callback);
-		virtual void unsubscribe(muzzley::Subscription& _from_property);
-		virtual void publish(muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback = nullptr);
 
 		virtual bool connect(string _host, uint16_t _port, string _path) final;
 		virtual void disconnect() final;
@@ -239,6 +242,10 @@ namespace muzzley {
 
 		bool handshake(muzzley::Handler _callback);
 		bool process(muzzley::Message& _received, muzzley::EventType* _type);
+		void subscribe(muzzley::Subscription& _to_property, muzzley::Callback _callback);
+		void unsubscribe(muzzley::Subscription& _from_property);
+		void publish(muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback = nullptr);
+
 
 		void run();
 		static void* launch(void* thread);

@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
   });
   ...
 
-  _client.connectApp("YOUR-APP-TOKEN-HERE");
+  _client.initApp("YOUR-APP-TOKEN-HERE");
 
   return 0;
 }
@@ -127,7 +127,9 @@ You can register handlers for the following events:
       SignalingMessage,  // when a Signaling message is received
       ChangeWidget, // when a change widget request is received
       SetupComponent, // when a setup component request is received
-      WidgetAction // when a widget action is received
+      WidgetAction, // when a widget action is received
+      Published, // when a message is published to a given Pub/Sub channel
+      Publish // to publish a message to a given Pub/Sub channel
     };
 
 An event register could look something like this:
@@ -150,9 +152,9 @@ Callback register also uses ***Lambda-function***s, It could look something like
       return true;
     });
 
-When you connect the application or the user to the Muzzley server (by invoking either ***connectApp*** or ***connectUser*** methods), the messaging loop starts. You can either run this loop synchronously or assynchronously, depending wether you want to keep control of the program loop or not.
+When you connect and initialize the application or the user to the Muzzley server (by invoking either ***initApp*** or ***initUser*** methods), the messaging loop starts. You can either run this loop synchronously or assynchronously, depending wether you want to keep control of the program loop or not.
 
-You control this by invoking the *muzzley::Client::setLoopAssynchronous(bool _assync)*. Passing *true* value will give you back the control of the program by lanuching a thread and returning from the ***connectApp*** or ***connectUser*** methods. Not invoking the method or passing *false* value, will keep the program execution inside the library, never returning from the ***connectApp*** or ***connectUser*** methods.
+You control this by invoking the *muzzley::Client::setLoopAssynchronous(bool _assync)*. Passing *true* value will give you back the control of the program by lanuching a thread and returning from the ***initApp*** or ***initUser*** methods. Not invoking the method or passing *false* value, will keep the program execution inside the library, never returning from the ***initApp*** or ***initUser*** methods.
 
 Hence, a basic program could look something like this:
 
@@ -202,7 +204,7 @@ int main(int argc, char* argv[]) {
   //
   // It will start the application loop synchronously,
   // i.e. the program will not execute anything below this line.
-  _client.connectApp("YOUR-APP-TOKEN-HERE");
+  _client.initApp("YOUR-APP-TOKEN-HERE");
 
   return 0;
 }
@@ -227,18 +229,24 @@ The *reply* method returns *true* if a message were sent and *false* if not (if 
 Hence, replying, for instance, to a Signaling Message could look like this:
 
     _client.on(muzzley::SignalingMessage, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-      if (_client.isReplyNeeded(_data)) {
-        _client.reply(_data, JSON(
-          "s" << true <<
-          "m" << "this is a testing signal so is always successful!" <<
-          "d" << JSON(
-            "optionalArg" << "value"
-          )
+      if (_data.isReplyNeeded()) {
+        _m.setStatus(true);
+        _m.setStatusMessage("this is a testing signal so is always successful!");
+        _m.setData(JSON(
+          "w" << "400" <<
+          "h" << "300"
         ));
+        _client.reply(_data, _m);
         cout << "great, replied to a Signal Message" << endl << flush;
       }
       return true;
     });
+
+# SUBSCRIBING TO A CHANNEL
+
+
+# PUBLISHING TO A CHANNEL
+
 
 #MAIN CLASSES
 
@@ -260,6 +268,14 @@ This class methods are organized in the following way:
 
     virtual void on(muzzley::EventType _type, muzzley::Handler _handler) final;
 
+### Event registering for Pub/Sub
+
+    virtual void on(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Callback _callback);
+    virtual void off(muzzley::EventType _type, muzzley::Subscription& _from_property);
+    virtual void trigger(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback = nullptr);
+
+**NOTE**: *_type* must be *muzzley::Published* or *muzzley::Publish*
+
 ### Message Handling
 
     virtual bool reply(muzzley::Message& _data_received, muzzley::Message& _reply) final;
@@ -269,9 +285,9 @@ This class methods are organized in the following way:
 #### Connection & Authentication
 
     // Only need to provide `_activity_id` when using a static activity token as configured at muzzley.com
-    virtual void connectApp(string _app_token, string _activity_id = "");
+    virtual void initApp(string _app_token, string _activity_id = "");
 
-    virtual void connectUser(string _user_token, string _activity_id);
+    virtual void initUser(string _user_token, string _activity_id);
 
 #### Activity
 
@@ -290,12 +306,6 @@ This class methods are organized in the following way:
     virtual void sendSignal(string _type, muzzley::Callback _callback = NULL);
     virtual void sendSignal(string _type, muzzley::JSONObj& _data, muzzley::Callback _callback = NULL);
     virtual void sendWidgetData(string _widget, string _component, string _event_type, string _event_value);
-
-#### Pub/Sub communication pattern
-
-    virtual void subscribe(muzzley::Subscription& _to_property, muzzley::Callback _callback);
-    virtual void unsubscribe(muzzley::Subscription& _from_property);
-    virtual void publish(muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback = nullptr);
 
 ### Getters and Setters
 
@@ -390,6 +400,7 @@ Casting operators are also provided, in order for you to convert the attribute v
     operator unsigned int();
     operator size_t();
     operator double();
+    operator time_t();
 
 So, given the above example, you could use the following code: 
 
@@ -399,9 +410,115 @@ So, given the above example, you could use the following code:
 
 ### Iterating over *muzzley::JSONObj* properties
 
-The *muzzley::JSONObj* is a smart pointer that references an extended *std::map*. 
+Since the *muzzley::JSONObj* is a smart pointer that references an extended *std::map*, iterating over it's properties follows the STL containers standards.
+
+For instance, given the following object initialization:
+
+    muzzley::JSONObj _o = JSON(
+      "name" << "Mr Muzzley" <<
+      "serial" << 123 <<
+      "sorting_field" << "name" <<
+      "numbers" << JSON_ARRAY( 123 << 345 << 67 << 78 ) <<
+      "animal_numbers" << JSON_ARRAY( "lions" << 345 << "horses" << 78 ) <<
+      "location" << JSON(
+        "city" << "Lisbon" <<
+        "country" << "Portugal"
+      )
+    );
+
+one could iterate over this object, using standard techniques;
+  
+    for (auto _field : *_o) { // don't forget the * since you want to iterate over the pointed object
+        cout << " field named " << _field.first << " has the following value " << _field.second << endl << flush;
+    }
+
+To learn more about *std::map* and map iterators, read [this C++ Reference section][cpp_map].
+
+### Iterating over *muzzley::JSONArr* properties
+
+Since the *muzzley::JSONArr* is a smart pointer that references an extended *std::vector*, iterating over it's properties follows the STL containers standards.
+
+For instance, given the following object initialization:
+
+    muzzley::JSON _a = JSON_ARRAY( "lions" << 345 << "horses" << 78 );
+
+one could iterate over this object, using standard techniques;
+  
+    for (auto _field : *_a) { // don't forget the * since you want to iterate over the pointed object
+        cout << " array element is " << _field << endl << flush;
+    }
+
+or 
+
+    for (size_t _i = 0; _i != _a->size(); _i++) { // don't forget the * since you want to iterate over the pointed object
+        cout << " array element " << _i << " is " << _a[_i] << endl << flush;
+    }
+
+To learn more about *std::vector* and vector iterators, read [this C++ Reference section][cpp_vector].
+
+## muzzley::Message
+
+This class stores JSON based message, since it extende *muzzley::JSONObj*, and aggregates a set of helper methods that allow you to access, in a fashionable manner, the Muzzley messaging protocol relevant fields.
+
+This class methods are organized in the following way:
+
+### Getters
+
+    virtual muzzley::MessageType getMessageType();
+    virtual string getCorrelationID();
+    virtual string getParticipantID();
+    virtual string getChannelID();
+    virtual string getAction();
+    virtual muzzley::JSONObj& getData();
+    virtual bool getStatus();
+    virtual string getStatusMessage();
+    virtual void getSubscriptionInfo(muzzley::Subscription&);
+
+### Setters
+
+    virtual void setMessageType(muzzley::MessageType _in);
+    virtual void setCorrelationID(string _in);
+    virtual void setParticipantID(string _in);
+    virtual void setChannelID(string _in);
+    virtual void setAction(string _in);
+    virtual void setData(muzzley::JSONObj& _in);
+    virtual void setStatus(bool _in);
+    virtual void setStatusMessage(string _in);
+
+### Testers
+
+    virtual bool isError();
+    virtual bool isRequest();
+    virtual bool isReponse();
+    virtual bool isReplyNeeded();
+
+## muzzley::Subscription
+
+This class stores JSON based message, since it extends *muzzley::JSONObj*, and aggregates a set of helper methods that allow you to access, in a fashionable manner, the Muzzley Pub/Sub communication pattern channel subscription.
+
+This class methods are organized in the following way:
+
+### Getters
+
+    virtual string getNamespace();
+    virtual string getProfile();
+    virtual string getChannel();
+    virtual string getComponent();
+    virtual string getProperty();
+
+### Setters
+
+    virtual void setNamespace(string _in);
+    virtual void setProfile(string _in);
+    virtual void setChannel(string _in);
+    virtual void setComponent(string _in);
+    virtual void setProperty(string _in);
+
 
 [muzzley_homepage]: https://www.muzzley.com
 [lambda_functions]: http://www.cprogramming.com/c++11/c++11-lambda-closures.html
 [changelog]: CHANGES.md
 [cpp_smart_pointers]: http://en.cppreference.com/w/cpp/memory/shared_ptr
+[cpp_map]: http://en.cppreference.com/w/cpp/container/map
+[cpp_vector]: http://en.cppreference.com/w/cpp/container/vector
+

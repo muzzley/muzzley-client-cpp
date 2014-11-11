@@ -59,45 +59,6 @@ int main(int argc, char* argv[]) {
 	_client.on(muzzley::ActivityCreated, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		cout << "Activity created with id " << (string) _data["d"]["activityId"] << endl << flush;
 		cout << "You can now pair your smartphone, using the muzzley app, to the activity id " << (string) _data["d"]["activityId"] << endl << flush;
-
-		muzzley::Subscription _s1;
-		_s1.setNamespace("iot");
-		_s1.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
-		_s1.setChannel("2183hroqw89");
-		_s1.setComponent("switch");
-		_s1.setProperty("status");
-		_client.subscribe(_s1, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-			_data->prettify(cout);
-			cout << endl << flush;
-		});
-
-		_client.subscribe(_s1, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-			_data->prettify(cout);
-			cout << endl << flush;
-		});
-
-		muzzley::Subscription _s2;
-		_s2.setNamespace("iot");
-		_s2.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
-		_s2.setChannel("2183hroqw89");
-		_s2.setComponent("bulb");
-		_s2.setProperty("intensity");
-		_client.subscribe(_s2, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-			_data->prettify(cout);
-			cout << endl << flush;
-			if (_data.isReplyNeeded()) {
-				muzzley::Message _m;
-				_m.setStatus(true);
-				_m.setData(JSON(
-					"value" << 125 << 
-					"unit" << "lm"
-				));
-				_client.reply(_data, _m);
-				muzzley::Subscription _s;
-				_data.getSubscriptionInfo(_s);
-				_client.unsubscribe(_s);
-			}
-		});
 		return true;
 	});
 

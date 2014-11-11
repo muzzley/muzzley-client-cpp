@@ -268,6 +268,22 @@ void muzzley::Client::trigger(muzzley::EventType _type, muzzley::Message& _data)
 		}
 	}
 }
+
+void muzzley::Client::on(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Callback _callback) {
+	assertz(_type == muzzley::Published, "the '_type' parameter must be muzzley::Published", 500, 300);
+	this->subscribe(_to_property, _callback);
+}
+
+void muzzley::Client::off(muzzley::EventType _type, muzzley::Subscription& _from_property) {
+	assertz(_type == muzzley::Published, "the '_type' parameter must be muzzley::Published", 500, 300);
+	this->unsubscribe(_from_property);
+}
+
+void muzzley::Client::trigger(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback) {
+	assertz(_type == muzzley::Publish, "the '_type' parameter must be muzzley::Publish", 500, 300);
+	this->publish(_to_property, _payload, _callback);
+}
+
 #endif
 
 bool muzzley::Client::connect(string _host, uint16_t _port, string _path) {

@@ -50,6 +50,7 @@ int main(int argc, char* argv[]) {
 	_client.on(muzzley::ActivityJoined, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		cout << "User joined activity. Assigned device Id: " << _client.getDeviceId() << endl << flush;
 		// _client.sendWidgetData("xpto", "a", "some", "value");
+
 		muzzley::Subscription _s1;
 		_s1.setNamespace("iot");
 		_s1.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
@@ -65,70 +66,20 @@ int main(int argc, char* argv[]) {
 				"unit" << "lm"
 			)
 		));
-		_client.publish(_s1, _m1);
+		_client.trigger(muzzley::Publish, _s1, _m1);
 
 		muzzley::Message _m2;
 		_m2.setData(JSON(
 			"io" << "r"
 		));
-		_client.publish(_s1, _m2, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+		_client.trigger(muzzley::Publish, _s1, _m2, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 			_data->prettify(cout);
 			cout << endl << flush;			
 		}); 
 		return true;
 	});
 
-	// Register listener to be invoked when the app requests
-	// the user to change to a certain widget.
-	//
-	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::ChangeWidget, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-		string widgetobj_str;
-		muzzley::tostr(widgetobj_str, _data["d"]["d"]);
-		cout << "User was requested to change to a widget. Object: " << widgetobj_str << endl << flush;
-
-		if ((string) _data["d"]["d"]["widget"] == "gamepad") {
-			// Assuming we changed to a gamepad, send a "button b pressed" event
-			_client.sendWidgetData("gamepad", "ba", "press", "a");
-		}
-
-		muzzley::JSONObj _signal_data;
-		_signal_data <<
-		  "arg1" << JSON (
-			"subArg1" << "subValue1"
-	  	);
-		cout << "Sending a test signal..." << endl << flush;
-		_client.sendSignal("testSignal", _signal_data, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-			string signalresp_str;
-			muzzley::tostr(signalresp_str, _data);
-			cout << "...received the test signal's response:" << endl << flush;
-			cout << signalresp_str << endl << flush;
-			return true;
-		});
-
-		return true;
-	});
-
-	// Register listener to be invoked when app receives a signal message.
-	//
-	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::SignalingMessage, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-		string signalobj_str;
-		muzzley::tostr(signalobj_str, _data);
-		cout << "Received a signaling message:" << endl << flush;
-		cout << signalobj_str << endl << flush;
-		return true;
-	});
-
-	// Register listener to be invoked when the activity we've joined terminates
-	//
-	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::ActivityTerminated, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-		cout << "Activity Terminated. We either try to reconnect or exit." << endl << flush;
-		return true;
-	});
-
-	// Connects the application to the Muzzley server.
+	// Connects the application to the Muzzley server, using the one-step-initialization process.
 	//
 	// Assuming that the program receives the activityId as argument.
 	//

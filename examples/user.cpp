@@ -50,31 +50,6 @@ int main(int argc, char* argv[]) {
 	_client.on(muzzley::ActivityJoined, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		cout << "User joined activity. Assigned device Id: " << _client.getDeviceId() << endl << flush;
 		// _client.sendWidgetData("xpto", "a", "some", "value");
-		muzzley::Subscription _s1;
-		_s1.setNamespace("iot");
-		_s1.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
-		_s1.setChannel("2183hroqw89");
-		_s1.setComponent("bulb");
-		_s1.setProperty("intensity");
-
-		muzzley::Message _m1;
-		_m1.setData(JSON(
-			"io" << "w" <<
-			"data" << JSON(
-				"value" << 125 << 
-				"unit" << "lm"
-			)
-		));
-		_client.publish(_s1, _m1);
-
-		muzzley::Message _m2;
-		_m2.setData(JSON(
-			"io" << "r"
-		));
-		_client.publish(_s1, _m2, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-			_data->prettify(cout);
-			cout << endl << flush;			
-		}); 
 		return true;
 	});
 
