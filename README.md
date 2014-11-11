@@ -297,7 +297,7 @@ The **muzzley::Message** class is used to pass on the payload to be published to
 
 The **muzzley::Subscription** class is used to pass the channel identifying information. The initializing values for this class should be the same for the subscriber and the publisher.
 
-## Publishing to a channel and expecting for a response
+## Publishing to a channel and expecting a response
 
 Altough it falls a bit outside the Pub/Sub messaging pattern, this library provides the functionality for a message to be returned by a given subscriber (usefull for making request for a given property value, for instance), allowing you to use the Pub/Sub pattern to make RPC calls.
 
