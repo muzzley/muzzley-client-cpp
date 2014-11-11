@@ -253,7 +253,6 @@ For further reading on this pattern, read the [wiki page][wiki_pubsub].
 In order to subscribe for the messages of a given channel, an event callback must be registered for the *muzzley::Published* event:
 
 ```
- 
     muzzley::Subscription _s1;
     _s1.setNamespace("iot");
     _s1.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
@@ -275,7 +274,6 @@ The callback will be invoked whenever a message is published to the given channe
 In order to publish to a given channel, an event must be triggered for the *muzzley::Publish* event:
 
 ```
-
     muzzley::Subscription _s1;
     _s1.setNamespace("iot");
     _s1.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
@@ -305,7 +303,6 @@ Altough it falls a bit outside the Pub/Sub messaging pattern, this library provi
 All you have to do is to pass a callback to the publish event triggering:
 
 ```
-
     muzzley::Subscription _s1;
     _s1.setNamespace("iot");
     _s1.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
