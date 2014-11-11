@@ -35,7 +35,7 @@ using namespace __gnu_cxx;
 
 #define MUZZLEY_ENDPOINT_PORT 80
 #define MUZZLEY_ENDPOINT_PATH "/ws"
-#define MUZZLEY_DEBUG
+//#define MUZZLEY_DEBUG
 
 #ifndef CRLF
 #define CRLF "\r\n"

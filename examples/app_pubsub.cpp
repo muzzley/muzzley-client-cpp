@@ -90,6 +90,7 @@ int main(int argc, char* argv[]) {
 					"unit" << "lm"
 				));
 				_client.reply(_data, _m);
+				
 				muzzley::Subscription _s;
 				_data.getSubscriptionInfo(_s);
 				_client.off(muzzley::Published, _s);
