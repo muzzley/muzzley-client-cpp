@@ -245,7 +245,7 @@ Hence, replying, for instance, to a Signaling Message could look like this:
 
 # PUB/SUB COMMUNICATION PATTERN
 
-The [Pub/Sub message pattern][wiki_pubsub] is a powerful communication mechanism that allows you to send and/or receive messages without knowing the communication actors and, therefore, not having to deal programming messages to be sent directly to specific peers.
+The [Pub/Sub message pattern][wiki_pubsub] is a powerful communication mechanism that allows you to send and/or receive messages without knowing the communication actors and, therefore, not having to deal with the problems of sending messages, directly, to specific peers.
 
 For further reading on this pattern, read the [wiki page][wiki_pubsub].
 
