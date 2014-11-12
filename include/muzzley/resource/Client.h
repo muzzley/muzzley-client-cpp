@@ -137,7 +137,7 @@ namespace muzzley {
 		Client();
 		virtual ~Client();
 
-	#if __cplusplus >= 201103L
+//	#if __cplusplus >= 201103L
 		virtual void on(muzzley::EventType _type, muzzley::Handler _handler) final;
 		virtual void trigger(muzzley::EventType _type, muzzley::Message& _data) final;
 
@@ -145,7 +145,7 @@ namespace muzzley {
 		virtual void off(muzzley::EventType _type, muzzley::Subscription& _from_property) final;
 		virtual void trigger(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback = nullptr) final;
 
-	#endif
+//	#endif
 		virtual void start() final;
 
 		virtual void connectApp(string _app_token, string _activity_id = "");
