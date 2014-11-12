@@ -137,21 +137,19 @@ namespace muzzley {
 		Client();
 		virtual ~Client();
 
-//	#if __cplusplus >= 201103L
-		virtual void on(muzzley::EventType _type, muzzley::Handler _handler) final;
-		virtual void trigger(muzzley::EventType _type, muzzley::Message& _data) final;
+		virtual void on(muzzley::EventType _type, muzzley::Handler _handler);
+		virtual void trigger(muzzley::EventType _type, muzzley::Message& _data);
 
-		virtual void on(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Callback _callback) final;
-		virtual void off(muzzley::EventType _type, muzzley::Subscription& _from_property) final;
-		virtual void trigger(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback = nullptr) final;
+		virtual void on(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Callback _callback);
+		virtual void off(muzzley::EventType _type, muzzley::Subscription& _from_property);
+		virtual void trigger(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback = nullptr);
 
-//	#endif
-		virtual void start() final;
+		virtual void start();
 
 		virtual void connectApp(string _app_token, string _activity_id = "");
 		virtual void connectUser(string _user_token, string _activity_id);
-		virtual void loginApp(string _app_token) final;
-		virtual void loginUser(string _user_token) final;
+		virtual void loginApp(string _app_token);
+		virtual void loginUser(string _user_token);
 		virtual void initApp(string _app_token, string _activity_id);
 		virtual void initUser(string _user_token, string _activity_id);
 
@@ -174,12 +172,12 @@ namespace muzzley {
 
 		virtual void sendWidgetData(string _widget, string _component, string _event_type, string _event_value);
 
-		virtual bool connect(string _host, uint16_t _port, string _path) final;
-		virtual void disconnect() final;
-		virtual void reconnect() final;
-		virtual bool read() final;
-		virtual bool write(muzzley::Message& _data, muzzley::Callback _callback = nullptr) final;
-		virtual bool reply(muzzley::Message& _data_received, muzzley::Message& _reply) final;
+		virtual bool connect(string _host, uint16_t _port, string _path);
+		virtual void disconnect();
+		virtual void reconnect();
+		virtual bool read();
+		virtual bool write(muzzley::Message& _data, muzzley::Callback _callback = nullptr);
+		virtual bool reply(muzzley::Message& _data_received, muzzley::Message& _reply);
 
 		void setLoopAssynchronous(bool _assync);
 
@@ -206,7 +204,7 @@ namespace muzzley {
 		long long __serial;
 		int __op_code;
 
-		string __endpoint_host = "platform.office.muzzley.com";
+		string __endpoint_host;
 
 		string __app_token;
 		string __user_token;

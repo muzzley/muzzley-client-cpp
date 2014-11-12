@@ -25,7 +25,7 @@
 #include <muzzley/log/log.h>
 
 muzzley::Client::Client() :
-	__serial(1) {
+	__serial(1),  __endpoint_host("platform.office.muzzley.com") {
 	this->__mtx = new pthread_mutex_t();
 	this->__thr = new pthread_t();
 	pthread_mutexattr_init(&this->__attr);
