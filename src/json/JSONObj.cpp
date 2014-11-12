@@ -71,7 +71,46 @@ muzzley::JSONElementT::JSONElementT(JSONElementT& _element) : __parent( nullptr 
 	}
 }
 
-muzzley::JSONElementT::JSONElementT(JSONPtr& _value) : muzzley::JSONElementT(*(_value.get())) {
+muzzley::JSONElementT::JSONElementT(JSONPtr& _value) {
+	this->type(_value->type());
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			if (_value->obj().get() != nullptr) {
+				this->__target.__object = _value->obj();
+			}
+			break;
+		}
+		case muzzley::JSArray : {
+			if (_value->arr().get() != nullptr) {
+				this->__target.__array = _value->arr();
+			}
+			break;
+		}
+		case muzzley::JSString : {
+			this->__target.__string = make_shared<string>(_value->str());
+			break;
+		}
+		case muzzley::JSInteger : {
+			this->__target.__integer = _value->intr();
+			break;
+		}
+		case muzzley::JSDouble : {
+			this->__target.__double = _value->dbl();
+			break;
+		}
+		case muzzley::JSBoolean : {
+			this->__target.__boolean = _value->bln();
+			break;
+		}
+		case muzzley::JSNil : {
+			this->__target.__nil = nullptr;
+			break;
+		}
+		case muzzley::JSDate : {
+			this->__target.__date = _value->date();
+			break;
+		}
+	}
 }
 
 muzzley::JSONElementT::JSONElementT(JSONObj& _value) : __parent( nullptr ) {
