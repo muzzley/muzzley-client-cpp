@@ -86,7 +86,7 @@ muzzley::Client::Client() :
 			return true;
 		}
 		if ((bool)_data["s"] == true) {
-			_client.__participant_id = (long) _data["d"]["participant"]["id"];
+			_client.__participant_id = (long long) _data["d"]["participant"]["id"];
 			_client.participantReady();
 			return true;
 		}
@@ -137,7 +137,7 @@ muzzley::Client::Client() :
 	this->on(muzzley::ParticipantQuit, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		if (!!_data["d"]["participantId"]) {
 			pthread_mutex_lock(_client.__mtx);
-			muzzley::ParticipantList::iterator _found = _client.__participants.find((long) _data["d"]["participantId"]);
+			muzzley::ParticipantList::iterator _found = _client.__participants.find((long long) _data["d"]["participantId"]);
 			if (_found != _client.__participants.end()) {
 				_client.__participants.erase(_found);
 			}
@@ -161,7 +161,7 @@ muzzley::Client::Client() :
 
 	this->on(muzzley::ParticipantJoined, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		if (!!_data["h"]["pid"] && !!_data["d"]) {
-			long _pid = (long) _data["h"]["pid"];
+			long long _pid = (long long) _data["h"]["pid"];
 
 			pthread_mutex_lock(_client.__mtx);
 			muzzley::ParticipantList::iterator _found = _client.__participants.find(_pid);
@@ -193,10 +193,10 @@ muzzley::Client::Client() :
 	this->on(muzzley::__INTERNAL_ParticipantJoined__, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		if (!!_data["d"]["participant"]["id"]) {
 			if (((string) _data["d"]["participant"]["deviceId"]) == _client.__device_id) {
-				_client.__participant_id = (long) _data["d"]["participant"]["id"];
+				_client.__participant_id = (long long) _data["d"]["participant"]["id"];
 			}
 			pthread_mutex_lock(_client.__mtx);
-			_client.__participants.insert(make_pair((long) _data["d"]["participant"]["id"], (string) _data["d"]));
+			_client.__participants.insert(make_pair((long long) _data["d"]["participant"]["id"], (string) _data["d"]));
 			pthread_mutex_unlock(_client.__mtx);
 
 			if (_client.isReplyNeeded(_data)) {
@@ -713,7 +713,7 @@ void muzzley::Client::initUser(string _user_token, string _activity_id) {
 				_client.__channel_id.assign((string) _data["d"]["join"]["channel"]["id"]);
 			}
 			if (!!_data["d"]["join"]["participant"]["id"]) {
-				_client.__participant_id = (long) _data["d"]["join"]["participant"]["id"];
+				_client.__participant_id = (long long) _data["d"]["join"]["participant"]["id"];
 				_client.participantReady();
 				muzzley::Message _d(JSON( "d" << (muzzley::JSONObj&) _data["d"]["join"]["participant"]));
 				_client.trigger(muzzley::ActivityJoined, _d);
@@ -913,14 +913,14 @@ void muzzley::Client::participantReady(muzzley::Callback _callback) {
 	this->write(_message, _callback);
 }
 
-void muzzley::Client::changeWidget(long _participant_id, string _widget, muzzley::Callback _callback) {
+void muzzley::Client::changeWidget(long long _participant_id, string _widget, muzzley::Callback _callback) {
 	muzzley::JSONObj _options;
 	_options <<
 		"widget" << _widget;
 	this->changeWidget(_participant_id, _options, _callback);
 }
 
-void muzzley::Client::changeWidget(long _participant_id, string _widget, muzzley::JSONObj& _params, muzzley::Callback _callback) {
+void muzzley::Client::changeWidget(long long _participant_id, string _widget, muzzley::JSONObj& _params, muzzley::Callback _callback) {
 	muzzley::JSONObj _options;
 	_options <<
 		"widget" << _widget <<
@@ -928,7 +928,7 @@ void muzzley::Client::changeWidget(long _participant_id, string _widget, muzzley
 	this->changeWidget(_participant_id, _options, _callback);
 }
 
-void muzzley::Client::changeWidget(long _participant_id, muzzley::JSONObj& _options, muzzley::Callback _callback) {
+void muzzley::Client::changeWidget(long long _participant_id, muzzley::JSONObj& _options, muzzley::Callback _callback) {
 	string _widget;
 	pthread_mutex_lock(this->__mtx);
 	bool _found = this->__participants.find(_participant_id) != this->__participants.end();
@@ -962,7 +962,7 @@ void muzzley::Client::changeWidget(long _participant_id, muzzley::JSONObj& _opti
 	this->write(_message, _callback);
 }
 
-void muzzley::Client::setupComponent(long _participant_id, string _component, string _component_id, string _action, muzzley::Callback _callback) {
+void muzzley::Client::setupComponent(long long _participant_id, string _component, string _component_id, string _action, muzzley::Callback _callback) {
 	pthread_mutex_lock(this->__mtx);
 	bool _found = this->__participants.find(_participant_id) != this->__participants.end();
 	pthread_mutex_unlock(this->__mtx);
@@ -999,7 +999,7 @@ void muzzley::Client::setupComponent(long _participant_id, string _component, st
 	this->write(_message, _callback);
 }
 
-void muzzley::Client::setupComponent(long _participant_id, string _component, string _component_id, string _action, muzzley::JSONObj& _options, muzzley::Callback _callback) {
+void muzzley::Client::setupComponent(long long _participant_id, string _component, string _component_id, string _action, muzzley::JSONObj& _options, muzzley::Callback _callback) {
 	pthread_mutex_lock(this->__mtx);
 	bool _found = this->__participants.find(_participant_id) != this->__participants.end();
 	pthread_mutex_unlock(this->__mtx);
@@ -1037,7 +1037,7 @@ void muzzley::Client::setupComponent(long _participant_id, string _component, st
 	this->write(_message, _callback);
 }
 
-void muzzley::Client::sendSignal(long _participant_id, string _type, muzzley::Callback _callback) {
+void muzzley::Client::sendSignal(long long _participant_id, string _type, muzzley::Callback _callback) {
 	pthread_mutex_lock(this->__mtx);
 	bool _found = this->__participants.find(_participant_id) != this->__participants.end();
 	pthread_mutex_unlock(this->__mtx);
@@ -1069,7 +1069,7 @@ void muzzley::Client::sendSignal(long _participant_id, string _type, muzzley::Ca
 	this->write(_message, _callback);
 }
 
-void muzzley::Client::sendSignal(long _participant_id, string _type, muzzley::JSONObj& _data, muzzley::Callback _callback) {
+void muzzley::Client::sendSignal(long long _participant_id, string _type, muzzley::JSONObj& _data, muzzley::Callback _callback) {
 	pthread_mutex_lock(this->__mtx);
 	bool _found = this->__participants.find(_participant_id) != this->__participants.end();
 	pthread_mutex_unlock(this->__mtx);
@@ -1354,7 +1354,7 @@ const string& muzzley::Client::getChannelId() const {
 	return __channel_id;
 }
 
-const long muzzley::Client::getParticipantId() const {
+const long long muzzley::Client::getParticipantId() const {
 	return __participant_id;
 }
 

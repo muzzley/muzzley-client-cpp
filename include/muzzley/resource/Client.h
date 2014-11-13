@@ -128,7 +128,7 @@ namespace muzzley {
 	typedef std::function<bool(muzzley::Message&, muzzley::Client&)> Handler;
 	typedef Handler Callback;
 	typedef map<int, pair<string, Callback> > CallbackQueue;
-	typedef map<long, string> ParticipantList;
+	typedef map<long long, string> ParticipantList;
 	typedef map< string, Callback > SubscriptionStack;
 	typedef map< string, vector < string > > SubscriptionChannels;
 
@@ -159,14 +159,14 @@ namespace muzzley {
 		virtual void participantQuit();
 
 		virtual void participantReady(muzzley::Callback _callback = nullptr);
-		virtual void changeWidget(long _participant_id, string _widget, muzzley::Callback _callback = nullptr);
-		virtual void changeWidget(long _participant_id, string _widget, muzzley::JSONObj& _params, muzzley::Callback _callback = nullptr);
-		virtual void changeWidget(long _participant_id, muzzley::JSONObj& _options, muzzley::Callback _callback);
-		virtual void setupComponent(long _participant_id, string _component, string _component_id, string _action, muzzley::Callback _callback = nullptr);
-		virtual void setupComponent(long _participant_id, string _component, string _component_id, string _action, muzzley::JSONObj& _options, muzzley::Callback _callback = nullptr);
+		virtual void changeWidget(long long _participant_id, string _widget, muzzley::Callback _callback = nullptr);
+		virtual void changeWidget(long long _participant_id, string _widget, muzzley::JSONObj& _params, muzzley::Callback _callback = nullptr);
+		virtual void changeWidget(long long _participant_id, muzzley::JSONObj& _options, muzzley::Callback _callback);
+		virtual void setupComponent(long long _participant_id, string _component, string _component_id, string _action, muzzley::Callback _callback = nullptr);
+		virtual void setupComponent(long long _participant_id, string _component, string _component_id, string _action, muzzley::JSONObj& _options, muzzley::Callback _callback = nullptr);
 
-		virtual void sendSignal(long _participant_id, string _type, muzzley::Callback _callback = nullptr);
-		virtual void sendSignal(long _participant_id, string _type, muzzley::JSONObj& _data, muzzley::Callback _callback = nullptr);
+		virtual void sendSignal(long long _participant_id, string _type, muzzley::Callback _callback = nullptr);
+		virtual void sendSignal(long long _participant_id, string _type, muzzley::JSONObj& _data, muzzley::Callback _callback = nullptr);
 		virtual void sendSignal(string _type, muzzley::Callback _callback = nullptr);
 		virtual void sendSignal(string _type, muzzley::JSONObj& _data, muzzley::Callback _callback = nullptr);
 
@@ -186,7 +186,7 @@ namespace muzzley {
 		const string& getDeviceId() const;
 		const string& getSessionId() const;
 		const string& getChannelId() const;
-		const long getParticipantId() const;
+		const long long getParticipantId() const;
 		const ParticipantList& getParticipants() const;
 
 		bool isReplyNeeded(muzzley::Message& _data_received) const;
@@ -214,7 +214,7 @@ namespace muzzley {
 		string __session_id;
 		string __device_id;
 		string __channel_id;
-		long __participant_id;
+		long long __participant_id;
 
 		muzzley::socketstream __channel;
 
