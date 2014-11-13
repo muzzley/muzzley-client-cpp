@@ -368,17 +368,12 @@ bool muzzley::Client::read() {
 	unsigned char _hdr;
 	this->__channel >> noskipws >> _hdr;
 
-	//cout << "bit 1: "; muzzley::printbits(_hdr);
-
 	bool _fin = _hdr & 0x80;
 	this->__op_code = _hdr & 0x0F;
 	this->__channel >> noskipws >> _hdr;
 	bool _mask = _hdr & 0x80;
 
-	//cout << "bit 2: "; muzzley::printbits(_hdr);
-
 	int _len = _hdr & 0x7F;
-	//cout << "len: " << _len << endl << flush;
 	if (_len == 126) {
 		this->__channel >> noskipws >> _hdr;
 		_len = (int) _hdr;
@@ -403,7 +398,6 @@ bool muzzley::Client::read() {
 	}
 
 	for (int _i = 0; _i != _len; _i++) {
-		//cout << "step: " << _i << endl << flush;
 		this->__channel >> noskipws >> _hdr;
 		this->__message.push_back((char) _hdr);
 	}

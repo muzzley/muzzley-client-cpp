@@ -70,10 +70,10 @@ namespace muzzley {
 			void set_socket(int _sock) {
 				this->__sock = _sock;
 
-//				int _opts = fcntl(this->__sock, F_GETFL);
-//				_opts = _opts & ~O_NONBLOCK;
-//				if (fcntl(this->__sock, F_SETFL, _opts) < 0) {
-//				}
+				int _opts = fcntl(this->__sock, F_GETFL);
+				_opts = _opts & ~O_NONBLOCK;
+				if (fcntl(this->__sock, F_SETFL, _opts) < 0) {
+				}
 			}
 			int get_socket() {
 				return this->__sock;
