@@ -25,7 +25,7 @@
 #include <muzzley/log/log.h>
 
 muzzley::Client::Client() :
-	__serial(1),  __endpoint_host("platform.office.muzzley.com") {
+	__serial(1),  __endpoint_host("geoplatform.muzzley.com") {
 	this->__mtx = new pthread_mutex_t();
 	this->__thr = new pthread_t();
 	pthread_mutexattr_init(&this->__attr);
@@ -253,7 +253,6 @@ muzzley::Client::~Client() {
 	pthread_exit(nullptr);
 }
 
-#if __cplusplus >= 201103L
 void muzzley::Client::on(muzzley::EventType _type, muzzley::Handler _handler) {
 	this->__handlers[_type].push_back(_handler);
 }
@@ -283,8 +282,6 @@ void muzzley::Client::trigger(muzzley::EventType _type, muzzley::Subscription& _
 	assertz(_type == muzzley::Publish, "the '_type' parameter must be muzzley::Publish", 500, 300);
 	this->publish(_to_property, _payload, _callback);
 }
-
-#endif
 
 bool muzzley::Client::connect(string _host, uint16_t _port, string _path) {
 	string _message("GET ");
@@ -326,8 +323,15 @@ bool muzzley::Client::connect(string _host, uint16_t _port, string _path) {
 	this->__channel << _message << flush;
 
 	string _reply;
+#ifdef MUZZLEY_DEBUG
+	string _change_protocol;
+#endif
 	do {
 		getline(this->__channel, _reply);
+#ifdef MUZZLEY_DEBUG
+		_change_protocol.insert(_change_protocol.length(), _reply);
+		_change_protocol.insert(_change_protocol.length(), "\n");
+#endif
 		muzzley::trim(_reply);
 	}
 	while (_reply != "");
@@ -335,6 +339,7 @@ bool muzzley::Client::connect(string _host, uint16_t _port, string _path) {
 	{
 		string _log("received WebSocket handshake");
 		muzzley::log(_log, muzzley::sys);
+		cout << _change_protocol << endl << flush;
 	}
 #endif
 

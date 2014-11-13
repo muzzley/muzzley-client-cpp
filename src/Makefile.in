@@ -141,6 +141,7 @@ am_libmuzzley_la_OBJECTS = ./base/libmuzzley_la-assert.lo \
 	./text/libmuzzley_la-manip.lo ./text/libmuzzley_la-url.lo \
 	./text/libmuzzley_la-convert.lo ./text/libmuzzley_la-base64.lo \
 	./stream/libmuzzley_la-SocketStreams.lo \
+	./stream/libmuzzley_la-WebSocket.lo \
 	./resource/libmuzzley_la-Client.lo \
 	./json/libmuzzley_la-JSONObj.lo
 libmuzzley_la_OBJECTS = $(am_libmuzzley_la_OBJECTS)
@@ -340,7 +341,7 @@ lib_LTLIBRARIES = libmuzzley.la
 libmuzzley_la_LIBADD = -lpthread
 libmuzzley_la_LDFLAGS = -version-info 0:2:0
 libmuzzley_la_CPPFLAGS = -std=c++0x -I../include
-libmuzzley_la_SOURCES = ./base/assert.cpp ./log/log.cpp ./exceptions/InterruptedException.cpp ./exceptions/CastException.cpp ./exceptions/ParserEOF.cpp ./exceptions/ClosedException.cpp ./exceptions/AssertionException.cpp ./exceptions/NoAttributeNameException.cpp ./exceptions/SyntaxErrorException.cpp ./parsers/JSONLexer.cpp ./parsers/json.cpp ./parsers/JSONTokenizer.cpp ./parsers/JSONTokenizerLexer.cpp ./parsers/JSONParser.cpp ./text/ascii.cpp ./text/utf8.cpp ./text/manip.cpp ./text/url.cpp ./text/convert.cpp ./text/base64.cpp ./stream/SocketStreams.cpp ./resource/Client.cpp ./json/JSONObj.cpp 
+libmuzzley_la_SOURCES = ./base/assert.cpp ./log/log.cpp ./exceptions/InterruptedException.cpp ./exceptions/CastException.cpp ./exceptions/ParserEOF.cpp ./exceptions/ClosedException.cpp ./exceptions/AssertionException.cpp ./exceptions/NoAttributeNameException.cpp ./exceptions/SyntaxErrorException.cpp ./parsers/JSONLexer.cpp ./parsers/json.cpp ./parsers/JSONTokenizer.cpp ./parsers/JSONTokenizerLexer.cpp ./parsers/JSONParser.cpp ./text/ascii.cpp ./text/utf8.cpp ./text/manip.cpp ./text/url.cpp ./text/convert.cpp ./text/base64.cpp ./stream/SocketStreams.cpp ./stream/WebSocket.cpp ./resource/Client.cpp ./json/JSONObj.cpp 
 all: all-am
 
 .SUFFIXES:
@@ -494,6 +495,8 @@ stream/$(DEPDIR)/$(am__dirstamp):
 	@: > stream/$(DEPDIR)/$(am__dirstamp)
 ./stream/libmuzzley_la-SocketStreams.lo: stream/$(am__dirstamp) \
 	stream/$(DEPDIR)/$(am__dirstamp)
+./stream/libmuzzley_la-WebSocket.lo: stream/$(am__dirstamp) \
+	stream/$(DEPDIR)/$(am__dirstamp)
 resource/$(am__dirstamp):
 	@$(MKDIR_P) ./resource
 	@: > resource/$(am__dirstamp)
@@ -553,6 +556,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./parsers/$(DEPDIR)/libmuzzley_la-json.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./resource/$(DEPDIR)/libmuzzley_la-Client.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./stream/$(DEPDIR)/libmuzzley_la-SocketStreams.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./stream/$(DEPDIR)/libmuzzley_la-WebSocket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./text/$(DEPDIR)/libmuzzley_la-ascii.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./text/$(DEPDIR)/libmuzzley_la-base64.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./text/$(DEPDIR)/libmuzzley_la-convert.Plo@am__quote@
@@ -730,6 +734,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='./stream/SocketStreams.cpp' object='./stream/libmuzzley_la-SocketStreams.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ./stream/libmuzzley_la-SocketStreams.lo `test -f './stream/SocketStreams.cpp' || echo '$(srcdir)/'`./stream/SocketStreams.cpp
+
+./stream/libmuzzley_la-WebSocket.lo: ./stream/WebSocket.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./stream/libmuzzley_la-WebSocket.lo -MD -MP -MF ./stream/$(DEPDIR)/libmuzzley_la-WebSocket.Tpo -c -o ./stream/libmuzzley_la-WebSocket.lo `test -f './stream/WebSocket.cpp' || echo '$(srcdir)/'`./stream/WebSocket.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ./stream/$(DEPDIR)/libmuzzley_la-WebSocket.Tpo ./stream/$(DEPDIR)/libmuzzley_la-WebSocket.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='./stream/WebSocket.cpp' object='./stream/libmuzzley_la-WebSocket.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ./stream/libmuzzley_la-WebSocket.lo `test -f './stream/WebSocket.cpp' || echo '$(srcdir)/'`./stream/WebSocket.cpp
 
 ./resource/libmuzzley_la-Client.lo: ./resource/Client.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmuzzley_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ./resource/libmuzzley_la-Client.lo -MD -MP -MF ./resource/$(DEPDIR)/libmuzzley_la-Client.Tpo -c -o ./resource/libmuzzley_la-Client.lo `test -f './resource/Client.cpp' || echo '$(srcdir)/'`./resource/Client.cpp
