@@ -30,7 +30,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #define DEBUG 1
 
-#define APP_TOKEN "muzzlionaire" // Get yours at muzzley.com
+#define APP_TOKEN "asjdhf8uy8aoqweo8u2o3" // Get yours at muzzley.com
 #define STATIC_ACTIVITY_ID ""        // Optional.
 
 #include <signal.h>
