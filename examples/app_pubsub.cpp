@@ -30,7 +30,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #define DEBUG 1
 
-#define APP_TOKEN "muzzlionaire" // Get yours at muzzley.com
+#define APP_TOKEN "sd789fya9sdfho8apso988" // Get yours at muzzley.com
 #define STATIC_ACTIVITY_ID ""        // Optional.
 
 #include <signal.h>
@@ -99,8 +99,6 @@ int main(int argc, char* argv[]) {
 		});
 		return true;
 	});
-
-	_client.setEndpointHost("platform.office.muzzley.com");
 
 	// Connects the application to the Muzzley server, using the one-step-initialization process.
 	//
