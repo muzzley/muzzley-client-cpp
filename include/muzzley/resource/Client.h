@@ -177,6 +177,7 @@ namespace muzzley {
 		virtual void reconnect();
 		virtual bool read();
 		virtual bool write(muzzley::Message& _data, muzzley::Callback _callback = nullptr);
+		virtual bool write(string& _to_send);
 		virtual bool reply(muzzley::Message& _data_received, muzzley::Message& _reply);
 
 		void setLoopAssynchronous(bool _assync);

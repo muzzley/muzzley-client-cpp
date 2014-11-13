@@ -422,6 +422,10 @@ bool muzzley::Client::write(muzzley::Message& _message, muzzley::Callback _callb
 
 	string _to_send;
 	muzzley::tostr(_to_send, _message);
+	return this->write(_to_send);
+}
+
+bool muzzley::Client::write(string& _to_send) {
 	int _len = _to_send.length();
 
 	this->__channel << (unsigned char) 0x81;
@@ -1517,6 +1521,7 @@ void muzzley::Client::run() {
 
 			if (this->read()) {
 				if (this->__message == "h") {
+					this->write(this->__message);
 					this->__message.clear();
 					continue;
 				}

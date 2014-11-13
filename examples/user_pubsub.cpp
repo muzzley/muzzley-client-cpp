@@ -80,6 +80,8 @@ int main(int argc, char* argv[]) {
 		return true;
 	});
 
+	_client.setEndpointHost("platform.office.muzzley.com");	
+
 	// Connects the application to the Muzzley server, using the one-step-initialization process.
 	//
 	// Assuming that the program receives the activityId as argument.
