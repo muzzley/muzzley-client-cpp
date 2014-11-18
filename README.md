@@ -206,7 +206,7 @@ int main(int argc, char* argv[]) {
   //
   // It will start the application loop synchronously,
   // i.e. the program will not execute anything below this line.
-  _client.initApp("YOUR-APP-TOKEN-HERE");
+  _client.connectApp("YOUR-APP-TOKEN-HERE");
 
   return 0;
 }
