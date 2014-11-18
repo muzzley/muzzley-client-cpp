@@ -37,7 +37,7 @@ namespace muzzley {
 			NoAttributeNameException(string _what);
 			virtual ~NoAttributeNameException() throw();
 
-			const char* what();
+			virtual const char* what() const throw();
 	};
 
 }

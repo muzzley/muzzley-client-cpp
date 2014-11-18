@@ -585,20 +585,14 @@ void muzzley::Client::loginUser(string _user_token) {
 	this->write(_message);
 }
 
-void muzzley::Client::initApp(string _app_token, string _activity_id) {
+void muzzley::Client::initApp(string _app_token) {
 	this->__app_token.assign(_app_token.data());
-	this->__activity_id.assign(_activity_id.data());
-	this->__is_static_activity = _activity_id.length() != 0;
+	this->__is_static_activity = false;
 	this->__is_one_step_initialization = true;
 	if (this->connect(this->__endpoint_host, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
 		this->__is_connected = true;
 		muzzley::Callback _callback = [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 			if ((bool) _data["s"] == false) {
-				if (!!_data["d"]["connectTo"]) {
-					_client.disconnect();
-					_client.__endpoint_host.assign((string) _data["d"]["connectTo"]);
-					_client.initApp(_client.__app_token, _client.__activity_id);
-				}
 				return false;
 			}
 			_client.__has_handshake = true;
@@ -641,9 +635,6 @@ void muzzley::Client::initApp(string _app_token, string _activity_id) {
 				) <<
 				"loginApp" << JSON(
 					"token" << _app_token
-				) <<
-				"create" << JSON(
-					"activityId" << _activity_id
 				)
 			)
 		));
@@ -673,21 +664,14 @@ void muzzley::Client::initApp(string _app_token, string _activity_id) {
 	}
 }
 
-void muzzley::Client::initUser(string _user_token, string _activity_id) {
-	assertz(_activity_id.length() != 0, "when connecting a user, the '_activity_id' parameter must be instantiated with a non-empty string", 500, 100);
+void muzzley::Client::initUser(string _user_token) {
 	this->__user_token.assign(_user_token.data());
-	this->__activity_id.assign(_activity_id.data());
-	this->__is_static_activity = _activity_id.length() != 0;
+	this->__is_static_activity = false;
 	this->__is_one_step_initialization = true;
 	if (this->connect(this->__endpoint_host, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
 		this->__is_connected = true;
 		muzzley::Callback _callback = [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 			if ((bool) _data["s"] == false) {
-				if (!!_data["d"]["connectTo"]) {
-					_client.disconnect();
-					_client.__endpoint_host.assign((string) _data["d"]["connectTo"]);
-					_client.initUser(_client.__user_token, _client.__activity_id);
-				}
 				return false;
 			}
 			_client.__has_handshake = true;
@@ -730,9 +714,6 @@ void muzzley::Client::initUser(string _user_token, string _activity_id) {
 				) <<
 				"loginUser" << JSON(
 					"token" << _user_token
-				) <<
-				"join" << JSON(
-					"activityId" << _activity_id
 				)
 			)
 		));
@@ -763,6 +744,7 @@ void muzzley::Client::initUser(string _user_token, string _activity_id) {
 }
 
 void muzzley::Client::createActivity(string _activity_id) {
+	assertz(!this->__is_one_step_initialization, "can not create an activity after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	assertz(this->__is_app_loggedin, "activity can only be created by Activity Master, you must be logged in as as app (use connectApp method).", 500, 101);
 
 	muzzley::Message _message(JSON(
@@ -799,6 +781,7 @@ void muzzley::Client::createActivity(string _activity_id) {
 }
 
 void muzzley::Client::joinActivity(string _activity_id) {
+	assertz(!this->__is_one_step_initialization, "can not join an activity after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	assertz(_activity_id.length() != 0 || (_activity_id.length() == 0 && this->__activity_id.length() != 0), "an activityId must be provided, either in joinActivity, connectApp or connectUser method invocations", 500, 103);
 	assertz(this->__is_user_loggedin, "joinActivity can only be invoked by a user", 500, 106);
 
@@ -836,6 +819,7 @@ void muzzley::Client::joinActivity(string _activity_id) {
 
 
 void muzzley::Client::quit() {
+	assertz(!this->__is_one_step_initialization, "can not quit an activity after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	assertz(this->__is_initiating_master, "quit can only be invoked by the initiating Activity Master, you must create the activity before quiting (use createActivity method) or use participantQuit method instead.", 500, 102);
 
 	muzzley::Message _message(JSON(
@@ -858,6 +842,7 @@ void muzzley::Client::quit() {
 }
 
 void muzzley::Client::participantQuit() {
+	assertz(!this->__is_one_step_initialization, "can not quit an activity after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	assertz(this->__participant_id != -1, "in order to quit you must have joined first (use joinActivity method)", 500, 105);
 
 	muzzley::Message _message(JSON(
@@ -883,6 +868,7 @@ void muzzley::Client::participantQuit() {
 }
 
 void muzzley::Client::participantReady(muzzley::Callback _callback) {
+	assertz(!this->__is_one_step_initialization, "can not ready a participant after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	assertz(this->__participant_id != -1, "in order to be ready you must have joined first (use joinActivity method)", 500, 106);
 
 	muzzley::Message _message(JSON(
@@ -908,6 +894,7 @@ void muzzley::Client::participantReady(muzzley::Callback _callback) {
 }
 
 void muzzley::Client::changeWidget(long long _participant_id, string _widget, muzzley::Callback _callback) {
+	assertz(!this->__is_one_step_initialization, "can not change widget after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	muzzley::JSONObj _options;
 	_options <<
 		"widget" << _widget;
@@ -915,6 +902,7 @@ void muzzley::Client::changeWidget(long long _participant_id, string _widget, mu
 }
 
 void muzzley::Client::changeWidget(long long _participant_id, string _widget, muzzley::JSONObj& _params, muzzley::Callback _callback) {
+	assertz(!this->__is_one_step_initialization, "can not change widget after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	muzzley::JSONObj _options;
 	_options <<
 		"widget" << _widget <<
@@ -923,6 +911,7 @@ void muzzley::Client::changeWidget(long long _participant_id, string _widget, mu
 }
 
 void muzzley::Client::changeWidget(long long _participant_id, muzzley::JSONObj& _options, muzzley::Callback _callback) {
+	assertz(!this->__is_one_step_initialization, "can not change widget after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	string _widget;
 	pthread_mutex_lock(this->__mtx);
 	bool _found = this->__participants.find(_participant_id) != this->__participants.end();
@@ -957,6 +946,7 @@ void muzzley::Client::changeWidget(long long _participant_id, muzzley::JSONObj& 
 }
 
 void muzzley::Client::setupComponent(long long _participant_id, string _component, string _component_id, string _action, muzzley::Callback _callback) {
+	assertz(!this->__is_one_step_initialization, "can not setup component after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	pthread_mutex_lock(this->__mtx);
 	bool _found = this->__participants.find(_participant_id) != this->__participants.end();
 	pthread_mutex_unlock(this->__mtx);
@@ -994,6 +984,7 @@ void muzzley::Client::setupComponent(long long _participant_id, string _componen
 }
 
 void muzzley::Client::setupComponent(long long _participant_id, string _component, string _component_id, string _action, muzzley::JSONObj& _options, muzzley::Callback _callback) {
+	assertz(!this->__is_one_step_initialization, "can not setup component after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	pthread_mutex_lock(this->__mtx);
 	bool _found = this->__participants.find(_participant_id) != this->__participants.end();
 	pthread_mutex_unlock(this->__mtx);
@@ -1032,6 +1023,7 @@ void muzzley::Client::setupComponent(long long _participant_id, string _componen
 }
 
 void muzzley::Client::sendSignal(long long _participant_id, string _type, muzzley::Callback _callback) {
+	assertz(!this->__is_one_step_initialization, "can not send signal after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	pthread_mutex_lock(this->__mtx);
 	bool _found = this->__participants.find(_participant_id) != this->__participants.end();
 	pthread_mutex_unlock(this->__mtx);
@@ -1064,6 +1056,7 @@ void muzzley::Client::sendSignal(long long _participant_id, string _type, muzzle
 }
 
 void muzzley::Client::sendSignal(long long _participant_id, string _type, muzzley::JSONObj& _data, muzzley::Callback _callback) {
+	assertz(!this->__is_one_step_initialization, "can not send signal after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	pthread_mutex_lock(this->__mtx);
 	bool _found = this->__participants.find(_participant_id) != this->__participants.end();
 	pthread_mutex_unlock(this->__mtx);
@@ -1097,6 +1090,7 @@ void muzzley::Client::sendSignal(long long _participant_id, string _type, muzzle
 }
 
 void muzzley::Client::sendSignal(string _type, muzzley::Callback _callback) {
+	assertz(!this->__is_one_step_initialization, "can not send signal after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
@@ -1120,6 +1114,7 @@ void muzzley::Client::sendSignal(string _type, muzzley::Callback _callback) {
 }
 
 void muzzley::Client::sendSignal(string _type, muzzley::JSONObj& _data, muzzley::Callback _callback) {
+	assertz(!this->__is_one_step_initialization, "can not send signal after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"cid" << this->__serial <<
@@ -1144,6 +1139,7 @@ void muzzley::Client::sendSignal(string _type, muzzley::JSONObj& _data, muzzley:
 }
 
 void muzzley::Client::sendWidgetData(string _widget, string _component, string _event_type, string _event_value) {
+	assertz(!this->__is_one_step_initialization, "can not send signal after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"t" << 5
@@ -1170,6 +1166,7 @@ void muzzley::Client::sendWidgetData(string _widget, string _component, string _
 
 
 void muzzley::Client::subscribe(muzzley::Subscription& _to_property, muzzley::Callback _callback) {
+	assertz(this->__is_one_step_initialization, "can not subscribe after invoking 'connectUser/connectApp' since it initializes protocol version 1.2 (signaling communication pattern).", 500, 101);
 	assertz(!!_to_property["namespace"], "field 'namespace' must be included in '_to_property' parameter (e.g., _to_proprety << \"namespace\" << \"iot\").", 500, 200);
 	assertz(!!_to_property["profile"], "field 'profile' must be included in '_to_property' parameter (e.g., _to_proprety << \"profile\" << \"internal-profile-id\").", 500, 201);
 	assertz(!!_to_property["channel"], "field 'channel' must be included in '_to_property' parameter (e.g., _to_proprety << \"channel\" << \"remote-channel-id\").", 500, 202);
@@ -1226,6 +1223,7 @@ void muzzley::Client::subscribe(muzzley::Subscription& _to_property, muzzley::Ca
 }
 
 void muzzley::Client::unsubscribe(muzzley::Subscription& _to_property) {
+	assertz(this->__is_one_step_initialization, "can not publish after invoking 'connectUser/connectApp' since it initializes protocol version 1.2 (signaling communication pattern).", 500, 101);
 	assertz(!!_to_property["namespace"], "field 'namespace' must be included in '_to_property' parameter (e.g., _to_proprety << \"namespace\" << \"iot\").", 500, 200);
 	assertz(!!_to_property["profile"], "field 'profile' must be included in '_to_property' parameter (e.g., _to_proprety << \"profile\" << \"internal-profile-id\").", 500, 201);
 	assertz(!!_to_property["channel"], "field 'channel' must be included in '_to_property' parameter (e.g., _to_proprety << \"channel\" << \"remote-channel-id\").", 500, 202);
@@ -1286,6 +1284,7 @@ void muzzley::Client::unsubscribe(muzzley::Subscription& _to_property) {
 }
 
 void muzzley::Client::publish(muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback) {
+	assertz(this->__is_one_step_initialization, "can not publish after invoking 'connectUser/connectApp' since it initializes protocol version 1.2 (signaling communication pattern).", 500, 101);
 	assertz(!!_to_property["namespace"], "field 'namespace' must be included in '_to_property' parameter (e.g., _to_proprety << \"namespace\" << \"iot\").", 500, 200);
 	assertz(!!_to_property["profile"], "field 'profile' must be included in '_to_property' parameter (e.g., _to_proprety << \"profile\" << \"internal-profile-id\").", 500, 201);
 	assertz(!!_to_property["channel"], "field 'channel' must be included in '_to_property' parameter (e.g., _to_proprety << \"channel\" << \"remote-channel-id\").", 500, 202);
@@ -1563,6 +1562,7 @@ void muzzley::Client::run() {
 				muzzley::log(_log, muzzley::error);
 			}
 #endif
+			throw e;
 		}
 	}
 }

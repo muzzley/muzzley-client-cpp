@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
 	//
 	// It will start the application loop synchronously,
 	// i.e. the program will not execute anything below this line.
-	_client.initApp(APP_TOKEN, STATIC_ACTIVITY_ID);
+	_client.connectApp(APP_TOKEN, STATIC_ACTIVITY_ID);
 
 	return 0;
 }

@@ -25,6 +25,6 @@ muzzley::NoAttributeNameException::NoAttributeNameException(string _in) : __what
 muzzley::NoAttributeNameException::~NoAttributeNameException() throw() {
 }
 
-const char* muzzley::NoAttributeNameException::what() {
+const char* muzzley::NoAttributeNameException::what() const throw() {
 	return this->__what.data();
 }

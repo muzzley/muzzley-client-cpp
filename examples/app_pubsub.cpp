@@ -28,10 +28,7 @@ PERFORMANCE OF THIS SOFTWARE.
 // written to the screen.
 //
 
-#define DEBUG 1
-
-#define APP_TOKEN "sd789fya9sdfho8apso988" // Get yours at muzzley.com
-#define STATIC_ACTIVITY_ID ""        // Optional.
+#define APP_TOKEN "c1bc8d7d6bc38873" // Get yours at muzzley.com
 
 #include <signal.h>
 #include <unistd.h>
@@ -56,9 +53,8 @@ int main(int argc, char* argv[]) {
 	// access it through the 'getActivityId' method.
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::ActivityCreated, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-		cout << "Activity created with id " << (string) _data["d"]["activityId"] << endl << flush;
-		cout << "You can now pair your smartphone, using the muzzley app, to the activity id " << (string) _data["d"]["activityId"] << endl << flush;
+	_client.on(muzzley::AppLoggedIn, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+		cout << "App logged in with created with session id " << (string) _data["d"]["sessionId"] << endl << flush;
 
 		muzzley::Subscription _s1;
 		_s1.setNamespace("iot");
@@ -104,7 +100,7 @@ int main(int argc, char* argv[]) {
 	//
 	// It will start the application loop synchronously,
 	// i.e. the program will not execute anything below this line.
-	_client.initApp(APP_TOKEN, STATIC_ACTIVITY_ID);
+	_client.initApp(APP_TOKEN);
 
 	return 0;
 }

@@ -37,7 +37,7 @@ namespace muzzley {
 			CastException(string _what);
 			virtual ~CastException() throw();
 
-			const char* what();
+			virtual const char* what() const throw();
 	};
 
 }

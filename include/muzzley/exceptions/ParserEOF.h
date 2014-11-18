@@ -37,7 +37,7 @@ namespace muzzley {
 			ParserEOF(string _what);
 			virtual ~ParserEOF() throw();
 
-			const char* what();
+			virtual const char* what() const throw();
 	};
 
 }

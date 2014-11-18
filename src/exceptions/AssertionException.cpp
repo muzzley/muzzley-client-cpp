@@ -33,7 +33,7 @@ muzzley::AssertionException::AssertionException(string _in, int _http_code, int 
 muzzley::AssertionException::~AssertionException() throw() {
 }
 
-const char* muzzley::AssertionException::what() {
+const char* muzzley::AssertionException::what() const throw() {
 	return this->__what.data();
 }
 

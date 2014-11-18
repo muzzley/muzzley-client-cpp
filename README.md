@@ -9,10 +9,11 @@ This library depends on:
 - GCC 4.5+
 - pthread
 - autotools
+- libtool
 
 # VERSIONING
 
-Current version: [0.0.2][changelog]
+Current version: [0.0.2][changelog] - ***Please read since this version contains breaking changes***
 
 # INSTALL
 
@@ -347,6 +348,17 @@ This class aggregates a set of methods that will allow the interaction between y
 
 This class methods are organized in the following way:
 
+#### Connection & Authentication
+
+    // Intialiazition of the protocol version 1.2
+    // Only need to provide `_activity_id` when using a static activity token as configured at muzzley.com
+    virtual void connectApp(string _app_token, string _activity_id = "");
+    virtual void connectUser(string _user_token, string _activity_id);
+
+    // Intialiazition of the protocol version 2.0
+    virtual void initApp(string _app_token);
+    virtual void initUser(string _user_token);
+
 ### Event registering
 
     virtual void on(muzzley::EventType _type, muzzley::Handler _handler) final;
@@ -362,15 +374,6 @@ This class methods are organized in the following way:
 ### Message Handling
 
     virtual bool reply(muzzley::Message& _data_received, muzzley::Message& _reply) final;
-
-### Protocol performatives
-
-#### Connection & Authentication
-
-    // Only need to provide `_activity_id` when using a static activity token as configured at muzzley.com
-    virtual void initApp(string _app_token, string _activity_id = "");
-
-    virtual void initUser(string _user_token, string _activity_id);
 
 #### Activity
 

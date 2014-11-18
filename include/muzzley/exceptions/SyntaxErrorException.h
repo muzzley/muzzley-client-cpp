@@ -37,7 +37,7 @@ namespace muzzley {
 			SyntaxErrorException(string _what);
 			virtual ~SyntaxErrorException() throw();
 
-			const char* what();
+			virtual const char* what() const throw();
 	};
 
 }

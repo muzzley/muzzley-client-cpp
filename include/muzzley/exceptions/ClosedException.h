@@ -37,7 +37,7 @@ namespace muzzley {
 			ClosedException(string _what);
 			virtual ~ClosedException() throw();
 
-			const char* what();
+			virtual const char* what() const throw();
 	};
 
 }

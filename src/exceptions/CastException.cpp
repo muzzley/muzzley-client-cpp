@@ -25,6 +25,6 @@ muzzley::CastException::CastException(string _in) : __what(_in){
 muzzley::CastException::~CastException() throw() {
 }
 
-const char* muzzley::CastException::what() {
+const char* muzzley::CastException::what() const throw() {
 	return this->__what.data();
 }

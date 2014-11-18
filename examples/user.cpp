@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
 	//
 	// It will start the application loop synchronously,
 	// i.e. the program will not execute anything below this line.
-	_client.initUser("guest", string(argv[1]));
+	_client.connectUser("guest", string(argv[1]));
 
 	return 0;
 }

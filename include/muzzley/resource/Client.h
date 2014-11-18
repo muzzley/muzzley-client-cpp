@@ -150,8 +150,8 @@ namespace muzzley {
 		virtual void connectUser(string _user_token, string _activity_id);
 		virtual void loginApp(string _app_token);
 		virtual void loginUser(string _user_token);
-		virtual void initApp(string _app_token, string _activity_id);
-		virtual void initUser(string _user_token, string _activity_id);
+		virtual void initApp(string _app_token);
+		virtual void initUser(string _user_token);
 
 		virtual void createActivity(string _activity_id = "");
 		virtual void joinActivity(string _activity_id = "");

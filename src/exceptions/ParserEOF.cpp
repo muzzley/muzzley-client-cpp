@@ -25,6 +25,6 @@ muzzley::ParserEOF::ParserEOF(string _in) : __what(_in){
 muzzley::ParserEOF::~ParserEOF() throw() {
 }
 
-const char* muzzley::ParserEOF::what() {
+const char* muzzley::ParserEOF::what() const throw() {
 	return this->__what.data();
 }

@@ -25,6 +25,6 @@ muzzley::SyntaxErrorException::SyntaxErrorException(string _in) : __what(_in){
 muzzley::SyntaxErrorException::~SyntaxErrorException() throw() {
 }
 
-const char* muzzley::SyntaxErrorException::what() {
+const char* muzzley::SyntaxErrorException::what() const throw() {
 	return this->__what.data();
 }

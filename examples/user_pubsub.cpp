@@ -47,8 +47,7 @@ int main(int argc, char* argv[]) {
 	// Register listener to be invoked when user succesfully joins the activity.
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::ActivityJoined, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
-		cout << "User joined activity. Assigned device Id: " << _client.getDeviceId() << endl << flush;
+	_client.on(muzzley::UserLoggedIn, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		// _client.sendWidgetData("xpto", "a", "some", "value");
 
 		muzzley::Subscription _s1;
@@ -86,7 +85,7 @@ int main(int argc, char* argv[]) {
 	//
 	// It will start the application loop synchronously,
 	// i.e. the program will not execute anything below this line.
-	_client.initUser("guest", string(argv[1]));
+	_client.initUser("guest");
 
 	return 0;
 }

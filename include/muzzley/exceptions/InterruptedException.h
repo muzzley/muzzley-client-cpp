@@ -37,7 +37,7 @@ namespace muzzley {
 			InterruptedException(string _what);
 			virtual ~InterruptedException() throw();
 
-			const char* what();
+			virtual const char* what() const throw();
 	};
 
 }
