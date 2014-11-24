@@ -646,20 +646,46 @@ using namespace __gnu_cxx;
 
 int main(int argc, char* argv[]) {
 
-      muzzley::sslsocketstream _ssl;
-      _ssl.open("api.muzzley.com", 443);
+  // Instantiate an HTTP(s) socket stream
+  muzzley::sslsocketstream _ssl;
+  // connect to server with muzzley::sslsocketstream::open(host, port)
+  _ssl.open("api.muzzley.com", 443);
 
-      muzzley::HTTPReq _req;
-      _req->method(muzzley::HTTPGet);
-      _req->header("Host", "api.muzzley.com");
-      _req->url("/");
-      _ssl << _req << flush;
+  // Instantiate an HTTP request object
+  muzzley::HTTPReq _req;
+  // set HTTP request method
+  _req->method(muzzley::HTTPPost);
 
-      muzzley::HTTPRep _rep;
-      _ssl >> _rep;
-      if (_rep->status() == muzzley::HTTP200) {
-        cout << "Received a reply with a " << _rep->header("Content-Length") << " bytes of body length" << endl << flush;
-      }
+  // set HTTP request server path
+  _req->url("/");
+
+  // Instantiate a string with some body part
+  string _body_part("{ \"name\" : \"HTTP Client\", id : 1 }");
+
+  // set HTTP "Host" header
+  _req->header("Host", "api.muzzley.com");
+  // set HTTP "Content-Type" header
+  _req->header("Content-Type", "application/json");
+  // set HTTP "Content-Length" header
+  _req->header("Content-Length", std::to_string(_body_part.length()));
+
+  // set the message body
+  _req->body(_body_part);
+
+  // Send the message
+  _ssl << _req << flush;
+
+  // Instantiate an HTTP response object
+  muzzley::HTTPRep _rep;
+  // Read the message from the stream
+  _ssl >> _rep;
+  // test the message status
+  if (_rep->status() == muzzley::HTTP200) {
+    // Print the value of a message header
+    cout << "Received a reply with a " << _rep->header("Content-Length") << " bytes of body length" << endl << flush;
+    // Print the body of the message
+    cout << _rep->body() << endl << flush;
+  }
 
   return 0;
 }

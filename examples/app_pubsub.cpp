@@ -58,23 +58,6 @@ int main(int argc, char* argv[]) {
 	_client.on(muzzley::AppLoggedIn, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		cout << "App logged in with created with session id " << (string) _data["d"]["sessionId"] << endl << flush;
 
-		{
-			muzzley::sslsocketstream _ssl;
-			_ssl.open("api.muzzley.com", 443);
-
-			muzzley::HTTPReq _req;
-			_req->method(muzzley::HTTPGet);
-			_req->header("Host", "api.muzzley.com");
-			_req->url("/");
-			_ssl << _req << flush;
-
-			muzzley::HTTPRep _rep;
-			_ssl >> _rep;
-			if (_rep->status() == muzzley::HTTP200) {
-				cout << "Received a reply with a " << _rep->header("Content-Length") << " bytes of body length" << endl << flush;
-			}
-		}
-
 		muzzley::Subscription _s1;
 		_s1.setNamespace("iot");
 		_s1.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
