@@ -39,6 +39,22 @@ The library will be located in `/usr/lib` and the header files (\*.h) will be lo
 
 If you want another target instalation directory, just pass it to the *./configure --prefix=[your prefix]* instalation command. Just don't forget to pass a *-I[your prefix]* flag to your compilation command.
 
+### Enabling HTTP(s) client support
+
+Being the purpose of this library to interact with the Muzzley platform, you may need to make HTTP request to the Muzzle API. Hence, an HTTP(s) client is supplied. To build and install the client as a part of the library, you must provide the ***--enable-http*** argument to the *configure* script:
+
+> $ ./configure --prefix=/usr --enable-http
+
+The client depends on the [OpenSSL][open_ssl] library, more specifically, on the **libssl** and **libcrypto** libraries and development packages.
+
+See se ***HTTP(s) support*** section, below.
+
+### Enabling message logging support
+
+If you want to inspect the messages being exchanged by the library, you must provide the ***--enable-logs*** argument to the *configure* script:
+
+> $ ./configure --prefix=/usr --enable-logs
+
 # EXAMPLE APPLICATIONS
 
 In the `Examples` folder, you can find several examples of muzzley-enabled applications for the Intel Galileo and other generic platforms.
@@ -332,7 +348,7 @@ The **muzzley::Subscription** class is used to pass the channel identifying info
 
 The callback will be invoked if some subscriber responds to the publish.
 
-#MAIN CLASSES
+# MAIN CLASSES
 
 There are two classes that you have to learn how to use in order to adequatly use this library:
 
@@ -348,7 +364,7 @@ This class aggregates a set of methods that will allow the interaction between y
 
 This class methods are organized in the following way:
 
-#### Connection & Authentication
+### Connection & Authentication
 
     // Intialiazition of the protocol version 1.2
     // Only need to provide `_activity_id` when using a static activity token as configured at muzzley.com
@@ -375,12 +391,12 @@ This class methods are organized in the following way:
 
     virtual bool reply(muzzley::Message& _data_received, muzzley::Message& _reply) final;
 
-#### Activity
+### Activity
 
     virtual void quit();
     virtual void participantQuit();
 
-#### Signaling
+### Signaling
 
     virtual void changeWidget(long _participant_id, string _widget, muzzley::Callback _callback = NULL);
     virtual void changeWidget(long _participant_id, string _widget, muzzley::JSONObj& _options, muzzley::Callback _callback = NULL);
@@ -600,6 +616,54 @@ This class methods are organized in the following way:
     virtual void setComponent(string _in);
     virtual void setProperty(string _in);
 
+# SUPPORT CLASSES
+
+## HTTP(s) support
+
+This library ships whit a built-in HTTP(s) client. It's composed by:
+
+* an HTTP parser for both requests and responses
+* ***muzzley::sslsocketstream***, which is an SSL socket stream (all encryption/decryption and certificate operations are delegated to OpenSSL's **libssl** and **libcrypto**)
+* ***muzzley::HTTPReq***, which is an *[std::share_ptr][cpp_smart_pointers]* to an HTTP request object 
+* ***muzzley::HTTPRep***, which is an *[std::share_ptr][cpp_smart_pointers]* to an HTTP response object 
+
+This classes usage is pretty self explanatory by example:
+
+```
+#include <signal.h>
+#include <unistd.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <muzzley/muzzley.h>
+#include <muzzley/parsers/http.h>
+#include <muzzley/stream/SSLSocketStreams.h>
+
+using namespace std;
+#if !defined __APPLE__
+using namespace __gnu_cxx;
+#endif
+
+int main(int argc, char* argv[]) {
+
+      muzzley::sslsocketstream _ssl;
+      _ssl.open("api.muzzley.com", 443);
+
+      muzzley::HTTPReq _req;
+      _req->method(muzzley::HTTPGet);
+      _req->header("Host", "api.muzzley.com");
+      _req->url("/");
+      _ssl << _req << flush;
+
+      muzzley::HTTPRep _rep;
+      _ssl >> _rep;
+      if (_rep->status() == muzzley::HTTP200) {
+        cout << "Received a reply with a " << _rep->header("Content-Length") << " bytes of body length" << endl << flush;
+      }
+
+  return 0;
+}
+```
 
 [muzzley_homepage]: https://www.muzzley.com
 [lambda_functions]: http://www.cprogramming.com/c++11/c++11-lambda-closures.html
@@ -608,3 +672,4 @@ This class methods are organized in the following way:
 [cpp_map]: http://en.cppreference.com/w/cpp/container/map
 [cpp_vector]: http://en.cppreference.com/w/cpp/container/vector
 [wiki_pubsub]: http://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern
+[open_ssl]: https://github.com/openssl/openssl
