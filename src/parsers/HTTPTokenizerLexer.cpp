@@ -21,6 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#include <muzzley/config.h>
+#ifdef HAVE_HTTP_CLIENT
 
 #include <muzzley/parsers/HTTPTokenizerLexer.h>
 
@@ -140,3 +142,4 @@ void muzzley::HTTPTokenizerLexer::value() {
 	this->__param_name.clear();
 }
 
+#endif

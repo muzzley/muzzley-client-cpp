@@ -1,5 +1,6 @@
 
 nobase_include_HEADERS =\
+./muzzley/config.h\
 ./muzzley/base/assert.h\
 ./muzzley/log/log.h\
 ./muzzley/exceptions/CastException.h\

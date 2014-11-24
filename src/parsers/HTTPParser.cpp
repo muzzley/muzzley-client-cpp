@@ -21,6 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#include <muzzley/config.h>
+#ifdef HAVE_HTTP_CLIENT
 
 #include <muzzley/parsers/HTTPParser.h>
 
@@ -44,3 +46,4 @@ void muzzley::HTTPParser::switchStreams(std::istream &_in, std::ostream &_out) {
 	this->d_scanner.switchStreams(_in, _out);
 }
 
+#endif

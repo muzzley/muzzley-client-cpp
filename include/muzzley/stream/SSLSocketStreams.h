@@ -18,6 +18,9 @@
 
 #pragma once
 
+#include <muzzley/config.h>
+#ifdef HAVE_HTTP_CLIENT
+
 #include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -369,3 +372,4 @@ namespace muzzley {
 	typedef basic_serversslsocketstream<wchar_t> wserversslsocketstream;
 
 }
+#endif

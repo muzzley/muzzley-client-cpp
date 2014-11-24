@@ -24,7 +24,8 @@ SOFTWARE.
 
 #pragma once
 
-//#ifdef HAVE_OPEN_SSL
+#include <muzzley/config.h>
+#ifdef HAVE_HTTP_CLIENT
 
 #define DEBUG_JSON
 
@@ -240,4 +241,4 @@ namespace muzzley {
 	void init(HTTPReq& _out);
 	void init(HTTPRep& _out);
 }
-//#endif
+#endif

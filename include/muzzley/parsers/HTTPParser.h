@@ -24,6 +24,9 @@ SOFTWARE.
 
 #pragma once
 
+#include <muzzley/config.h>
+#ifdef HAVE_HTTP_CLIENT
+
 #include <muzzley/http/HTTPObj.h>
 #include <muzzley/parsers/HTTPTokenizer.h>
 
@@ -40,3 +43,4 @@ namespace muzzley {
 	};
 
 }
+#endif

@@ -24,6 +24,9 @@ SOFTWARE.
 
 #pragma once
 
+#include <muzzley/config.h>
+#ifdef HAVE_HTTP_CLIENT
+
 #include <string>
 #include <muzzley/http/HTTPObj.h>
 #include <muzzley/parsers/HTTPParser.h>
@@ -48,3 +51,4 @@ namespace muzzley {
 	void tostr(ostream& _out, HTTPRep& _in) ;
 }
 
+#endif
