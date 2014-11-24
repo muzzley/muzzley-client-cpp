@@ -662,11 +662,11 @@ int main(int argc, char* argv[]) {
   // Instantiate a string with some body part
   string _body_part("{ \"name\" : \"HTTP Client\", id : 1 }");
 
-  // set HTTP "Host" header
+  // set HTTP Host header
   _req->header("Host", "api.muzzley.com");
-  // set HTTP "Content-Type" header
+  // set HTTP Content-Type header
   _req->header("Content-Type", "application/json");
-  // set HTTP "Content-Length" header
+  // set HTTP Content-Length header
   _req->header("Content-Length", std::to_string(_body_part.length()));
 
   // set the message body
