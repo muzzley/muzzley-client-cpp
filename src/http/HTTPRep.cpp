@@ -25,6 +25,7 @@ SOFTWARE.
 #include <muzzley/http/HTTPObj.h>
 
 #include <iostream>
+#include <muzzley/parsers/HTTPParser.h>
 #include <muzzley/exceptions/CastException.h>
 #include <muzzley/exceptions/NoHeaderNameException.h>
 
@@ -70,3 +71,11 @@ muzzley::HTTPRep::HTTPRep(HTTPRepT* _target) : shared_ptr<HTTPRepT>(_target) {
 
 muzzley::HTTPRep::~HTTPRep(){
 }
+
+void muzzley::HTTPRep::parse(istream& _in){
+	muzzley::HTTPParser _p;
+	_p.switchRoots(* this);
+	_p.switchStreams(_in);
+	_p.parse();
+}
+

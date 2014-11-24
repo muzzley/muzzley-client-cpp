@@ -66,10 +66,13 @@ int main(int argc, char* argv[]) {
 			_req->method(muzzley::HTTPGet);
 			_req->header("Host", "api.muzzley.com");
 			_req->url("/");
-			muzzley::tostr(_ssl, _req);
+			_ssl << _req << flush;
 
 			muzzley::HTTPRep _rep;
-			muzzley::fromhttpstream(_ssl, _rep);
+			_ssl >> _rep;
+			if (_rep->status() == muzzley::HTTP200) {
+				cout << "Received a reply with a " << _rep->header("Content-Length") << " bytes of body length" << endl << flush;
+			}
 		}
 
 		muzzley::Subscription _s1;

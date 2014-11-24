@@ -67,8 +67,6 @@ void muzzley::HTTPTokenizerLexer::body() {
 		}
 		case muzzley::HTTPReply : {
 			this->__root_rep->body(this->matched());
-			this->__root_rep->stringify(cout);
-			cout << endl << flush;
 			break;
 		}
 	}
@@ -96,8 +94,6 @@ void muzzley::HTTPTokenizerLexer::status() {
 			string _statusstr(this->matched());
 			muzzley::fromstr(_statusstr, &_status);
 			this->__root_rep->status((muzzley::HTTPStatus) _status);
-			this->__root_rep->stringify(cout);
-			cout << endl << flush;
 			break;
 		}
 	}
@@ -117,8 +113,6 @@ void muzzley::HTTPTokenizerLexer::add() {
 		}
 		case muzzley::HTTPReply : {
 			this->__root_rep->header(this->__header_name, _s);
-			this->__root_rep->stringify(cout);
-			cout << endl << flush;
 			break;
 		}
 	}

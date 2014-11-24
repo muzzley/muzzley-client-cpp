@@ -17,7 +17,9 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <muzzley/json/JSONObj.h>
+
 #include <ostream>
+#include <muzzley/parsers/JSONParser.h>
 
 namespace muzzley {
 	JSONPtr undefined;
@@ -1271,6 +1273,13 @@ muzzley::JSONPtr::operator JSONObj&() {
 muzzley::JSONPtr::operator JSONArr&() {
 	assertz(this->get() != nullptr && this->get()->type() == muzzley::JSArray, "this element is not of type JSArray", 0, 0);
 	return this->get()->arr();
+}
+
+void muzzley::JSONPtr::parse(istream& _in) {
+	muzzley::JSONParser _p;
+	_p.switchRoots(* this);
+	_p.switchStreams(_in);
+	_p.parse();
 }
 
 /*JSON POINTER TO OBJECT*/
