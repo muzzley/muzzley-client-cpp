@@ -24,6 +24,8 @@ SOFTWARE.
 
 #pragma once
 
+//#ifdef HAVE_OPEN_SSL
+
 #define DEBUG_JSON
 
 #include <ostream>
@@ -238,3 +240,4 @@ namespace muzzley {
 	void init(HTTPReq& _out);
 	void init(HTTPRep& _out);
 }
+//#endif

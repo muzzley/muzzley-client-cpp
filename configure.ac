@@ -12,6 +12,10 @@ AC_CONFIG_AUX_DIR([.])
 dnl Check for libraries
 AC_HAVE_LIBRARY(pthread)
 
+dnl Check for header files
+AC_CONFIG_HEADERS([include/muzzley/config.h])
+AC_CHECK_HEADERS([openssl/ssl.h])
+
 AC_CANONICAL_SYSTEM
 
 dnl Initialize automake

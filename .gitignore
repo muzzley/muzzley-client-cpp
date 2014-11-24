@@ -30,3 +30,5 @@ missing
 .sublime-workspace
 examples/myapp
 examples/myuser
+stamp-h1
+*/**/config.h.in
