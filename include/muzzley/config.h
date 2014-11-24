@@ -4,6 +4,9 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
 
+/* "Turn on HTTP(S) client support - OpenSSL development library needed" */
+/* #undef HAVE_HTTP_CLIENT */
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
@@ -12,9 +15,6 @@
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
-
-/* Define to 1 if you have the <openssl/ssl.h> header file. */
-#define HAVE_OPENSSL_SSL_H 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -40,6 +40,9 @@
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #define LT_OBJDIR ".libs/"
+
+/* "Turn on log messages" */
+/* #undef MUZZLEY_DEBUG */
 
 /* Name of package */
 #define PACKAGE "muzzley"

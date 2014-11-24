@@ -28,6 +28,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <map>
 #include <fstream>
 #include <sstream>
+#include <muzzley/config.h>
 #include <muzzley/base/assert.h>
 #include <muzzley/text/convert.h>
 #include <muzzley/text/manip.h>

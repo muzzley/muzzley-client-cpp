@@ -19,6 +19,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #pragma once
 
+#include <muzzley/config.h>
 #include <muzzley/exceptions/AssertionException.h>
 
 /**

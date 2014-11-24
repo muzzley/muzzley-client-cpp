@@ -2,7 +2,7 @@ lib_LTLIBRARIES = libmuzzley.la
 
 libmuzzley_la_LIBADD = -lpthread
 libmuzzley_la_LDFLAGS = -version-info 0:2:0
-libmuzzley_la_CPPFLAGS = -std=c++0x -I../include -DHAVE_HTTP_CLIENT
+libmuzzley_la_CPPFLAGS = -std=c++0x -I../include
 
 libmuzzley_la_SOURCES = \
 ./base/assert.cpp\

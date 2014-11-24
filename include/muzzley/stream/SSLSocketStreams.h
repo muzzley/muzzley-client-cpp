@@ -122,7 +122,6 @@ namespace muzzley {
 
 			int num;
 			if ((num = SSL_read(this->__sslstream, reinterpret_cast<char*>(ibuf), SIZE * char_size)) <= 0) {
-				cout << "nothing to read from stream" << endl << flush;
 				return __traits_type::eof();
 			}
 
@@ -190,11 +189,9 @@ namespace muzzley {
 			_sin.sin_port = htons(_port);
 
 			if (connect(_sd, reinterpret_cast<sockaddr*>(&_sin), sizeof(_sin)) < 0) {
-				cout << "could not connect to " << _host << ":" << _port << endl << flush;
 				__stream_type::setstate(std::ios::failbit);
 			}
 			else {
-				cout << "connected to " << _host << ":" << _port << endl << flush;
 				SSL_library_init();
 				OpenSSL_add_all_algorithms();
 				SSL_load_error_strings();
@@ -203,7 +200,6 @@ namespace muzzley {
 					__stream_type::setstate(std::ios::failbit);
 				}
 				else {
-					cout << "started context" << endl << flush;
 					this->assign(_sd, _context);
 				}
 			}

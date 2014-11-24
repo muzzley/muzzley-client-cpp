@@ -18,9 +18,10 @@
 
 #pragma once
 
+#include <muzzley/config.h>
 #include <muzzley/json/JSONObj.h>
-#include <pthread.h>
 #include <muzzley/stream/SocketStreams.h>
+#include <pthread.h>
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -35,7 +36,6 @@ using namespace __gnu_cxx;
 
 #define MUZZLEY_ENDPOINT_PORT 80
 #define MUZZLEY_ENDPOINT_PATH "/ws"
-//#define MUZZLEY_DEBUG
 
 #ifndef CRLF
 #define CRLF "\r\n"
