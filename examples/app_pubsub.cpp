@@ -36,6 +36,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <fstream>
 #include <string>
 #include <muzzley/muzzley.h>
+#include <muzzley/parsers/http.h>
+#include <muzzley/stream/SSLSocketStreams.h>
 
 using namespace std;
 #if !defined __APPLE__
@@ -55,6 +57,20 @@ int main(int argc, char* argv[]) {
 	// Return 'false' if you want to stop other listeners from being invoked.
 	_client.on(muzzley::AppLoggedIn, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		cout << "App logged in with created with session id " << (string) _data["d"]["sessionId"] << endl << flush;
+
+		{
+			muzzley::sslsocketstream _ssl;
+			_ssl.open("api.muzzley.com", 443);
+
+			muzzley::HTTPReq _req;
+			_req->method(muzzley::HTTPGet);
+			_req->header("Host", "api.muzzley.com");
+			_req->url("/");
+			muzzley::tostr(_ssl, _req);
+
+			muzzley::HTTPRep _rep;
+			muzzley::fromhttpstream(_ssl, _rep);
+		}
 
 		muzzley::Subscription _s1;
 		_s1.setNamespace("iot");

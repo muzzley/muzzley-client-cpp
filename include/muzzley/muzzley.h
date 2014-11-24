@@ -28,11 +28,15 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include <muzzley/json/JSONObj.h>
 
+#include <muzzley/http/HTTPObj.h>
+
 #include <muzzley/parsers/json.h>
+#include <muzzley/parsers/http.h>
 
 #include <muzzley/resource/Client.h>
 
 #include <muzzley/stream/SocketStreams.h>
+#include <muzzley/stream/SSLSocketStreams.h>
 
 #include <muzzley/text/convert.h>
 #include <muzzley/text/manip.h>
