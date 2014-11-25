@@ -180,7 +180,9 @@ size_t              d_content_length;
 		return 261;
 	}
 	([^:\n\r]+) {
-		if (matched() == string("Content-Length")) {
+		string _m(matched());
+		::transform(_m.begin(), _m.end(), _m.begin(), ::tolower);
+		if (matched() == string("content-length")) {
 			begin(StartCondition__::contentlengthval);
 		}
 		return 263;

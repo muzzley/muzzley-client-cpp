@@ -24,6 +24,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <functional>
 #include <iterator>
 #include <string>
+#include <sstream>
 
 using namespace std;
 #if !defined __APPLE__
@@ -56,3 +57,15 @@ void muzzley::replace(string& str, string find, string replace) {
 	}
 }
 
+void muzzley::prettify_header_name(string& name) {
+	std::transform(name.begin(), name.begin() + 1, name.begin(), ::toupper);
+	istringstream iss;
+	iss.str(name);
+	char line[256];
+	size_t pos = 0;
+	while (iss.good()) {
+		iss.getline(line, 256, '-');
+		pos += iss.gcount();
+		std::transform(name.begin() + pos, name.begin() + pos + 1, name.begin() + pos, ::toupper);
+	}
+}

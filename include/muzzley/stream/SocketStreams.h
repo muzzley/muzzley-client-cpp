@@ -61,7 +61,7 @@ namespace muzzley {
 			basic_socketbuf() : __sock(0) {
 				__buf_type::setp(obuf, obuf + (SIZE - 1));
 				__buf_type::setg(ibuf, ibuf, ibuf);
-			}
+			};
 
 			virtual ~basic_socketbuf() {
 				sync();
@@ -69,11 +69,6 @@ namespace muzzley {
 
 			void set_socket(int _sock) {
 				this->__sock = _sock;
-
-//				int _opts = fcntl(this->__sock, F_GETFL);
-//				_opts = _opts & ~O_NONBLOCK;
-//				if (fcntl(this->__sock, F_SETFL, _opts) < 0) {
-//				}
 			}
 			int get_socket() {
 				return this->__sock;
@@ -140,7 +135,7 @@ namespace muzzley {
 		public:
 			basic_socketstream() :
 				__stream_type(&__buf) {
-			}
+			};
 			basic_socketstream(int s) : __stream_type(&__buf) {
 				__buf.set_socket(s);
 			}
@@ -214,7 +209,7 @@ namespace muzzley {
 		public:
 			basic_serversocketstream() :
 				__stream_type(&__buf) {
-			}
+			};
 			basic_serversocketstream(int s) : __stream_type(&__buf) {
 				__buf.set_socket(s);
 			}

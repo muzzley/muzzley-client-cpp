@@ -226,7 +226,9 @@ muzzley::HeaderMap& muzzley::HTTPObj::headers() {
 }
 
 string muzzley::HTTPObj::header(const char* _idx) {
-	auto _found = this->__headers.find(_idx);
+	string _name(_idx);
+	muzzley::prettify_header_name(_name);
+	auto _found = this->__headers.find(_name);
 	if (_found != this->__headers.end()) {
 		return _found->second;
 	}
@@ -234,15 +236,21 @@ string muzzley::HTTPObj::header(const char* _idx) {
 }
 
 void muzzley::HTTPObj::header(const char* _name, const char* _value) {
-	this->__headers.insert(pair< string, string> (_name, _value));
+	string _n(_name);
+	muzzley::prettify_header_name(_n);
+	this->__headers.insert(pair< string, string> (_n, _value));
 }
 
 void muzzley::HTTPObj::header(const char* _name, string _value) {
-	this->__headers.insert(pair< string, string> (_name, _value));
+	string _n(_name);
+	muzzley::prettify_header_name(_n);
+	this->__headers.insert(pair< string, string> (_n, _value));
 }
 
 void muzzley::HTTPObj::header(string _name, string _value) {
-	this->__headers.insert(pair< string, string> (_name, _value));
+	string _n(_name);
+	muzzley::prettify_header_name(_n);
+	this->__headers.insert(pair< string, string> (_n, _value));
 }
 
 extern "C" int muzzley_http() {

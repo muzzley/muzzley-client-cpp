@@ -32,4 +32,6 @@ namespace muzzley {
 	void rtrim(std::string &_in_out);
 	void trim(std::string &_in_out);
 	void replace(string& str, string find, string replace);
+
+	void prettify_header_name(string& name);
 }

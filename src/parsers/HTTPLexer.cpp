@@ -1128,7 +1128,9 @@ try
         case 32:
         {
             {
-    if (matched() == string("Content-Length")) {
+    string _m(matched());
+    ::transform(_m.begin(), _m.end(), _m.begin(), ::tolower);
+    if (matched() == string("content-length")) {
         begin(StartCondition__::contentlengthval);
     }
     return 263;
