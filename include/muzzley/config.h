@@ -5,7 +5,7 @@
 #define HAVE_DLFCN_H 1
 
 /* "Turn on HTTP(S) client support - OpenSSL development library needed" */
-/* #undef HAVE_HTTP_CLIENT */
+#define HAVE_HTTP_CLIENT 1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1

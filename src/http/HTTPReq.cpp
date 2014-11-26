@@ -103,9 +103,13 @@ void muzzley::HTTPReqT::stringify(string& _out) {
 				_out.insert(_out.length(), "&");
 			}
 			_first = false;
-			_out.insert(_out.length(), i.first);
+			string _n(i.first);
+			muzzley::url_encode(_n);
+			string _v(i.second);
+			muzzley::url_encode(_v);
+			_out.insert(_out.length(), _n);
 			_out.insert(_out.length(), "=");
-			_out.insert(_out.length(), i.second);
+			_out.insert(_out.length(), _v);
 		}
 	}
 	_out.insert(_out.length(), " HTTP/1.1");

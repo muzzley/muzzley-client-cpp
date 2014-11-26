@@ -46,6 +46,8 @@ void muzzley::HTTPTokenizerLexer::justLeave() {
 }
 
 void muzzley::HTTPTokenizerLexer::init(muzzley::HTTPType _in_type) {
+	this->d_chunked_body = false;
+	this->d_chunked.clear();
 	this->__root_type = _in_type;
 	switch (_in_type) {
 		case muzzley::HTTPRequest : {
