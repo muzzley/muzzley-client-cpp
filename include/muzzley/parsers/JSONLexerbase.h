@@ -29,7 +29,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <vector>
 #include <memory>
 
-
 // $insert namespace-open
 namespace muzzley
 {
@@ -170,7 +169,7 @@ private:
     Input           d_input;
     std::string     d_matched;              // matched characters
     bool            d_return;               // return after a rule's action 
-    bool            d_more;         // set to true by more()
+    bool            d_more = false;         // set to true by more()
 
 protected:
     std::istream   *d_in__;
@@ -178,14 +177,14 @@ protected:
 
 
 
-    int     const (*d_dfaBase__)[48];
+    int     const (*d_dfaBase__)[49];
 
-    static int     const s_dfa__[][48];
-    static int     const (*s_dfaBase__[])[48];
+    static int     const s_dfa__[][49];
+    static int     const (*s_dfaBase__[])[49];
     enum: bool { s_interactive__ = false };
     enum: size_t {
-        s_rangeOfEOF__           = 45,
-        s_finacIdx__             = 46,
+        s_rangeOfEOF__           = 46,
+        s_finacIdx__             = 47,
         s_nRules__               = 24,
         s_maxSizeofStreamStack__ = 10
     };

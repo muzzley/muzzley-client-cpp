@@ -870,8 +870,9 @@ muzzley::JSONPtr& muzzley::JSONArrT::operator[](int _idx) {
 }
 
 muzzley::JSONPtr& muzzley::JSONArrT::operator[](size_t _idx) {
-	assertz(_idx >= 0, "the index of the element you want to remove must be higher then 0", 0, 0);
-	assertz(_idx < this->size(), "the index of the element you want to remove must be lower than the array size", 0, 0);
+	if (_idx < 0 ||_idx >= this->size()) {
+		return muzzley::undefined;
+	}
 	return this->at(_idx);
 }
 
@@ -883,8 +884,9 @@ muzzley::JSONPtr& muzzley::JSONArrT::operator[](string _idx) {
 	size_t _i = 0;
 	muzzley::fromstr(_idx, &_i);
 
-	assertz(_i >= 0, "the index of the element you want to remove must be higher then 0", 0, 0);
-	assertz(_i < this->size(), "the index of the element you want to remove must be lower than the array size", 0, 0);
+	if (_i < 0 ||_i >= this->size()) {
+		return muzzley::undefined;
+	}
 
 	return this->at(_i);
 }
