@@ -22,7 +22,6 @@
 #include <muzzley/json/JSONObj.h>
 #include <muzzley/stream/SocketStreams.h>
 #include <pthread.h>
-#include <cstdint>
 #include <functional>
 #include <map>
 #include <string>

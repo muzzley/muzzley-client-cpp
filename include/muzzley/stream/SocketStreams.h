@@ -79,7 +79,7 @@ namespace muzzley {
 			int output_buffer() {
 				int num = __buf_type::pptr() - __buf_type::pbase();
 				if (::send(__sock, reinterpret_cast<char*>(obuf), num * char_size, 0) != num) {
-				                    return __traits_type::eof();
+					return __traits_type::eof();
 				}
 				__buf_type::pbump(-num);
 				return num;
@@ -99,19 +99,19 @@ namespace muzzley {
 
 			virtual int sync() {
 				if (output_buffer() == __traits_type::eof()) {
-				                    return __traits_type::eof();
+					return __traits_type::eof();
 				}
 				return 0;
 			}
 
 			virtual __int_type underflow() {
 				if (__buf_type::gptr() < __buf_type::egptr()) {
-				                    return *__buf_type::gptr();
+					return *__buf_type::gptr();
 				}
 
 				int num = -1;
 				if ((num = ::recv(__sock, reinterpret_cast<char*>(ibuf), SIZE * char_size, 0)) <= 0) {
-				                    return __traits_type::eof();
+					return __traits_type::eof();
 				}
 				__buf_type::setg(ibuf, ibuf, ibuf + num);
 				return *__buf_type::gptr();

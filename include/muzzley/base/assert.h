@@ -22,6 +22,10 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <muzzley/config.h>
 #include <muzzley/exceptions/AssertionException.h>
 
+#if __cplusplus <= 199711L
+#define nullptr NULL
+#endif
+
 /**
  * Compact form for throwing exceptions when validating logical requirements and input/output validation
  * @param x a boolean expression to be validated
