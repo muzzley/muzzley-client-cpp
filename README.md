@@ -111,9 +111,9 @@ A compilation command could look something like this:
 
 > $ g++ -std=c++0x main.cpp -o mymuzzley -lpthread -lmuzzley
 
-# MULTITHREADING
+# MULTI-THREADING
 
-This library is **NOT** thread safe, you'll have to implement synchronization yourself. Thread synchronization is very importante when accessing the *muzzley::Client* communication features, since the *muzzley::socketstream* class will *segfault* when access by several threads at the same time. 
+This library is **NOT** thread safe, you'll have to implement synchronization yourself. Thread synchronization is very importante when accessing the *muzzley::Client* communication features, since the *muzzley::socketstream* class will *segfault* if accessed by several threads at the same time. 
 
 See the ***examples/multithreading.cpp*** example for a suggestion on how to accomplish synchronized access to the communication features.
 
