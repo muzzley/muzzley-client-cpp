@@ -39,15 +39,17 @@ The library will be located in `/usr/lib` and the header files (\*.h) will be lo
 
 If you want another target instalation directory, just pass it to the *./configure --prefix=[your prefix]* instalation command. Just don't forget to pass a *-I[your prefix]* flag to your compilation command.
 
-### Enabling HTTP(s) client support
+### Enabling HTTP(s) support
 
-Being the purpose of this library to interact with the Muzzley platform, you may need to make HTTP request to the Muzzle API. Hence, an HTTP(s) client is supplied. To build and install the client as a part of the library, you must provide the ***--enable-http*** argument to the *configure* script:
+Being the purpose of this library to interact with the Muzzley platform, you may need to make HTTP request to the Muzzle API. Hence, an HTTP(s) abstraction classes are supplied. To build and install this features as a part of the library, you must provide the ***--enable-http*** argument to the *configure* script:
+
+Note that this features don't replicate an HTTP(s) client since they do not implement the full HTTP protocol (redirection, content acceptance features, content type validations, etc). That task is passed on to you, if you would like to take advantage of all features of the HTTP protocol.
 
 > $ ./configure --prefix=/usr --enable-http
 
-The client depends on the [OpenSSL][open_ssl] library, more specifically, on the **libssl** and **libcrypto** libraries and development packages.
+The classes depend on the [OpenSSL][open_ssl] library, more specifically, on the **libssl** and **libcrypto** libraries and development packages.
 
-See se ***HTTP(s) support*** section, below.
+See the  ***HTTP(s) support*** section, below.
 
 ### Enabling message logging support
 
