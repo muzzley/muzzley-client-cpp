@@ -28,7 +28,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <iostream>
 #include <errno.h>
 #include <sstream>
-#include <memory.h>
 #include <algorithm>
 #include <fstream>
 #include <muzzley/text/manip.h>

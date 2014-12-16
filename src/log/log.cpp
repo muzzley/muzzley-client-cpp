@@ -19,6 +19,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include <muzzley/log/log.h>
 
+#include <time.h>
 #include <muzzley/text/convert.h>
 
 namespace muzzley {
