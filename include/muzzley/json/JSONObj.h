@@ -28,7 +28,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <map>
 #include <fstream>
 #include <sstream>
+#ifndef PACKAGE
 #include <muzzley/config.h>
+#endif
 #include <muzzley/base/assert.h>
 #include <muzzley/text/convert.h>
 #include <muzzley/text/manip.h>
@@ -401,6 +403,9 @@ namespace muzzley {
 		bool operator!=(JSONPtr& _rhs);
 		template <typename T>
 		bool operator!=(T _in) {
+			if (_in == nullptr) {
+				return this->__target.__type == muzzley::JSNil; 
+			}
 			JSONElementT _rhs(_in);
 			return (* this) == _rhs;
 		};

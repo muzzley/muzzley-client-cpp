@@ -74,6 +74,21 @@ namespace muzzley {
 				return this->__sock;
 			}
 
+			virtual bool __good() {
+				char _buf;
+				
+				int _opts = fcntl(this->__sock, F_GETFL);
+				_opts = _opts | O_NONBLOCK;
+				fcntl(this->__sock, F_SETFL, _opts);
+
+				int _err = ::recv(this->__sock, &_buf, 1, MSG_PEEK);
+
+				_opts = _opts & ~O_NONBLOCK;
+				fcntl(this->__sock, F_SETFL, _opts);
+
+				return _err > 0;
+			}
+
 		protected:
 
 			int output_buffer() {
@@ -157,7 +172,7 @@ namespace muzzley {
 			}
 
 			bool is_open() {
-				return __buf.get_socket() != 0;
+				return __buf.get_socket() != 0 && __buf.__good();
 			}
 
 			bool ready() {
@@ -227,7 +242,7 @@ namespace muzzley {
 			}
 
 			bool is_open() {
-				return __buf.get_socket() != 0;
+				return __buf.get_socket() != 0 && __buf.__good();
 			}
 
 			bool ready() {

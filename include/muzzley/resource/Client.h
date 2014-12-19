@@ -18,7 +18,9 @@
 
 #pragma once
 
+#ifndef PACKAGE
 #include <muzzley/config.h>
+#endif
 #include <muzzley/json/JSONObj.h>
 #include <muzzley/stream/SocketStreams.h>
 #include <pthread.h>
