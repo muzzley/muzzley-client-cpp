@@ -196,8 +196,9 @@ namespace muzzley {
 				_sin.sin_family = AF_INET;
 				_sin.sin_port = htons(_port);
 
-				if (connect(_sd, reinterpret_cast<sockaddr*>(&_sin), sizeof(_sin)) < 0) {
+				if (::connect(_sd, reinterpret_cast<sockaddr*>(&_sin), sizeof(_sin)) < 0) {
 					__stream_type::setstate(std::ios::failbit);
+					__buf.set_socket(0);
 				}
 				else {
 					__buf.set_socket(_sd);
@@ -279,6 +280,7 @@ namespace muzzley {
 				if (::bind(this->__sockfd, (struct sockaddr *) &_serv_addr, sizeof(_serv_addr)) < 0) {
 					::close(this->__sockfd);
 					this->__sockfd = -1;
+					__buf.set_socket(0);
 					__stream_type::setstate(std::ios::failbit);
 					throw muzzley::ClosedException("Could not bind to the provided port");
 				}
