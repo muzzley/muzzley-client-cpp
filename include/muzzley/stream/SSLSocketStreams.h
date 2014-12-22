@@ -27,6 +27,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <fcntl.h>
 #include <streambuf>
 #include <istream>
 #include <ostream>
@@ -86,6 +87,22 @@ namespace muzzley {
 			this->__sslstream = SSL_new(_ctx);
 			SSL_set_fd(this->__sslstream, this->__sock);
 			SSL_connect(this->__sslstream);
+		}
+
+		virtual bool __good() {
+			char _buf;
+			
+			int _opts = fcntl(this->__sock, F_GETFL);
+			_opts = _opts | O_NONBLOCK;
+			fcntl(this->__sock, F_SETFL, _opts);
+
+			int _err = ::recv(this->__sock, &_buf, 1, MSG_PEEK);
+			bool _ret = errno == EAGAIN || errno == EWOULDBLOCK || _err > 0;
+
+			_opts = _opts & ~O_NONBLOCK;
+			fcntl(this->__sock, F_SETFL, _opts);
+
+			return _ret;
 		}
 
 	protected:
@@ -169,6 +186,10 @@ namespace muzzley {
 			__stream_type::clear();
 		}
 
+		bool is_open() {
+			return __buf.get_socket() != 0 && __buf.__good();
+		}
+
 		bool ready() {
 			fd_set sockset;
 			FD_ZERO(&sockset);
@@ -192,6 +213,7 @@ namespace muzzley {
 
 			if (connect(_sd, reinterpret_cast<sockaddr*>(&_sin), sizeof(_sin)) < 0) {
 				__stream_type::setstate(std::ios::failbit);
+				__buf.set_socket(0);
 			}
 			else {
 				SSL_library_init();
@@ -200,6 +222,7 @@ namespace muzzley {
 				SSL_CTX* _context = SSL_CTX_new(SSLv23_method());
 				if (_context == nullptr) {
 					__stream_type::setstate(std::ios::failbit);
+					__buf.set_socket(0);
 				}
 				else {
 					this->assign(_sd, _context);
@@ -256,6 +279,10 @@ namespace muzzley {
 				::close(__buf.get_socket());
 			}
 			__stream_type::clear();
+		}
+
+		bool is_open() {
+			return __buf.get_socket() != 0 && __buf.__good();
 		}
 
 		bool ready() {
@@ -317,6 +344,7 @@ namespace muzzley {
 			if (::bind(this->__sockfd, (struct sockaddr *) &_serv_addr, sizeof(_serv_addr)) < 0) {
 				::close(this->__sockfd);
 				this->__sockfd = -1;
+				__buf.set_context(0);
 				__stream_type::setstate(std::ios::failbit);
 				throw muzzley::ClosedException("Could not bind to the provided port");
 			}
