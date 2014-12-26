@@ -1694,7 +1694,7 @@ bool muzzley::Message::isError(){
 	if (_found == (* this)->end()) {
 		return false;
 	}
-	return (bool) (* this)["s"];
+	return !(bool) (* this)["s"];
 }
 
 bool muzzley::Message::isRequest(){
