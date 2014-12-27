@@ -663,6 +663,7 @@ try
 
         case 23:
         {
+         d_scanner.init();
          }
         break;
 
