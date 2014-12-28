@@ -481,7 +481,12 @@ void muzzley::JSONElementT::stringify(ostream& _out) {
 			break;
 		}
 		case muzzley::JSString : {
-			_out << "\"" << this->str() << "\"" << flush;
+			string _str(this->str());
+			muzzley::replace(_str, "\"", "\\\"");
+			muzzley::replace(_str, "\n", "\\\n");
+			muzzley::replace(_str, "\r", "\\\b");
+			muzzley::replace(_str, "\t", "\\\t");
+			_out << "\"" << _str << "\"" << flush;
 			break;
 		}
 		case muzzley::JSInteger : {
@@ -520,8 +525,13 @@ void muzzley::JSONElementT::stringify(string& _out) {
 			break;
 		}
 		case muzzley::JSString : {
+			string _str(this->str());
+			muzzley::replace(_str, "\"", "\\\"");
+			muzzley::replace(_str, "\n", "\\\n");
+			muzzley::replace(_str, "\r", "\\\b");
+			muzzley::replace(_str, "\t", "\\\t");
 			_out.insert(_out.length(), "\"");
-			_out.insert(_out.length(), this->str());
+			_out.insert(_out.length(), _str);
 			_out.insert(_out.length(), "\"");
 			break;
 		}
@@ -561,7 +571,12 @@ void muzzley::JSONElementT::prettify(ostream& _out, uint _n_tabs) {
 			break;
 		}
 		case muzzley::JSString : {
-			_out << "\"" << this->str() << "\"" << flush;
+			string _str(this->str());
+			muzzley::replace(_str, "\"", "\\\"");
+			muzzley::replace(_str, "\n", "\\\n");
+			muzzley::replace(_str, "\r", "\\\b");
+			muzzley::replace(_str, "\t", "\\\t");
+			_out << "\"" << _str << "\"" << flush;
 			break;
 		}
 		case muzzley::JSInteger : {
@@ -600,8 +615,13 @@ void muzzley::JSONElementT::prettify(string& _out, uint _n_tabs) {
 			break;
 		}
 		case muzzley::JSString : {
+			string _str(this->str());
+			muzzley::replace(_str, "\"", "\\\"");
+			muzzley::replace(_str, "\n", "\\\n");
+			muzzley::replace(_str, "\r", "\\\b");
+			muzzley::replace(_str, "\t", "\\\t");
 			_out.insert(_out.length(), "\"");
-			_out.insert(_out.length(), this->str());
+			_out.insert(_out.length(), _str);
 			_out.insert(_out.length(), "\"");
 			break;
 		}
