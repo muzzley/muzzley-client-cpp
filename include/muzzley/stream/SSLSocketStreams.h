@@ -34,7 +34,8 @@
 #include <strings.h>
 #include <unistd.h>
 #include <openssl/ssl.h>
-#include <muzzley/exceptions/ClosedException.h>
+ #include <openssl/err.h>
+ #include <muzzley/exceptions/ClosedException.h>
 
 using namespace std;
 #if !defined __APPLE__
@@ -141,6 +142,49 @@ namespace muzzley {
 
 			int num;
 			if ((num = SSL_read(this->__sslstream, reinterpret_cast<char*>(ibuf), SIZE * char_size)) <= 0) {
+				cout << "could not read from SSL: " << flush;
+				int _err = SSL_get_error(this->__sslstream, num);
+				switch(_err) {
+					case SSL_ERROR_ZERO_RETURN : {
+						cout << "SSL_ERROR_ZERO_RETURN" << endl << flush;
+						break;
+					}
+					case SSL_ERROR_WANT_READ : {
+						cout << "SSL_ERROR_WANT_READ" << endl << flush;
+						cout << ERR_error_string(ERR_peek_last_error(), nullptr) << endl << flush;
+						break;
+					}
+					case SSL_ERROR_WANT_WRITE : {
+						cout << "SSL_ERROR_WANT_WRITE" << endl << flush;
+						cout << ERR_error_string(ERR_peek_last_error(), nullptr) << endl << flush;
+						break;
+					}
+					case SSL_ERROR_WANT_CONNECT : {
+						cout << "SSL_ERROR_WANT_CONNECT" << endl << flush;
+						cout << ERR_error_string(ERR_peek_last_error(), nullptr) << endl << flush;
+						break;
+					}
+					case SSL_ERROR_WANT_ACCEPT : {
+						cout << "SSL_ERROR_WANT_ACCEPT" << endl << flush;
+						cout << ERR_error_string(ERR_peek_last_error(), nullptr) << endl << flush;
+						break;
+					}
+					case SSL_ERROR_WANT_X509_LOOKUP : {
+						cout << "SSL_ERROR_WANT_X509_LOOKUP" << endl << flush;
+						cout << ERR_error_string(ERR_peek_last_error(), nullptr) << endl << flush;
+						break;
+					}
+					case SSL_ERROR_SYSCALL : {
+						cout << "SSL_ERROR_SYSCALL" << endl << flush;
+						cout << ERR_error_string(ERR_peek_last_error(), nullptr) << endl << flush;
+						break;
+					}
+					case SSL_ERROR_SSL : {
+						cout << "SSL_ERROR_SSL" << endl << flush;
+						cout << ERR_error_string(ERR_peek_last_error(), nullptr) << endl << flush;
+						break;
+					}
+				}
 				return __traits_type::eof();
 			}
 
@@ -219,7 +263,7 @@ namespace muzzley {
 				SSL_library_init();
 				OpenSSL_add_all_algorithms();
 				SSL_load_error_strings();
-				SSL_CTX* _context = SSL_CTX_new(SSLv23_method());
+				SSL_CTX* _context = SSL_CTX_new(SSLv23_client_method());
 				if (_context == nullptr) {
 					__stream_type::setstate(std::ios::failbit);
 					__buf.set_socket(0);

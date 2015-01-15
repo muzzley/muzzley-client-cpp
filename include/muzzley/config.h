@@ -42,7 +42,11 @@
 #define LT_OBJDIR ".libs/"
 
 /* "Turn on log messages" */
-/* #undef MUZZLEY_DEBUG */
+#define MUZZLEY_DEBUG 1
+
+/* "Turn off SSL secure channel for real-time channel - OpenSSL development
+   library needed" */
+/* #undef NOT_HAVE_SECURE_CHANNEL */
 
 /* Name of package */
 #define PACKAGE "muzzley"

@@ -22,7 +22,11 @@
 #include <muzzley/config.h>
 #endif
 #include <muzzley/json/JSONObj.h>
-#include <muzzley/stream/SocketStreams.h>
+#ifndef NOT_HAVE_SECURE_CHANNEL
+	#include <muzzley/stream/SSLSocketStreams.h>
+#else
+	#include <muzzley/stream/SocketStreams.h>
+#endif
 #include <pthread.h>
 #include <functional>
 #include <map>
@@ -35,7 +39,11 @@ using namespace std;
 using namespace __gnu_cxx;
 #endif
 
-#define MUZZLEY_ENDPOINT_PORT 80
+#ifndef NOT_HAVE_SECURE_CHANNEL
+	#define MUZZLEY_ENDPOINT_PORT 443
+#else
+	#define MUZZLEY_ENDPOINT_PORT 80
+#endif
 #define MUZZLEY_ENDPOINT_PATH "/ws"
 
 #ifndef CRLF
@@ -217,7 +225,11 @@ namespace muzzley {
 		string __channel_id;
 		long long __participant_id;
 
+#ifndef NOT_HAVE_SECURE_CHANNEL
+		muzzley::sslsocketstream __channel;
+#else
 		muzzley::socketstream __channel;
+#endif
 
 		CallbackQueue __queue;
 		ParticipantList __participants;
