@@ -39,7 +39,7 @@ The library will be located in `/usr/lib` and the header files (\*.h) will be lo
 
 If you want another target instalation directory, just pass it to the *./configure --prefix=[your prefix]* instalation command. Just don't forget to pass a *-I[your prefix]* flag to your compilation command.
 
-The library depend on the [OpenSSL][open_ssl] library, more specifically, on the **libssl** and **libcrypto** libraries and development packages, since the connection is *SSL/TLS*-wrapped by default. To disable *SSL/TLS* support see section ***Disabling SSL support*** below. Note that we **strongly discourage you disabling this capabilities**, this parameter is available for chipsets that have specialized components that handle encryptio/decryption.
+The library depend on the [OpenSSL][open_ssl] library, more specifically, on the **libssl** and **libcrypto** libraries and development packages, since the connection is *SSL/TLS*-wrapped by default. To disable *SSL/TLS* support see section ***Disabling SSL support*** below. Note that we **strongly discourage you disabling this capabilities**, this parameter is available for chipsets that have specialized components that handle encryption/decryption.
 
 ### Disabling SSL support
 
@@ -47,7 +47,7 @@ When connecting to the **muzzley** cloud platform, *SSL/TLS* connections are ena
 
 > $ ./configure --prefix=/usr --disable-ssl
 
-Note that we **strongly discourage you disabling this capabilities**, this parameter is available for chipsets that have specialized components that handle encryptio/decryption.
+Note that we **strongly discourage you disabling this capabilities**, this parameter is available for chipsets that have specialized components that handle encryption/decryption.
 
 ### Enabling HTTP(s) support
 
