@@ -92,6 +92,10 @@ namespace muzzley {
 	protected:
 
 		int output_buffer() {
+			if (!__good()) {
+				return __traits_type::eof();
+			}
+
 			int num = __buf_type::pptr() - __buf_type::pbase();
 			if (::send(__sock, reinterpret_cast<char*>(obuf), num * char_size, 0) != num) {
 				return __traits_type::eof();
@@ -122,6 +126,10 @@ namespace muzzley {
 		virtual __int_type underflow() {
 			if (__buf_type::gptr() < __buf_type::egptr()) {
 				return *__buf_type::gptr();
+			}
+
+			if (!__good()) {
+				return __traits_type::eof();
 			}
 
 			int num = -1;
