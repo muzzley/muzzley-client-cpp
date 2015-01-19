@@ -33,9 +33,10 @@
 #include <ostream>
 #include <strings.h>
 #include <unistd.h>
+#include <errno.h>
 #include <openssl/ssl.h>
- #include <openssl/err.h>
- #include <muzzley/exceptions/ClosedException.h>
+#include <openssl/err.h>
+#include <muzzley/exceptions/ClosedException.h>
 
 using namespace std;
 #if !defined __APPLE__

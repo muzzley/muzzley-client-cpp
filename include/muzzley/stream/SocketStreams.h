@@ -29,6 +29,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <ostream>
 #include <strings.h>
 #include <unistd.h>
+#include <errno.h>
 #include <muzzley/exceptions/ClosedException.h>
 
 using namespace std;
