@@ -15,7 +15,6 @@
  TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  PERFORMANCE OF THIS SOFTWARE.
  */
-
 #pragma once
 
 #ifndef PACKAGE
@@ -263,7 +262,7 @@ namespace muzzley {
 			_sin.sin_family = AF_INET;
 			_sin.sin_port = htons(_port);
 
-			if (connect(_sd, reinterpret_cast<sockaddr*>(&_sin), sizeof(_sin)) < 0) {
+			if (::connect(_sd, reinterpret_cast<sockaddr*>(&_sin), sizeof(_sin)) < 0) {
 				__stream_type::setstate(std::ios::failbit);
 				__buf.set_socket(0);
 			}

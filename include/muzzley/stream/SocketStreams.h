@@ -15,8 +15,6 @@ PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
 TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR 
 PERFORMANCE OF THIS SOFTWARE.
 */
-
-
 #pragma once
 
 #include <sys/socket.h>
@@ -70,6 +68,7 @@ namespace muzzley {
 		void set_socket(int _sock) {
 			this->__sock = _sock;
 		}
+
 		int get_socket() {
 			return this->__sock;
 		}
@@ -159,6 +158,7 @@ namespace muzzley {
 		basic_socketstream() :
 		__stream_type(&__buf) {
 		};
+
 		basic_socketstream(int s) : __stream_type(&__buf) {
 			__buf.set_socket(s);
 		}
@@ -203,6 +203,7 @@ namespace muzzley {
 			std::copy(reinterpret_cast<char*>(_he->h_addr), reinterpret_cast<char*>(_he->h_addr) + _he->h_length, reinterpret_cast<char*>(&_sin.sin_addr.s_addr));
 			_sin.sin_family = AF_INET;
 			_sin.sin_port = htons(_port);
+
 			if (::connect(_sd, reinterpret_cast<sockaddr*>(&_sin), sizeof(_sin)) < 0) {
 				__stream_type::setstate(std::ios::failbit);
 				__buf.set_socket(0);
@@ -232,6 +233,7 @@ namespace muzzley {
 		basic_serversocketstream() :
 		__stream_type(&__buf) {
 		};
+
 		basic_serversocketstream(int s) : __stream_type(&__buf) {
 			__buf.set_socket(s);
 		}

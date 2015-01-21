@@ -50,6 +50,8 @@ When connecting to the **muzzley** cloud platform, *SSL/TLS* connections are ena
 
 Note that we **strongly discourage you disabling this capabilities**, this parameter is available for chipsets that have specialized components that handle encryption/decryption.
 
+If you decide to disable SSL, you should exclude the linkage options ***-lssl -lcrypto*** when compiling your application (see examples below).
+
 ### Enabling HTTP(s) support
 
 Being the purpose of this library to interact with the Muzzley platform, you may need to make HTTP request to the Muzzle API. Hence, an HTTP(s) abstraction classes are supplied. To build and install this features as a part of the library, you must provide the ***--enable-http*** argument to the *configure* script:
@@ -79,7 +81,7 @@ In the `Examples` folder, you can find several examples of muzzley-enabled appli
 
 To compile and run the Galileo example, for instance, you'd execute the following commands:
 
-> $ g++ -std=c++0x examples/galileo_app.cpp -o myapp -lmuzzley -lpthread
+> $ g++ -std=c++0x examples/galileo_app.cpp -o myapp -lpthread -lmuzzley -lssl -lcrypto 
 
 > $ ./myapp
 
@@ -120,7 +122,7 @@ int main(int argc, char* argv[]) {
 
 A compilation command could look something like this:
 
-> $ g++ -std=c++0x main.cpp -o mymuzzley -lpthread -lmuzzley
+> $ g++ -std=c++0x main.cpp -o mymuzzley -lpthread -lmuzzley -lssl -lcrypto
 
 # MULTI-THREADING
 
