@@ -684,11 +684,15 @@ void muzzley::JSONObjT::push(JSONElementT* _value) {
 }
 
 void muzzley::JSONObjT::pop(int _name) {
-	this->pop(to_string(_name));
+	string _sname;
+	muzzley::tostr(_sname, _name);
+	this->pop(_sname);
 }
 
 void muzzley::JSONObjT::pop(size_t _name) {
-	this->pop(to_string(_name));
+	string _sname;
+	muzzley::tostr(_sname, _name);
+	this->pop(_sname);
 }
 
 void muzzley::JSONObjT::pop(const char* _name) {
