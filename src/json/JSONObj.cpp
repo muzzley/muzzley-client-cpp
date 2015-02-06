@@ -746,7 +746,9 @@ muzzley::JSONPtr& muzzley::JSONObjT::operator[](int _idx) {
 }
 
 muzzley::JSONPtr& muzzley::JSONObjT::operator[](size_t _idx) {
-	return (* this)[to_string(_idx)];
+	string _sidx;
+	muzzley::tostr(_sidx, _idx);
+	return (* this)[_sidx];
 }
 
 muzzley::JSONPtr& muzzley::JSONObjT::operator[](const char* _idx) {
