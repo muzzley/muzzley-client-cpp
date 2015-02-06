@@ -10,7 +10,7 @@ This library depends on:
 - pthread
 - autotools
 - libtool
-- [OpenSSL][open_ssl] (libraries and development packages)
+- [OpenSSL's libssl and libcrypto][open_ssl] (libraries and development packages)
 
 # VERSIONING
 
