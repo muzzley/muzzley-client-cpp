@@ -39,7 +39,8 @@ namespace muzzley {
 		error = 1,
 		warning = 2,
 		info = 3,
-		debug = 4
+		debug = 4,
+		info2 = 5
 	};
 
 	void log(string __text, muzzley::LogLevel _level);
