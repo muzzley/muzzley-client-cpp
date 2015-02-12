@@ -16,10 +16,6 @@ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef PACKAGE
-#include <muzzley/config.h>
-#endif
-
 #include <muzzley/base/assert.h>
 
 #include <muzzley/exceptions/AssertionException.h>

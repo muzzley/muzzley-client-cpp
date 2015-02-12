@@ -18,9 +18,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #pragma once
 
-#ifndef PACKAGE
 #include <muzzley/config.h>
-#endif
 #ifdef HAVE_HTTP_CLIENT
 
 

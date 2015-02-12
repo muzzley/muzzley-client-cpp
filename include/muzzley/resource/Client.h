@@ -18,9 +18,7 @@
 
 #pragma once
 
-#ifndef PACKAGE
 #include <muzzley/config.h>
-#endif
 #include <muzzley/json/JSONObj.h>
 #ifndef NOT_HAVE_SECURE_CHANNEL
 	#include <muzzley/stream/SSLSocketStreams.h>

@@ -15,9 +15,7 @@
  TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef PACKAGE
 #include <muzzley/config.h>
-#endif
 #ifdef HAVE_HTTP_CLIENT
 
 #include <muzzley/stream/SSLSocketStreams.h>
