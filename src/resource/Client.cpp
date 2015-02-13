@@ -423,7 +423,18 @@ bool muzzley::Client::write(string& _to_send) {
 	int _len = _to_send.length();
 
 	this->__channel << (unsigned char) 0x81;
-	if (_len > 125) {
+	if (_len > 65535) {
+		this->__channel << (unsigned char) 0x7F;
+		this->__channel << (unsigned char) 0x00;
+		this->__channel << (unsigned char) 0x00;
+		this->__channel << (unsigned char) 0x00;
+		this->__channel << (unsigned char) 0x00;
+		this->__channel << ((unsigned char) ((_len >> 24) & 0xFF));
+		this->__channel << ((unsigned char) ((_len >> 16) & 0xFF));
+		this->__channel << ((unsigned char) ((_len >> 8) & 0xFF));
+		this->__channel << ((unsigned char) (_len & 0xFF));
+	}
+	else if (_len > 125) {
 		this->__channel << (unsigned char) 0xFE;
 		this->__channel << ((unsigned char) (_len >> 8));
 		this->__channel << ((unsigned char) (_len & 0xFF));

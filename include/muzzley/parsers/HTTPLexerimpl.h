@@ -40,9 +40,10 @@ namespace muzzley {
 /*
 #include <muzzley/parsers/HTTPLexerimpl.h>
     size_t              d_content_length;
-    long int          d_chunked_length;
+    long int            d_chunked_length;
     bool                d_chunked_body;
-    std::string      d_chunked;
+    std::string         d_chunked_trailer;
+    std::string         d_chunked;
 */
 
 #endif
