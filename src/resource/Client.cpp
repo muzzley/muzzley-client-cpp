@@ -1230,6 +1230,7 @@ void muzzley::Client::subscribe(muzzley::Subscription& _to_property, muzzley::Ca
 			}
 			_found->second.push_back((string) _data["d"]["channel"]["id"]);
 		}
+		return true;
 	});
 }
 
@@ -1289,6 +1290,7 @@ void muzzley::Client::unsubscribe(muzzley::Subscription& _to_property) {
 					_client.__stack.erase(_ch);
 				}
 			}
+			return true;
 		});
 	}
 	this->__namespaces.erase(_found);

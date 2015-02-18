@@ -345,6 +345,9 @@ double muzzley::JSONElementT::number() {
 		case muzzley::JSBoolean : {
 			return (double) this->__target.__boolean;
 		}
+		default : {
+			return 0;
+		}
 	}
 	return 0;
 }
@@ -985,7 +988,7 @@ muzzley::JSONPtr::~JSONPtr(){
 
 muzzley::JSONElementT& muzzley::JSONPtr::value() {
 	if (this->get() == nullptr) {
-		*(muzzley::undefined.get());
+		return *(muzzley::undefined.get());
 	}
 	return *(this->get());
 }

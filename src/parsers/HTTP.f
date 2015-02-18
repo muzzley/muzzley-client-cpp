@@ -312,7 +312,7 @@ string	d_chunked;
 				more();
 			}
 		}
-		else if (matched().length() - 2 == d_chunked_length) {
+		else if (matched().length() - 2 == (size_t) d_chunked_length) {
 			d_chunked.insert(d_chunked.length(), matched());
 			muzzley::trim(d_chunked);
 			setMatched("");
