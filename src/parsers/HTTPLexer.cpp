@@ -569,7 +569,7 @@ HTTPLexerBase::HTTPLexerBase(std::istream &in, std::ostream &out)
     d_in(0),
     d_input(new std::istream(in.rdbuf())),
     d_dfaBase__(s_dfa__)
-{}
+{ d_more = false; }
 
 void HTTPLexerBase::switchStream__(std::istream &in, size_t lineNr)
 {
@@ -594,7 +594,7 @@ HTTPLexerBase::HTTPLexerBase(std::string const &infilename, std::string const &o
     d_tailCount(51, std::numeric_limits<size_t>::max()),
     d_input(new std::ifstream(infilename)),
     d_dfaBase__(s_dfa__)
-{}
+{ d_more = false; }
 
 void HTTPLexerBase::switchStreams(std::istream &in, std::ostream &out)
 {
