@@ -190,6 +190,8 @@ namespace muzzley {
 		JSONObjT::iterator begin();
 		JSONObjT::iterator end();
 
+		operator string();
+
 		template <typename T>
 		bool operator==(T _rhs) {
 			return *(this->get()) == _rhs;
@@ -230,6 +232,8 @@ namespace muzzley {
 
 		JSONArrT::iterator begin();
 		JSONArrT::iterator end();
+
+		operator string();
 
 		template <typename T>
 		bool operator==(T _rhs) {

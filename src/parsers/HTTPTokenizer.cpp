@@ -930,7 +930,7 @@ try
 
 
             int action = lookup(false);     // lookup d_token__ in d_state__
-
+            //cout << "- " << action << endl << flush;
             if (action > 0)                 // SHIFT: push a new state
             {
                 push__(action);

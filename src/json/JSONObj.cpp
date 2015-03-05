@@ -329,7 +329,13 @@ bool muzzley::JSONElementT::bln() {
 }
 
 time_t muzzley::JSONElementT::date() {
-	assertz(this->__target.__type == muzzley::JSDate, "this element is not of type JSDate", 0, 0);
+	assertz(this->__target.__type == muzzley::JSDate || this->__target.__type == muzzley::JSString, "this element is not of type JSDate", 0, 0);
+	if (this->__target.__type == muzzley::JSString) {
+		time_t _n = 0;
+		string _s(this->__target.__string.get()->data());
+		muzzley::fromstr(_s, &_n, "%Y-%m-%dT%H-%M-%S.000Z");
+		return _n;
+	}
 	return this->__target.__date;
 }
 
@@ -605,6 +611,9 @@ void muzzley::JSONElementT::prettify(ostream& _out, uint _n_tabs) {
 			break;
 		}
 	}
+	if (_n_tabs == 0) {
+		_out << endl << flush;
+	}
 }
 
 void muzzley::JSONElementT::prettify(string& _out, uint _n_tabs) {
@@ -650,6 +659,9 @@ void muzzley::JSONElementT::prettify(string& _out, uint _n_tabs) {
 			_out.insert(_out.length(), "\"");
 			break;
 		}
+	}
+	if (_n_tabs == 0) {
+		_out.insert(_out.length(), "\n");
 	}
 }
 
@@ -1074,10 +1086,10 @@ muzzley::JSONPtr::operator int() {
 	}
 	switch(this->get()->type()) {
 		case muzzley::JSObject : {
-			return this->get()->obj()->size();;
+			return this->get()->obj()->size();
 		}
 		case muzzley::JSArray : {
-			return this->get()->arr()->size();;
+			return this->get()->arr()->size();
 		}
 		case muzzley::JSString : {
 			int _n = 0;
@@ -1110,10 +1122,10 @@ muzzley::JSONPtr::operator long() {
 	}
 	switch(this->get()->type()) {
 		case muzzley::JSObject : {
-			return this->get()->obj()->size();;
+			return this->get()->obj()->size();
 		}
 		case muzzley::JSArray : {
-			return this->get()->arr()->size();;
+			return this->get()->arr()->size();
 		}
 		case muzzley::JSString : {
 			long _n = 0;
@@ -1146,10 +1158,10 @@ muzzley::JSONPtr::operator long long() {
 	}
 	switch(this->get()->type()) {
 		case muzzley::JSObject : {
-			return this->get()->obj()->size();;
+			return this->get()->obj()->size();
 		}
 		case muzzley::JSArray : {
-			return this->get()->arr()->size();;
+			return this->get()->arr()->size();
 		}
 		case muzzley::JSString : {
 			long long _n = 0;
@@ -1183,10 +1195,10 @@ muzzley::JSONPtr::operator unsigned int() {
 	}
 	switch(this->get()->type()) {
 		case muzzley::JSObject : {
-			return this->get()->obj()->size();;
+			return this->get()->obj()->size();
 		}
 		case muzzley::JSArray : {
-			return this->get()->arr()->size();;
+			return this->get()->arr()->size();
 		}
 		case muzzley::JSString : {
 			unsigned int _n = 0;
@@ -1220,10 +1232,10 @@ muzzley::JSONPtr::operator size_t() {
 	}
 	switch(this->get()->type()) {
 		case muzzley::JSObject : {
-			return this->get()->obj()->size();;
+			return this->get()->obj()->size();
 		}
 		case muzzley::JSArray : {
-			return this->get()->arr()->size();;
+			return this->get()->arr()->size();
 		}
 		case muzzley::JSString : {
 			size_t _n = 0;
@@ -1256,10 +1268,10 @@ muzzley::JSONPtr::operator double() {
 	}
 	switch(this->get()->type()) {
 		case muzzley::JSObject : {
-			return (double) this->get()->obj()->size();;
+			return (double) this->get()->obj()->size();
 		}
 		case muzzley::JSArray : {
-			return (double) this->get()->arr()->size();;
+			return (double) this->get()->arr()->size();
 		}
 		case muzzley::JSString : {
 			double _n = 0;
@@ -1334,6 +1346,15 @@ muzzley::JSONObjT::iterator muzzley::JSONObj::end() {
 	return (* this)->end();
 }
 
+muzzley::JSONObj::operator string() {
+	if (this->get() == nullptr) {
+		return "";
+	}
+	string _out;
+	(* this)->stringify(_out);
+	return _out;
+}
+
 muzzley::JSONObj& muzzley::JSONObj::operator<<(string _in) {
 	(* this)->push(_in);
 	return * this;
@@ -1355,6 +1376,15 @@ muzzley::JSONArr::JSONArr(JSONArrT* _target) : shared_ptr<JSONArrT>(_target) {
 }
 
 muzzley::JSONArr::~JSONArr(){
+}
+
+muzzley::JSONArr::operator string() {
+	if (this->get() == nullptr) {
+		return "";
+	}
+	string _out;
+	(* this)->stringify(_out);
+	return _out;
 }
 
 muzzley::JSONArrT::iterator muzzley::JSONArr::begin() {

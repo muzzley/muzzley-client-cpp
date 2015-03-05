@@ -39,10 +39,10 @@ namespace muzzley {
 		error = 1,
 		warning = 2,
 		info = 3,
-		debug = 4,
-		info2 = 5
+		debug = 4
 	};
 
+	void log(string __prefix, string __text, muzzley::LogLevel _level);
 	void log(string __text, muzzley::LogLevel _level);
 	void process_mem_usage(double& vm_usage, double& resident_set);
 	void log_mem_usage();
