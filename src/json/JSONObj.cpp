@@ -783,12 +783,12 @@ void muzzley::JSONObjT::stringify(string& _out) {
 	bool _first = true;
 	for (auto _i : * this) {
 		if (!_first) {
-			_out.insert(_out.length(), ", ");
+			_out.insert(_out.length(), ",");
 		}
 		_first = false;
 		_out.insert(_out.length(), "\"");
 		_out.insert(_out.length(), _i.first);
-		_out.insert(_out.length(), "\" : ");
+		_out.insert(_out.length(), "\":");
 		_i.second->stringify(_out);
 	}
 	_out.insert(_out.length(), "}");
@@ -799,10 +799,10 @@ void muzzley::JSONObjT::stringify(ostream& _out) {
 	bool _first = true;
 	for (auto _i : * this) {
 		if (!_first) {
-			_out << ", ";
+			_out << ",";
 		}
 		_first = false;
-		_out << "\"" << _i.first << "\" : " << flush;
+		_out << "\"" << _i.first << "\":" << flush;
 		_i.second->stringify(_out);
 	}
 	_out << "}" << flush;
@@ -937,7 +937,7 @@ void muzzley::JSONArrT::stringify(string& _out) {
 	bool _first = true;
 	for (auto _i : * this) {
 		if (!_first) {
-			_out.insert(_out.length(), ", ");
+			_out.insert(_out.length(), ",");
 		}
 		_first = false;
 		_i->stringify(_out);
@@ -950,7 +950,7 @@ void muzzley::JSONArrT::stringify(ostream& _out) {
 	bool _first = true;
 	for (auto _i : * this) {
 		if (!_first) {
-			_out << ", ";
+			_out << ",";
 		}
 		_first = false;
 		_i->stringify(_out);
