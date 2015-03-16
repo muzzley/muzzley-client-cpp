@@ -63,6 +63,10 @@ void muzzley::JSONTokenizerLexer::init(muzzley::JSONType _in_type, const string 
 }
 
 void muzzley::JSONTokenizerLexer::init(muzzley::JSONType _in_type) {
+	if (this->__parent->type() != muzzley::JSObject && this->__parent->type() != muzzley::JSArray) {
+		this->__parent->type(_in_type);
+		return;
+	}
 	switch (_in_type) {
 		case muzzley::JSObject : {
 			JSONObj _obj;
@@ -73,6 +77,7 @@ void muzzley::JSONTokenizerLexer::init(muzzley::JSONType _in_type) {
 				this->__parent = _ptr;
 			}
 			catch (muzzley::AssertionException& _e) {
+				cout << __FILE__ << ":" << __LINE__ << " " << _e.description() << endl << flush;
 				delete _ptr;
 				this->__parent->type(_in_type);
 			}
@@ -87,6 +92,7 @@ void muzzley::JSONTokenizerLexer::init(muzzley::JSONType _in_type) {
 				this->__parent = _ptr;
 			}
 			catch (muzzley::AssertionException& _e) {
+				cout << __FILE__ << ":" << __LINE__ << " " << _e.description() << endl << flush;
 				delete _ptr;
 				this->__parent->type(_in_type);
 			}
@@ -113,7 +119,7 @@ void muzzley::JSONTokenizerLexer::init(bool _in) {
 void muzzley::JSONTokenizerLexer::init(long long _in) {
 	JSONElementT* _ptr = new JSONElementT(_in);
 	_ptr->parent(this->__parent);
-	try {			
+	try {
 		(* this->__parent) <<  _ptr;
 	}
 	catch (muzzley::AssertionException& _e) {
@@ -126,7 +132,7 @@ void muzzley::JSONTokenizerLexer::init(long long _in) {
 void muzzley::JSONTokenizerLexer::init(double _in) {
 	JSONElementT* _ptr = new JSONElementT(_in);
 	_ptr->parent(this->__parent);
-	try {			
+	try {
 		(* this->__parent) <<  _ptr;
 	}
 	catch (muzzley::AssertionException& _e) {
@@ -139,7 +145,7 @@ void muzzley::JSONTokenizerLexer::init(double _in) {
 void muzzley::JSONTokenizerLexer::init(string _in) {
 	JSONElementT* _ptr = new JSONElementT(_in);
 	_ptr->parent(this->__parent);
-	try {			
+	try {
 		(* this->__parent) <<  _ptr;
 	}
 	catch (muzzley::AssertionException& _e) {
@@ -152,7 +158,7 @@ void muzzley::JSONTokenizerLexer::init(string _in) {
 void muzzley::JSONTokenizerLexer::init() {
 	JSONElementT* _ptr = new JSONElementT();
 	_ptr->parent(this->__parent);
-	try {			
+	try {
 		(* this->__parent) << _ptr;
 	}
 	catch (muzzley::AssertionException& _e) {
