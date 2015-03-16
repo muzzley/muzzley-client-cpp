@@ -15,8 +15,6 @@ PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
 TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR 
 PERFORMANCE OF THIS SOFTWARE.
 */
-
-
 #include <muzzley/parsers/JSONTokenizerLexer.h>
 
 muzzley::JSONTokenizerLexer::JSONTokenizerLexer(std::istream &_in, std::ostream &_out) : muzzley::JSONLexer(_in, _out) {
