@@ -42,8 +42,9 @@ void muzzley::JSONTokenizerLexer::result(muzzley::JSONType _in) {
 
 void muzzley::JSONTokenizerLexer::finish(muzzley::JSONType _in) {
 	try {			
-		//cout << "- finishing object: " << (* this->__parent) <<  " > " << this->__parent->type() << endl << flush;
-		this->__parent = this->__parent->parent();
+		muzzley::JSONElementT * _cur = this->__parent;
+		this->__parent = _cur->parent();
+		_cur->parent(nullptr);
 	}
 	catch (muzzley::AssertionException& _e) {
 		cout << __FILE__ << ":" << __LINE__ << " " << _e.description() << endl << flush;
@@ -53,7 +54,6 @@ void muzzley::JSONTokenizerLexer::finish(muzzley::JSONType _in) {
 
 void muzzley::JSONTokenizerLexer::init(muzzley::JSONType _in_type, const string _in_str) {
 	try {			
-		//cout << "- starting field: " << _in_str << endl << flush;
 		(* this->__parent) << _in_str;
 	}
 	catch (muzzley::AssertionException& _e) {
@@ -63,97 +63,101 @@ void muzzley::JSONTokenizerLexer::init(muzzley::JSONType _in_type, const string 
 }
 
 void muzzley::JSONTokenizerLexer::init(muzzley::JSONType _in_type) {
-	try {		
-		//cout << "- putting this object on hold: " << (* this->__parent) <<  " > " << this->__parent->type() << endl << flush;
-		switch (_in_type) {
-			case muzzley::JSObject : {
-				JSONObj _obj;
-				JSONElementT* _ptr = new JSONElementT(_obj);
-				_ptr->parent(this->__parent);
+	switch (_in_type) {
+		case muzzley::JSObject : {
+			JSONObj _obj;
+			JSONElementT* _ptr = new JSONElementT(_obj);
+			_ptr->parent(this->__parent);
+			try {		
 				(* this->__parent) << _ptr;
 				this->__parent = _ptr;
-				//cout << "- starting object: " << (* this->__parent) <<  " > " << this->__parent->type() << " with parent " << this->__parent->parent() << endl << flush;
-				break;
 			}
-			case muzzley::JSArray : {
-				JSONArr _arr;
-				JSONElementT* _ptr = new JSONElementT(_arr);
-				_ptr->parent(this->__parent);
-				(* this->__parent) << _ptr;
-				this->__parent = _ptr;
-				//cout << "- starting object: " << (* this->__parent) <<  " > " << this->__parent->type() << " with parent " << this->__parent->parent() << endl << flush;
-				break;
+			catch (muzzley::AssertionException& _e) {
+				delete _ptr;
+				this->__parent->type(_in_type);
 			}
-			default : {
-			}
+			break;
 		}
-	}
-	catch (muzzley::AssertionException& _e) {
-		this->__parent->type(_in_type);
+		case muzzley::JSArray : {
+			JSONArr _arr;
+			JSONElementT* _ptr = new JSONElementT(_arr);
+			_ptr->parent(this->__parent);
+			try {		
+				(* this->__parent) << _ptr;
+				this->__parent = _ptr;
+			}
+			catch (muzzley::AssertionException& _e) {
+				delete _ptr;
+				this->__parent->type(_in_type);
+			}
+			break;
+		}
+		default : {
+		}
 	}
 }
 
 void muzzley::JSONTokenizerLexer::init(bool _in) {
+	JSONElementT* _ptr = new JSONElementT(_in);
+	_ptr->parent(this->__parent);
 	try {			
-		//cout << "- adding value: " << _in << endl << flush;
-		JSONElementT* _ptr = new JSONElementT(_in);
-		_ptr->parent(this->__parent);
 		(* this->__parent) << _ptr;
 	}
 	catch (muzzley::AssertionException& _e) {
 		cout << __FILE__ << ":" << __LINE__ << " " << _e.description() << endl << flush;
+		delete _ptr;
 		throw _e;
 	}
 }
 
 void muzzley::JSONTokenizerLexer::init(long long _in) {
+	JSONElementT* _ptr = new JSONElementT(_in);
+	_ptr->parent(this->__parent);
 	try {			
-		//cout << "- adding value: " << _in << endl << flush;
-		JSONElementT* _ptr = new JSONElementT(_in);
-		_ptr->parent(this->__parent);
 		(* this->__parent) <<  _ptr;
 	}
 	catch (muzzley::AssertionException& _e) {
 		cout << __FILE__ << ":" << __LINE__ << " " << _e.description() << endl << flush;
+		delete _ptr;
 		throw _e;
 	}
 }
 
 void muzzley::JSONTokenizerLexer::init(double _in) {
+	JSONElementT* _ptr = new JSONElementT(_in);
+	_ptr->parent(this->__parent);
 	try {			
-		//cout << "- adding value: " << _in << endl << flush;
-		JSONElementT* _ptr = new JSONElementT(_in);
-		_ptr->parent(this->__parent);
 		(* this->__parent) <<  _ptr;
 	}
 	catch (muzzley::AssertionException& _e) {
 		cout << __FILE__ << ":" << __LINE__ << " " << _e.description() << endl << flush;
+		delete _ptr;
 		throw _e;
 	}
 }
 
 void muzzley::JSONTokenizerLexer::init(string _in) {
+	JSONElementT* _ptr = new JSONElementT(_in);
+	_ptr->parent(this->__parent);
 	try {			
-		//cout << "- adding value: " << _in << endl << flush;
-		JSONElementT* _ptr = new JSONElementT(_in);
-		_ptr->parent(this->__parent);
 		(* this->__parent) <<  _ptr;
 	}
 	catch (muzzley::AssertionException& _e) {
 		cout << __FILE__ << ":" << __LINE__ << " " << _e.description() << endl << flush;
+		delete _ptr;
 		throw _e;
 	}
 }
 
 void muzzley::JSONTokenizerLexer::init() {
+	JSONElementT* _ptr = new JSONElementT();
+	_ptr->parent(this->__parent);
 	try {			
-		//cout << "- adding value: " << _in << endl << flush;
-		JSONElementT* _ptr = new JSONElementT();
-		_ptr->parent(this->__parent);
 		(* this->__parent) << _ptr;
 	}
 	catch (muzzley::AssertionException& _e) {
 		cout << __FILE__ << ":" << __LINE__ << " " << _e.description() << endl << flush;
+		delete _ptr;
 		throw _e;
 	}
 }

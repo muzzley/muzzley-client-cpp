@@ -359,7 +359,7 @@ double muzzley::JSONElementT::number() {
 }
 
 muzzley::JSONElementT& muzzley::JSONElementT::operator<<(const char* _in) {
-	(*this) << string(_in);
+	(* this) << string(_in);
 	return * this;
 }
 
@@ -823,7 +823,7 @@ void muzzley::JSONObjT::prettify(string& _out, uint _n_tabs) {
 		_i.second->prettify(_out, _n_tabs + 1);
 	}
 	_out.insert(_out.length(), "\n");
-	_out.insert(_out.length(), string(_n_tabs + 1, '\t'));
+	_out.insert(_out.length(), string(_n_tabs, '\t'));
 	_out.insert(_out.length(), "}");
 }
 
