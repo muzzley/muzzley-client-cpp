@@ -31,7 +31,9 @@ using namespace __gnu_cxx;
 
 namespace muzzley {
 	extern short int log_lvl;
+	extern bool log_color;
 	extern ostream* log_fd;
+	extern const char* log_lvl_colored_names[];
 	extern const char* log_lvl_names[];
 
 	enum LogLevel {
