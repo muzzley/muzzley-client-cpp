@@ -2,6 +2,8 @@
 
 This repo contains the code for the [muzzley][muzzley_homepage] C++ client library.
 
+[![Build Status](https://travis-ci.org/muzzley/muzzley-client-cpp.svg)](https://travis-ci.org/muzzley/muzzley-client-cpp)
+
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/muzzley/muzzley-client-cpp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 # DEPENDENCIES
