@@ -1,0 +1,8 @@
+language: cpp
+install: 
+    - sudo apt-get install -qq g++ build-essential autoconf libtool libssl-dev libssl1.0.0
+before_script: 
+    - autoreconf -vfi
+script: 
+    - ./configure --prefix=/usr --enable-http --enable-logs && make 
+
