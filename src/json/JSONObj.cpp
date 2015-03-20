@@ -333,7 +333,7 @@ time_t muzzley::JSONElementT::date() {
 	if (this->__target.__type == muzzley::JSString) {
 		time_t _n = 0;
 		string _s(this->__target.__string.get()->data());
-		muzzley::fromstr(_s, &_n, "%Y-%m-%dT%H-%M-%S.000Z");
+		muzzley::fromstr(_s, &_n, "%Y-%m-%dT%H:%M:%S.000Z");
 		return _n;
 	}
 	return this->__target.__date;
@@ -562,7 +562,7 @@ void muzzley::JSONElementT::stringify(string& _out) {
 		}
 		case muzzley::JSDate : {
 			_out.insert(_out.length(), "\"");
-			muzzley::tostr(_out, this->__target.__date, "%Y-%m-%dT%H-%M-%S.000Z");
+			muzzley::tostr(_out, this->__target.__date, "%Y-%m-%dT%H:%M:%S.000Z");
 			_out.insert(_out.length(), "\"");
 			break;
 		}
@@ -655,7 +655,7 @@ void muzzley::JSONElementT::prettify(string& _out, uint _n_tabs) {
 		}
 		case muzzley::JSDate : {
 			_out.insert(_out.length(), "\"");
-			muzzley::tostr(_out, this->__target.__date, "%Y-%m-%dT%H-%M-%S.000Z");
+			muzzley::tostr(_out, this->__target.__date, "%Y-%m-%dT%H:%M:%S.000Z");
 			_out.insert(_out.length(), "\"");
 			break;
 		}
@@ -1040,7 +1040,7 @@ muzzley::JSONPtr::operator string() {
 			break;
 		}
 		case muzzley::JSDate : {
-			muzzley::tostr(_out, this->get()->date(), "%Y-%m-%dT%H-%M-%S.000Z");
+			muzzley::tostr(_out, this->get()->date(), "%Y-%m-%dT%H:%M:%S.000Z");
 			break;
 		}
 	}
