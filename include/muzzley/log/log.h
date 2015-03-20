@@ -37,11 +37,14 @@ namespace muzzley {
 	extern const char* log_lvl_names[];
 
 	enum LogLevel {
-		sys = 0,
-		error = 1,
-		warning = 2,
-		info = 3,
-		debug = 4
+		emergency = 0,
+		alert = 1,
+		critical = 2,
+		error = 3,
+		warning = 4,
+		notice = 5,
+		info = 6,
+		debug = 7
 	};
 
 	void log(string __prefix, string __text, muzzley::LogLevel _level);

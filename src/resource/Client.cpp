@@ -317,7 +317,7 @@ bool muzzley::Client::connect(string _host, uint16_t _port, string _path) {
 		_log.insert(_log.length(), _host);
 		_log.insert(_log.length(), ":");
 		muzzley::tostr(_log, _port);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 	this->__channel << _message << flush;
@@ -338,7 +338,7 @@ bool muzzley::Client::connect(string _host, uint16_t _port, string _path) {
 #ifdef MUZZLEY_DEBUG
 	{
 		string _log("received WebSocket handshake");
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 		cout << _change_protocol << endl << flush;
 	}
 #endif
@@ -566,7 +566,7 @@ void muzzley::Client::loginApp(string _app_token) {
 	{
 		string _log("login app:\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -589,7 +589,7 @@ void muzzley::Client::loginUser(string _user_token) {
 	{
 		string _log("login user:\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -654,7 +654,7 @@ void muzzley::Client::initApp(string _app_token) {
 		{
 			string _log("login app:\n-> ");
 			muzzley::tostr(_log, _message);
-			muzzley::log(_log, muzzley::sys);
+			muzzley::log(_log, muzzley::notice);
 		}
 #endif
 
@@ -733,7 +733,7 @@ void muzzley::Client::initUser(string _user_token) {
 		{
 			string _log("login app:\n-> ");
 			muzzley::tostr(_log, _message);
-			muzzley::log(_log, muzzley::sys);
+			muzzley::log(_log, muzzley::notice);
 		}
 #endif
 
@@ -784,7 +784,7 @@ void muzzley::Client::createActivity(string _activity_id) {
 	{
 		string _log("creating activity:\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -820,7 +820,7 @@ void muzzley::Client::joinActivity(string _activity_id) {
 		_log.insert(_log.length(), _activity_id);
 		_log.insert(_log.length(), ":\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -845,7 +845,7 @@ void muzzley::Client::quit() {
 	{
 		string _log("quiting:\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -871,7 +871,7 @@ void muzzley::Client::participantQuit() {
 	{
 		string _log("participant quiting:\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -897,7 +897,7 @@ void muzzley::Client::participantReady(muzzley::Callback _callback) {
 	{
 		string _log("participant ready:\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -949,7 +949,7 @@ void muzzley::Client::changeWidget(long long _participant_id, muzzley::JSONObj& 
 		muzzley::tostr(_log, _participant_id);
 		_log.insert(_log.length(), ":\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -987,7 +987,7 @@ void muzzley::Client::setupComponent(long long _participant_id, string _componen
 		muzzley::tostr(_log, _participant_id);
 		_log.insert(_log.length(), ":\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -1026,7 +1026,7 @@ void muzzley::Client::setupComponent(long long _participant_id, string _componen
 		muzzley::tostr(_log, _participant_id);
 		_log.insert(_log.length(), ":\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -1059,7 +1059,7 @@ void muzzley::Client::sendSignal(long long _participant_id, string _type, muzzle
 		muzzley::tostr(_log, _participant_id);
 		_log.insert(_log.length(), ":\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -1093,7 +1093,7 @@ void muzzley::Client::sendSignal(long long _participant_id, string _type, muzzle
 		muzzley::tostr(_log, _participant_id);
 		_log.insert(_log.length(), ":\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -1117,7 +1117,7 @@ void muzzley::Client::sendSignal(string _type, muzzley::Callback _callback) {
 	{
 		string _log("sending signal:\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -1142,7 +1142,7 @@ void muzzley::Client::sendSignal(string _type, muzzley::JSONObj& _data, muzzley:
 	{
 		string _log("sending signal:\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -1168,7 +1168,7 @@ void muzzley::Client::sendWidgetData(string _widget, string _component, string _
 	{
 		string _log("sending widget data:\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
@@ -1217,7 +1217,7 @@ void muzzley::Client::subscribe(muzzley::Subscription& _to_property, muzzley::Ca
 	{
 		string _log("sending widget data:\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 	this->write(_message,  [ _ns_channel, _callback ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
@@ -1280,7 +1280,7 @@ void muzzley::Client::unsubscribe(muzzley::Subscription& _to_property) {
 		{
 			string _log("sending widget data:\n-> ");
 			muzzley::tostr(_log, _message);
-			muzzley::log(_log, muzzley::sys);
+			muzzley::log(_log, muzzley::notice);
 		}
 #endif
 		this->write(_message,  [ _ns ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
@@ -1334,7 +1334,7 @@ void muzzley::Client::publish(muzzley::Subscription& _to_property, muzzley::Mess
 	{
 		string _log("sending widget data:\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 	this->write(_message, _callback);
@@ -1421,7 +1421,7 @@ bool muzzley::Client::handshake(muzzley::Handler _callback) {
 	{
 		string _log("sending handshake:\n-> ");
 		muzzley::tostr(_log, _message);
-		muzzley::log(_log, muzzley::sys);
+		muzzley::log(_log, muzzley::notice);
 	}
 #endif
 
