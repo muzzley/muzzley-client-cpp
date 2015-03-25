@@ -524,7 +524,14 @@ void muzzley::JSONElementT::stringify(ostream& _out) {
 			string _date;
 			muzzley::tostr(_date, (size_t) this->__target.__date / 1000, "%Y-%m-%dT%H:%M:%S");
 			_date.insert(_date.length(), ".");
-			muzzley::tostr(_date, (size_t) this->__target.__date % 1000);
+			size_t _remainder = this->__target.__date % 1000;
+			if (_remainder < 100) {
+				_date.insert(_date.length(), "0");
+				if (_remainder < 10) {
+					_date.insert(_date.length(), "0");
+				}
+			}
+			muzzley::tostr(_date, _remainder);
 			_date.insert(_date.length(), "Z");
 			_out << "\"" << _date << "\"" << flush;
 			break;
@@ -573,7 +580,14 @@ void muzzley::JSONElementT::stringify(string& _out) {
 			_out.insert(_out.length(), "\"");
 			muzzley::tostr(_out, (size_t) this->__target.__date / 1000, "%Y-%m-%dT%H:%M:%S");
 			_out.insert(_out.length(), ".");
-			muzzley::tostr(_out, (size_t) this->__target.__date % 1000);
+			size_t _remainder = this->__target.__date % 1000;
+			if (_remainder < 100) {
+				_out.insert(_out.length(), "0");
+				if (_remainder < 10) {
+					_out.insert(_out.length(), "0");
+				}
+			}
+			muzzley::tostr(_out, _remainder);
 			_out.insert(_out.length(), "Z");
 			_out.insert(_out.length(), "\"");
 			break;
@@ -620,7 +634,14 @@ void muzzley::JSONElementT::prettify(ostream& _out, uint _n_tabs) {
 			string _date;
 			muzzley::tostr(_date, (size_t) this->__target.__date / 1000, "%Y-%m-%dT%H:%M:%S");
 			_date.insert(_date.length(), ".");
-			muzzley::tostr(_date, (size_t) this->__target.__date % 1000);
+			size_t _remainder = this->__target.__date % 1000;
+			if (_remainder < 100) {
+				_date.insert(_date.length(), "0");
+				if (_remainder < 10) {
+					_date.insert(_date.length(), "0");
+				}
+			}
+			muzzley::tostr(_date, _remainder);
 			_date.insert(_date.length(), "Z");
 			_out << "\"" << _date << "\"" << flush;
 			break;
@@ -672,7 +693,14 @@ void muzzley::JSONElementT::prettify(string& _out, uint _n_tabs) {
 			_out.insert(_out.length(), "\"");
 			muzzley::tostr(_out, (size_t) this->__target.__date / 1000, "%Y-%m-%dT%H:%M:%S");
 			_out.insert(_out.length(), ".");
-			muzzley::tostr(_out, (size_t) this->__target.__date % 1000);
+			size_t _remainder = this->__target.__date % 1000;
+			if (_remainder < 100) {
+				_out.insert(_out.length(), "0");
+				if (_remainder < 10) {
+					_out.insert(_out.length(), "0");
+				}
+			}
+			muzzley::tostr(_out, _remainder);
 			_out.insert(_out.length(), "Z");
 			_out.insert(_out.length(), "\"");
 			break;
@@ -1060,7 +1088,14 @@ muzzley::JSONPtr::operator string() {
 		case muzzley::JSDate : {
 			muzzley::tostr(_out, (size_t) this->get()->date() / 1000, "%Y-%m-%dT%H:%M:%S");
 			_out.insert(_out.length(), ".");
-			muzzley::tostr(_out, (size_t) this->get()->date() % 1000);
+			size_t _remainder = this->get()->date() % 1000;
+			if (_remainder < 100) {
+				_out.insert(_out.length(), "0");
+				if (_remainder < 10) {
+					_out.insert(_out.length(), "0");
+				}
+			}
+			muzzley::tostr(_out, _remainder);
 			_out.insert(_out.length(), "Z");
 			break;
 		}
