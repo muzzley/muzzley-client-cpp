@@ -42,7 +42,7 @@ using namespace __gnu_cxx;
 
 
 namespace muzzley {
-	typedef unsigned long long mstime_t;
+	typedef unsigned long long timestamp_t;
 
 	class JSONElementT;
 	class JSONObj;
@@ -76,7 +76,7 @@ namespace muzzley {
 #endif
 		operator size_t();
 		operator double();
-		operator mstime_t();
+		operator timestamp_t();
 		operator JSONObj();
 		operator JSONArr();
 		operator JSONObj&();
@@ -305,7 +305,7 @@ namespace muzzley {
 			double __double;
 			bool __boolean;
 			void* __nil;
-			muzzley::mstime_t __date;
+			muzzley::timestamp_t __date;
 		};
 	} JSONUnion;
 
@@ -321,7 +321,7 @@ namespace muzzley {
 		JSONElementT(long long _value);
 		JSONElementT(double _value);
 		JSONElementT(bool _value);
-		JSONElementT(muzzley::mstime_t _value);
+		JSONElementT(muzzley::timestamp_t _value);
 		JSONElementT(int _value);
 		JSONElementT(size_t _value);
 #ifdef __LP64__
@@ -347,7 +347,7 @@ namespace muzzley {
 		long long intr();
 		double dbl();
 		bool bln();
-		muzzley::mstime_t date();
+		muzzley::timestamp_t date();
 		double number();
 
 		JSONElementT& operator<<(const char* _in);

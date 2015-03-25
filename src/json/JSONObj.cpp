@@ -154,7 +154,7 @@ muzzley::JSONElementT::JSONElementT(bool _value) : __parent( nullptr ) {
 	this->__target.__boolean = _value;
 }
 
-muzzley::JSONElementT::JSONElementT(muzzley::mstime_t _value) : __parent( nullptr ) {
+muzzley::JSONElementT::JSONElementT(muzzley::timestamp_t _value) : __parent( nullptr ) {
 	this->type( muzzley::JSDate);
 	this->__target.__date = _value;
 }
@@ -328,7 +328,7 @@ bool muzzley::JSONElementT::bln() {
 	return this->__target.__boolean;
 }
 
-muzzley::mstime_t muzzley::JSONElementT::date() {
+muzzley::timestamp_t muzzley::JSONElementT::date() {
 	assertz(this->__target.__type == muzzley::JSDate || this->__target.__type == muzzley::JSString, "this element is not of type JSDate", 0, 0);
 	if (this->__target.__type == muzzley::JSString) {
 		time_t _n = 0;
@@ -1319,7 +1319,7 @@ muzzley::JSONPtr::operator double() {
 	return 0;
 }
 
-muzzley::JSONPtr::operator muzzley::mstime_t() {
+muzzley::JSONPtr::operator muzzley::timestamp_t() {
 	if (this->get() == nullptr) {
 		return 0;
 	}
@@ -1338,15 +1338,13 @@ muzzley::JSONPtr::operator muzzley::mstime_t() {
 			return this->get()->date();
 		}
 		case muzzley::JSInteger : {
-			return (muzzley::mstime_t) this->get()->intr();
+			return (muzzley::timestamp_t) this->get()->intr();
 		}
 		case muzzley::JSDouble : {
-			double _intpart;
-			double _fracpart = modf(this->get()->dbl(), &_intpart);
-			return (((long long) _intpart) * 1000) + _fracpart;
+			return (muzzley::timestamp_t) this->get()->dbl();
 		}
 		case muzzley::JSBoolean : {
-			return (muzzley::mstime_t) this->get()->bln();
+			return (muzzley::timestamp_t) this->get()->bln();
 		}
 		case muzzley::JSNil : {
 			return 0;
