@@ -154,7 +154,7 @@ muzzley::JSONElementT::JSONElementT(bool _value) : __parent( nullptr ) {
 	this->__target.__boolean = _value;
 }
 
-muzzley::JSONElementT::JSONElementT(time_t _value) : __parent( nullptr ) {
+muzzley::JSONElementT::JSONElementT(muzzley::mstime_t _value) : __parent( nullptr ) {
 	this->type( muzzley::JSDate);
 	this->__target.__date = _value;
 }
@@ -328,13 +328,19 @@ bool muzzley::JSONElementT::bln() {
 	return this->__target.__boolean;
 }
 
-time_t muzzley::JSONElementT::date() {
+muzzley::mstime_t muzzley::JSONElementT::date() {
 	assertz(this->__target.__type == muzzley::JSDate || this->__target.__type == muzzley::JSString, "this element is not of type JSDate", 0, 0);
 	if (this->__target.__type == muzzley::JSString) {
 		time_t _n = 0;
+		int _ms = 0;
 		string _s(this->__target.__string.get()->data());
-		muzzley::fromstr(_s, &_n, "%Y-%m-%dT%H:%M:%S.000Z");
-		return _n;
+		size_t _idx = _s.rfind(".");
+		string _mss(_s.substr(_idx + 1));
+		_mss.assign(_mss.substr(0, _mss.length() - 1));
+		_s.assign(_s.substr(0, _idx));
+		muzzley::fromstr(_s, &_n, "%Y-%m-%dT%H:%M:%S");
+		muzzley::fromstr(_mss, &_ms);
+		return _n * 1000 + _ms;
 	}
 	return this->__target.__date;
 }
@@ -516,7 +522,10 @@ void muzzley::JSONElementT::stringify(ostream& _out) {
 		}
 		case muzzley::JSDate : {
 			string _date;
-			muzzley::tostr(_date, this->__target.__date, "%Y-%m-%dT%H:%M:%S.000Z");
+			muzzley::tostr(_date, (size_t) this->__target.__date / 1000, "%Y-%m-%dT%H:%M:%S");
+			_date.insert(_date.length(), ".");
+			muzzley::tostr(_date, (size_t) this->__target.__date % 1000);
+			_date.insert(_date.length(), "Z");
 			_out << "\"" << _date << "\"" << flush;
 			break;
 		}
@@ -562,7 +571,10 @@ void muzzley::JSONElementT::stringify(string& _out) {
 		}
 		case muzzley::JSDate : {
 			_out.insert(_out.length(), "\"");
-			muzzley::tostr(_out, this->__target.__date, "%Y-%m-%dT%H:%M:%S.000Z");
+			muzzley::tostr(_out, (size_t) this->__target.__date / 1000, "%Y-%m-%dT%H:%M:%S");
+			_out.insert(_out.length(), ".");
+			muzzley::tostr(_out, (size_t) this->__target.__date % 1000);
+			_out.insert(_out.length(), "Z");
 			_out.insert(_out.length(), "\"");
 			break;
 		}
@@ -606,7 +618,10 @@ void muzzley::JSONElementT::prettify(ostream& _out, uint _n_tabs) {
 		}
 		case muzzley::JSDate : {
 			string _date;
-			muzzley::tostr(_date, this->__target.__date, "%Y-%m-%dT%H:%M:%S.000Z");
+			muzzley::tostr(_date, (size_t) this->__target.__date / 1000, "%Y-%m-%dT%H:%M:%S");
+			_date.insert(_date.length(), ".");
+			muzzley::tostr(_date, (size_t) this->__target.__date % 1000);
+			_date.insert(_date.length(), "Z");
 			_out << "\"" << _date << "\"" << flush;
 			break;
 		}
@@ -655,7 +670,10 @@ void muzzley::JSONElementT::prettify(string& _out, uint _n_tabs) {
 		}
 		case muzzley::JSDate : {
 			_out.insert(_out.length(), "\"");
-			muzzley::tostr(_out, this->__target.__date, "%Y-%m-%dT%H:%M:%S.000Z");
+			muzzley::tostr(_out, (size_t) this->__target.__date / 1000, "%Y-%m-%dT%H:%M:%S");
+			_out.insert(_out.length(), ".");
+			muzzley::tostr(_out, (size_t) this->__target.__date % 1000);
+			_out.insert(_out.length(), "Z");
 			_out.insert(_out.length(), "\"");
 			break;
 		}
@@ -1040,7 +1058,10 @@ muzzley::JSONPtr::operator string() {
 			break;
 		}
 		case muzzley::JSDate : {
-			muzzley::tostr(_out, this->get()->date(), "%Y-%m-%dT%H:%M:%S.000Z");
+			muzzley::tostr(_out, (size_t) this->get()->date() / 1000, "%Y-%m-%dT%H:%M:%S");
+			_out.insert(_out.length(), ".");
+			muzzley::tostr(_out, (size_t) this->get()->date() % 1000);
+			_out.insert(_out.length(), "Z");
 			break;
 		}
 	}
@@ -1293,6 +1314,45 @@ muzzley::JSONPtr::operator double() {
 		}
 		case muzzley::JSDate : {
 			return (double) this->get()->date();
+		}
+	}
+	return 0;
+}
+
+muzzley::JSONPtr::operator muzzley::mstime_t() {
+	if (this->get() == nullptr) {
+		return 0;
+	}
+	switch(this->get()->type()) {
+		case muzzley::JSObject : {
+			struct timeval _tp;
+			gettimeofday(& _tp, nullptr);
+			return _tp.tv_sec * 1000 + _tp.tv_usec / 1000;
+		}
+		case muzzley::JSArray : {
+			struct timeval _tp;
+			gettimeofday(& _tp, nullptr);
+			return _tp.tv_sec * 1000 + _tp.tv_usec / 1000;
+		}
+		case muzzley::JSString : {
+			return this->get()->date();
+		}
+		case muzzley::JSInteger : {
+			return (muzzley::mstime_t) this->get()->intr();
+		}
+		case muzzley::JSDouble : {
+			double _intpart;
+			double _fracpart = modf(this->get()->dbl(), &_intpart);
+			return (((long long) _intpart) * 1000) + _fracpart;
+		}
+		case muzzley::JSBoolean : {
+			return (muzzley::mstime_t) this->get()->bln();
+		}
+		case muzzley::JSNil : {
+			return 0;
+		}
+		case muzzley::JSDate : {
+			return this->get()->date();
 		}
 	}
 	return 0;

@@ -28,6 +28,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <map>
 #include <fstream>
 #include <sstream>
+#include <cmath>
+#include <sys/time.h>
 #include <muzzley/config.h>
 #include <muzzley/base/assert.h>
 #include <muzzley/text/convert.h>
@@ -38,7 +40,9 @@ using namespace std;
 using namespace __gnu_cxx;
 #endif
 
+
 namespace muzzley {
+	typedef unsigned long long mstime_t;
 
 	class JSONElementT;
 	class JSONObj;
@@ -72,6 +76,7 @@ namespace muzzley {
 #endif
 		operator size_t();
 		operator double();
+		operator mstime_t();
 		operator JSONObj();
 		operator JSONArr();
 		operator JSONObj&();
@@ -300,7 +305,7 @@ namespace muzzley {
 			double __double;
 			bool __boolean;
 			void* __nil;
-			time_t __date;
+			muzzley::mstime_t __date;
 		};
 	} JSONUnion;
 
@@ -316,7 +321,7 @@ namespace muzzley {
 		JSONElementT(long long _value);
 		JSONElementT(double _value);
 		JSONElementT(bool _value);
-		JSONElementT(time_t _value);
+		JSONElementT(muzzley::mstime_t _value);
 		JSONElementT(int _value);
 		JSONElementT(size_t _value);
 #ifdef __LP64__
@@ -342,7 +347,7 @@ namespace muzzley {
 		long long intr();
 		double dbl();
 		bool bln();
-		time_t date();
+		muzzley::mstime_t date();
 		double number();
 
 		JSONElementT& operator<<(const char* _in);
