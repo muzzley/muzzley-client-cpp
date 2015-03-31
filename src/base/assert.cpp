@@ -18,6 +18,21 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include <muzzley/base/assert.h>
 
+std::string muzzley::stacktrace() {
+	void* _frames[MAX_FRAMES];
+	string _text;
+	size_t _fsize = backtrace(_frames, MAX_FRAMES);
+	char ** _stack(backtrace_symbols(_frames, _fsize));
+	for (size_t _i = 0 ; _i != _fsize ; ++_i ) {
+		if (_i != 0) {
+			_text.insert(_text.length(), "\n");
+		}
+		_text.insert(_text.length(), _stack[_i]);
+	}
+	free(_stack);
+	return _text;
+}
+
 extern "C" int muzzley_lib() {
 	return 1;
 }

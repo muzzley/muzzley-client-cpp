@@ -21,6 +21,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include <exception>
 #include <string>
+#include <muzzley/base/assert.h>
 
 using namespace std;
 #if !defined __APPLE__
@@ -29,7 +30,7 @@ using namespace __gnu_cxx;
 
 namespace muzzley {
 
-	class AssertionException: public std::exception {
+	class AssertionException : public std::exception {
 		private:
 			string __what;
 			int __http_code;
@@ -37,6 +38,7 @@ namespace muzzley {
 			string __description;
 			int __line;
 			string __file;
+			string __stacktrace;
 
 		public:
 			AssertionException(string _what,  int _http_code, int _code, string _desc, int _line, string _file);
@@ -44,6 +46,7 @@ namespace muzzley {
 
 			virtual const char* what() const throw();
 			virtual const char* description();
+			virtual const char* backtrace();
 			int code();
 			int status();
 	};

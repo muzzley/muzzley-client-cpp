@@ -15,10 +15,9 @@ PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
 TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR 
 PERFORMANCE OF THIS SOFTWARE.
 */
-
-
 #pragma once
 
+#include <execinfo.h>
 #include <muzzley/config.h>
 #include <muzzley/exceptions/AssertionException.h>
 
@@ -34,6 +33,8 @@ PERFORMANCE OF THIS SOFTWARE.
  */
 #define assertz(x,y,z,c) if (! (x)) { throw muzzley::AssertionException(y, z, c, #x, __LINE__, __FILE__); }
 
+#define MAX_FRAMES 10
+
 namespace muzzley {
 	enum JSONType {
 		JSObject, JSArray, JSString, JSInteger, JSDouble, JSBoolean, JSNil, JSDate
@@ -42,6 +43,8 @@ namespace muzzley {
 	enum ObjectOp {
 		pretty = 1, minified = 2, json = 4,  xml = 8,  nil = 16,  headers = 32,  params = 64,  body = 128
 	};
+
+	std::string stacktrace();
 }
 
 extern "C" int muzzley_lib();

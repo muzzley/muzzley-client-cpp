@@ -330,6 +330,7 @@ namespace muzzley {
 		virtual ~JSONElementT();
 
 		virtual JSONType type();
+		virtual string demangle();
 		virtual void type(JSONType _in);
 		virtual JSONUnion& value();
 		virtual bool ok();
