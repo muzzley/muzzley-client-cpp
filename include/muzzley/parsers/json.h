@@ -42,4 +42,9 @@ namespace muzzley {
 	muzzley::JSONElementT * make_element(T& _e) {
 		return new muzzley::JSONElementT(_e);
 	}
+
+	template <typename T>	
+	muzzley::JSONPtr make_ptr(T& _e) {
+		return muzzley::JSONPtr(new muzzley::JSONElementT(_e));
+	}
 }

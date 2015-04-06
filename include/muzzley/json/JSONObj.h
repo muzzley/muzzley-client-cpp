@@ -85,7 +85,8 @@ namespace muzzley {
 		friend istream& operator>>(istream& _in, JSONPtr& _out) {
 			_out.parse(_in);
 			return _in;
-		};		
+		};
+
 	};
 
 	typedef JSONPtr JSONElement;
@@ -113,6 +114,8 @@ namespace muzzley {
 		virtual void pop(size_t _idx);
 		virtual void pop(const char* _idx);
 		virtual void pop(string _idx);
+
+		muzzley::JSONPtr getPath(std::string _path, std::string _separator = ".");
 
 		bool operator==(JSONObjT& _in);
 		bool operator==(JSONObj& _in);
@@ -159,6 +162,8 @@ namespace muzzley {
 		virtual void pop(size_t _idx);
 		virtual void pop(const char* _idx);
 		virtual void pop(string _idx);
+
+		muzzley::JSONPtr getPath(std::string _path, std::string _separator = ".");
 
 		bool operator==(JSONArrT& _in);
 		bool operator==(JSONArr& _in);
@@ -422,6 +427,8 @@ namespace muzzley {
 			_in.stringify(_out);
 			return _out;
 		};
+
+		muzzley::JSONPtr getPath(std::string _path, std::string _separator = ".");
 
 		virtual void stringify(string& _out);
 		virtual void stringify(ostream& _out);

@@ -515,6 +515,28 @@ bool muzzley::JSONElementT::operator!=(muzzley::JSONPtr& _rhs) {
 	return * this != * _rhs;
 }
 
+
+muzzley::JSONPtr muzzley::JSONElementT::getPath(std::string _path, std::string _separator) {
+	assertz(this->__target.__type >= 0, "the type must be a valid value", 0, 0);
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			return this->__target.__object->getPath(_path, _separator);
+		}
+		case muzzley::JSArray : {
+			return this->__target.__array->getPath(_path, _separator);
+		}
+		case muzzley::JSString :
+		case muzzley::JSInteger :
+		case muzzley::JSDouble :
+		case muzzley::JSBoolean :
+		case muzzley::JSNil :
+		case muzzley::JSDate : {
+			return muzzley::undefined;
+		}
+	}
+	return muzzley::undefined;
+}
+
 void muzzley::JSONElementT::stringify(ostream& _out) {
 	switch(this->__target.__type) {
 		case muzzley::JSObject : {
@@ -797,6 +819,23 @@ void muzzley::JSONObjT::pop(string _name) {
 	}
 }
 
+muzzley::JSONPtr muzzley::JSONObjT::getPath(std::string _path, std::string _separator) {
+	std::istringstream _iss(_path);
+	std::string _part;
+	getline(_iss, _part, _separator[0]);
+	muzzley::JSONPtr _current = (* this)[_part];
+	while(_iss.good()) {
+		getline(_iss, _part, _separator[0]);
+		if (_current[_part]->ok()) {
+			_current = _current[_part];
+		}
+		else {
+			return muzzley::undefined;
+		}
+	}
+	return _current;
+}
+
 bool muzzley::JSONObjT::operator==(muzzley::JSONObjT& _rhs) {
 	for (auto _f : * this) {
 		auto _found = _rhs.find(_f.first);
@@ -960,6 +999,23 @@ void muzzley::JSONArrT::pop(size_t _idx) {
 	assertz(_idx >= 0, "the index of the element you want to remove must be higher then 0", 0, 0);
 	assertz(_idx < this->size(), "the index of the element you want to remove must be lower than the array size", 0, 0);
 	this->erase(this->begin() + _idx);
+}
+
+muzzley::JSONPtr muzzley::JSONArrT::getPath(std::string _path, std::string _separator) {
+	std::istringstream _iss(_path);
+	std::string _part;
+	getline(_iss, _part, _separator[0]);
+	muzzley::JSONPtr _current = (* this)[_part];
+	while(_iss.good()) {
+		getline(_iss, _part, _separator[0]);
+		if (_current[_part]->ok()) {
+			_current = _current[_part];
+		}
+		else {
+			return muzzley::undefined;
+		}
+	}
+	return _current;			
 }
 
 bool muzzley::JSONArrT::operator==(muzzley::JSONArrT& _rhs) {
