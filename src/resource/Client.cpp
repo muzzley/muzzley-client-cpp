@@ -355,7 +355,6 @@ bool muzzley::Client::connect(string _host, uint16_t _port, string _path) {
 	{
 		string _log("received WebSocket handshake");
 		muzzley::log(_log, muzzley::notice);
-		cout << _change_protocol << endl << flush;
 	}
 #endif
 
