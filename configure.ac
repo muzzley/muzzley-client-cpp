@@ -23,6 +23,7 @@ AC_ARG_ENABLE(logs, [  --enable-logs		Turn on log messages ],
 
 dnl Check for libraries
 AC_HAVE_LIBRARY(pthread)
+AC_HAVE_LIBRARY(rt)
 if test -z $enable_ssl
 then
 	AC_HAVE_LIBRARY(ssl)

@@ -1,20 +1,20 @@
 /*
- Copyright (c) 2014, Muzzley
+Copyright (c) 2014, Muzzley
 
- Permission to use, copy, modify, and/or distribute this software for
- any purpose with or without fee is hereby granted, provided that the
- above copyright notice and this permission notice appear in all
- copies.
+Permission to use, copy, modify, and/or distribute this software for
+any purpose with or without fee is hereby granted, provided that the
+above copyright notice and this permission notice appear in all
+copies.
 
- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
- WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
- AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
- DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
- PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
- TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
- PERFORMANCE OF THIS SOFTWARE.
- */
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
+PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+*/
 
 #include <muzzley/resource/Client.h>
 #include <muzzley/base/assert.h>
@@ -24,8 +24,9 @@
 #include <bitset>
 #include <muzzley/log/log.h>
 
-muzzley::Client::Client() :
-	__serial(1),  __endpoint_host("geoplatform.muzzley.com") {
+#define HEARTBEAT_SECONDS 75
+
+muzzley::Client::Client() : __serial( 1 ),  __endpoint_host("geoplatform.muzzley.com") {
 	this->__mtx = new pthread_mutex_t();
 	this->__thr = new pthread_t();
 	pthread_mutexattr_init(&this->__attr);
@@ -42,6 +43,8 @@ muzzley::Client::Client() :
 	this->__has_handshake = false;
 
 	this->__participant_id = -1;
+
+	this->__heartbeat_timer = nullptr;
 
 	muzzley::log_fd = &cout;
 
@@ -128,7 +131,7 @@ muzzley::Client::Client() :
 		if (_client.isReplyNeeded(_data)) {
 			muzzley::Message _m(JSON(
 				"s" << true
-			));
+				));
 			_client.reply(_data, _m);
 		}
 		return true;
@@ -146,14 +149,14 @@ muzzley::Client::Client() :
 			if (_client.isReplyNeeded(_data)) {
 				muzzley::Message _m(JSON(
 					"s" << true
-				));
+					));
 				_client.reply(_data, _m);
 			}
 		}
 		else if (_client.isReplyNeeded(_data)) {
 			muzzley::Message _m(JSON(
 				"s" << false
-			));
+				));
 			_client.reply(_data, _m);
 		}
 		return true;
@@ -175,16 +178,16 @@ muzzley::Client::Client() :
 				muzzley::Message _m(JSON(
 					"h" << JSON (
 						"pid" << _pid
-					) <<
+						) <<
 					"s" << true
-				));
+					));
 				_client.reply(_data, _m);
 			}
 		}
 		else {
 			muzzley::Message _m(JSON(
 				"s" << false
-			));
+				));
 			_client.reply(_data, _m);
 		}
 		return true;
@@ -202,14 +205,14 @@ muzzley::Client::Client() :
 			if (_client.isReplyNeeded(_data)) {
 				muzzley::Message _m(JSON(
 					"s" << true
-				));
+					));
 				_client.reply(_data, _m);
 			}
 		}
 		else if (_client.isReplyNeeded(_data)) {
 			muzzley::Message _m(JSON(
 				"s" << false
-			));
+				));
 			_client.reply(_data, _m);
 		}
 		return true;
@@ -219,7 +222,7 @@ muzzley::Client::Client() :
 		if (_client.isReplyNeeded(_data)) {
 			muzzley::Message _m(JSON(
 				"s" << true
-			));
+				));
 			_client.reply(_data, _m);
 		}
 		return true;
@@ -229,7 +232,7 @@ muzzley::Client::Client() :
 		if (_client.isReplyNeeded(_data)) {
 			muzzley::Message _m(JSON(
 				"s" << true
-			));
+				));
 			_client.reply(_data, _m);
 		}
 		return true;
@@ -257,15 +260,16 @@ void muzzley::Client::on(muzzley::EventType _type, muzzley::Handler _handler) {
 	this->__handlers[_type].push_back(_handler);
 }
 
-void muzzley::Client::trigger(muzzley::EventType _type, muzzley::Message& _data) {
+bool muzzley::Client::trigger(muzzley::EventType _type, muzzley::Message& _data) {
 	if (_type < 0 || _type > N_EVENT_TYPES) {
-		return;
+		return false;
 	}
 	for (std::vector<muzzley::Handler>::iterator _i = this->__handlers[_type].begin(); _i != this->__handlers[_type].end(); _i++) {
-		if (!(*_i)(_data, *this)) {
-			return;
+		if (!(* _i)(_data, * this)) {
+			return false;
 		}
 	}
+	return true;
 }
 
 void muzzley::Client::on(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Callback _callback) {
@@ -278,9 +282,15 @@ void muzzley::Client::off(muzzley::EventType _type, muzzley::Subscription& _from
 	this->unsubscribe(_from_property);
 }
 
-void muzzley::Client::trigger(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback) {
+bool muzzley::Client::trigger(muzzley::EventType _type, muzzley::Subscription& _to_property, muzzley::Message& _payload, muzzley::Callback _callback) {
 	assertz(_type == muzzley::Publish, "the '_type' parameter must be muzzley::Publish", 500, 300);
-	this->publish(_to_property, _payload, _callback);
+	try {
+		this->publish(_to_property, _payload, _callback);
+	}
+	catch (muzzley::AssertionException& _e) {
+		return false;
+	}
+	return true;
 }
 
 bool muzzley::Client::connect(string _host, uint16_t _port, string _path) {
@@ -310,7 +320,13 @@ bool muzzley::Client::connect(string _host, uint16_t _port, string _path) {
 	_message.insert(_message.length(), CRLF);
 	_message.insert(_message.length(), CRLF);
 
-	this->__channel.open(_host, _port);
+	while (!this->__channel.open(_host, _port)) {
+		muzzley::Message _empty;
+		if (!this->trigger(muzzley::Reconnect, _empty)) {
+			throw muzzley::ClosedException("could not connect to host");
+		}
+		sleep(HEARTBEAT_SECONDS);
+	}
 #ifdef MUZZLEY_DEBUG
 	{
 		string _log("connecting to ");
@@ -343,6 +359,7 @@ bool muzzley::Client::connect(string _host, uint16_t _port, string _path) {
 	}
 #endif
 
+	this->arm();
 	return true;
 }
 
@@ -351,17 +368,75 @@ void muzzley::Client::disconnect() {
 	this->__channel << (uint8_t) 0x00;
 	this->__channel << flush;
 	this->__channel.close();
-	this->__is_connected = false;
 }
 
-void muzzley::Client::reconnect() {
+bool muzzley::Client::reconnect() {
 	if (this->isConnected()) {
 		this->disconnect();
 	}
-	if (this->connect(this->__endpoint_host, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
-		this->__is_connected = true;
-		this->handshake(nullptr);
+	this->disarm();
+	this->__queue.erase(this->__queue.begin(), this->__queue.end());
+	this->__participants.erase(this->__participants.begin(), this->__participants.end());
+	this->__stack.erase(this->__stack.begin(), this->__stack.end());
+	this->__namespaces.erase(this->__namespaces.begin(), this->__namespaces.end());
+	muzzley::Message _empty;
+	if (this->trigger(muzzley::Reconnect, _empty)) {
+		if (this->__app_token.length() != 0) {
+			if (this->__is_one_step_initialization) {
+				this->initApp(this->__app_token);
+			}
+			else {
+				this->connectApp(this->__app_token, this->__activity_id);
+			}
+		}
+		else {
+			if (this->__is_one_step_initialization) {
+				this->initUser(this->__user_token);			
+			}
+			else {
+				this->connectUser(this->__user_token, this->__activity_id);
+			}
+		}
+		return true;
 	}
+	return false;
+}
+
+void __HEARTBEAT_CALLBACK__(union sigval _arg) {
+	muzzley::Client * _client = (muzzley::Client *) _arg.sival_ptr;
+	_client->disconnect();
+}
+
+bool muzzley::Client::arm() {
+	struct sigevent _se;
+	struct itimerspec _ts;
+
+	_se.sigev_notify = SIGEV_THREAD;
+	_se.sigev_value.sival_ptr = this;
+	_se.sigev_notify_function = __HEARTBEAT_CALLBACK__;
+	_se.sigev_notify_attributes = nullptr;
+
+	if ( -1 == timer_create(CLOCK_REALTIME, & _se, & this->__heartbeat_timer)) {
+		return false;
+	}
+
+	_ts.it_value.tv_sec = HEARTBEAT_SECONDS;
+	_ts.it_value.tv_nsec = 0;
+	_ts.it_interval.tv_sec = HEARTBEAT_SECONDS;
+	_ts.it_interval.tv_nsec = 0 ;
+
+	if (-1 == timer_settime(this->__heartbeat_timer, 0, & _ts, nullptr)) {
+		return false;
+	}
+	return true;
+}
+
+bool muzzley::Client::disarm() {
+	if (this->__heartbeat_timer != nullptr) {
+		timer_delete(this->__heartbeat_timer);
+		this->__heartbeat_timer = nullptr;
+	}
+	return true;
 }
 
 bool muzzley::Client::read() {
@@ -420,6 +495,11 @@ bool muzzley::Client::write(muzzley::Message& _message, muzzley::Callback _callb
 }
 
 bool muzzley::Client::write(string& _to_send) {
+	if (!this->isConnected()) {
+		if (!this->reconnect()) {
+			return false;
+		}
+	}
 	int _len = _to_send.length();
 
 	this->__channel << (unsigned char) 0x81;
@@ -461,14 +541,14 @@ bool muzzley::Client::reply(muzzley::Message& _data_received, muzzley::Message& 
 		case muzzley::RequestInitiatedByEndpoint: {
 			if (!!_reply["h"]) {
 				((muzzley::JSONObj) _reply["h"]) <<
-					"t" << (int) muzzley::ReplyToEndpoint <<
-					"cid" << (string) _data_received["h"]["cid"];
+				"t" << (int) muzzley::ReplyToEndpoint <<
+				"cid" << (string) _data_received["h"]["cid"];
 			}
 			else {
 				_reply <<
-					"h" << JSON(
-						"t" << (int) muzzley::ReplyToEndpoint <<
-						"cid" << (string) _data_received["h"]["cid"]
+				"h" << JSON(
+					"t" << (int) muzzley::ReplyToEndpoint <<
+					"cid" << (string) _data_received["h"]["cid"]
 					);
 			}
 			break;
@@ -476,20 +556,20 @@ bool muzzley::Client::reply(muzzley::Message& _data_received, muzzley::Message& 
 		case muzzley::RequestInitiatedMuzzleyCore: {
 			if (!!_reply["h"]) {
 				((muzzley::JSONObj) _reply["h"]) <<
-					"t" << (int) muzzley::ReplyToEndpoint <<
-					"cid" << (string) _data_received["h"]["cid"];
+				"t" << (int) muzzley::ReplyToEndpoint <<
+				"cid" << (string) _data_received["h"]["cid"];
 			}
 			else {
 				_reply <<
-					"h" << JSON(
-						"t" << (int) muzzley::ReplyToMuzzleyCore <<
-						"cid" << (string) _data_received["h"]["cid"]
+				"h" << JSON(
+					"t" << (int) muzzley::ReplyToMuzzleyCore <<
+					"cid" << (string) _data_received["h"]["cid"]
 					);
 			}
 			break;
 		}
 		default:
-			return false;
+		return false;
 	}
 
 	return this->write(_reply);
@@ -500,7 +580,6 @@ void muzzley::Client::connectApp(string _app_token, string _activity_id) {
 	this->__activity_id.assign(_activity_id.data());
 	this->__is_static_activity = _activity_id.length() != 0;
 	if (this->connect(this->__endpoint_host, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
-		this->__is_connected = true;
 		if (this->__is_loop_assynchronous) {
 			this->start();
 			this->handshake([ _app_token ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
@@ -528,7 +607,6 @@ void muzzley::Client::connectUser(string _user_token, string _activity_id) {
 	this->__activity_id.assign(_activity_id.data());
 	this->__is_static_activity = _activity_id.length() != 0;
 	if (this->connect(this->__endpoint_host, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
-		this->__is_connected = true;
 		if (this->__is_loop_assynchronous) {
 			this->start();
 			this->handshake([ _user_token ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
@@ -555,12 +633,12 @@ void muzzley::Client::loginApp(string _app_token) {
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-		) <<
+			) <<
 		"a" << "loginApp" <<
 		"d" << JSON(
 			"token" << _app_token
-		)
-	));
+			)
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -578,12 +656,12 @@ void muzzley::Client::loginUser(string _user_token) {
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-		) <<
+			) <<
 		"a" << "loginUser" <<
 		"d" << JSON(
 			"token" << _user_token
-		)
-	));
+			)
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -601,7 +679,6 @@ void muzzley::Client::initApp(string _app_token) {
 	this->__is_static_activity = false;
 	this->__is_one_step_initialization = true;
 	if (this->connect(this->__endpoint_host, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
-		this->__is_connected = true;
 		muzzley::Callback _callback = [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 			if ((bool) _data["s"] == false) {
 				return false;
@@ -635,20 +712,20 @@ void muzzley::Client::initApp(string _app_token) {
 			"h" << JSON(
 				"cid" << this->__serial <<
 				"t" << 1
-			) <<
+				) <<
 			"a" << "init" <<
 			"d" << JSON(
 				"handshake"<< JSON(
 					"protocolVersion" << "2.0" <<
 					"lib" << "C++ 0.1.0" <<
 					"userAgent" << "C++ Lib"
-					//<< "deviceId" << "68748e45-36ef-422b-bcc2-d6edcea7ce75"
-				) <<
+//<< "deviceId" << "68748e45-36ef-422b-bcc2-d6edcea7ce75"
+					) <<
 				"loginApp" << JSON(
 					"token" << _app_token
+					)
 				)
-			)
-		));
+			));
 
 #ifdef MUZZLEY_DEBUG
 		{
@@ -680,7 +757,6 @@ void muzzley::Client::initUser(string _user_token) {
 	this->__is_static_activity = false;
 	this->__is_one_step_initialization = true;
 	if (this->connect(this->__endpoint_host, MUZZLEY_ENDPOINT_PORT, MUZZLEY_ENDPOINT_PATH)) {
-		this->__is_connected = true;
 		muzzley::Callback _callback = [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 			if ((bool) _data["s"] == false) {
 				return false;
@@ -714,20 +790,20 @@ void muzzley::Client::initUser(string _user_token) {
 			"h" << JSON(
 				"cid" << this->__serial <<
 				"t" << 1
-			) <<
+				) <<
 			"a" << "init" <<
 			"d" << JSON(
 				"handshake"<< JSON(
 					"protocolVersion" << "2.0" <<
 					"lib" << "C++ 0.1.0" <<
 					"userAgent" << "C++ Lib"
-					//<< "deviceId" << "68748e45-36ef-422b-bcc2-d6edcea7ce75"
-				) <<
+//<< "deviceId" << "68748e45-36ef-422b-bcc2-d6edcea7ce75"
+					) <<
 				"loginUser" << JSON(
 					"token" << _user_token
+					)
 				)
-			)
-		));
+			));
 
 #ifdef MUZZLEY_DEBUG
 		{
@@ -762,9 +838,9 @@ void muzzley::Client::createActivity(string _activity_id) {
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-		) <<
+			) <<
 		"a" << "create"
-	));
+		));
 
 	if (_activity_id.length() != 0) {
 		this->__activity_id.assign(_activity_id.data());
@@ -775,9 +851,9 @@ void muzzley::Client::createActivity(string _activity_id) {
 
 	if (_activity_id.length() != 0) {
 		_message <<
-			"d" << JSON(
-				"activityId" << _activity_id
-				);
+		"d" << JSON(
+			"activityId" << _activity_id
+			);
 	}
 
 #ifdef MUZZLEY_DEBUG
@@ -807,12 +883,12 @@ void muzzley::Client::joinActivity(string _activity_id) {
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-		) <<
+			) <<
 		"a" << "join" <<
 		"d" << JSON(
 			"activityId" << _activity_id
-		)
-	));
+			)
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -837,9 +913,9 @@ void muzzley::Client::quit() {
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-		) <<
+			) <<
 		"a" << "quit"
-	));
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -860,12 +936,12 @@ void muzzley::Client::participantQuit() {
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-		) <<
+			) <<
 		"a" << "participantQuit" <<
 		"d" << JSON(
 			"participantId" << this->__participant_id
-		)
-	));
+			)
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -886,12 +962,12 @@ void muzzley::Client::participantReady(muzzley::Callback _callback) {
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-		) <<
+			) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << "ready"
-		)
-	));
+			)
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -908,7 +984,7 @@ void muzzley::Client::changeWidget(long long _participant_id, string _widget, mu
 	assertz(!this->__is_one_step_initialization, "can not change widget after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	muzzley::JSONObj _options;
 	_options <<
-		"widget" << _widget;
+	"widget" << _widget;
 	this->changeWidget(_participant_id, _options, _callback);
 }
 
@@ -916,8 +992,8 @@ void muzzley::Client::changeWidget(long long _participant_id, string _widget, mu
 	assertz(!this->__is_one_step_initialization, "can not change widget after invoking 'initUser/initApp' since it initializes protocol version 2.0 (pub/sub communication pattern).", 500, 101);
 	muzzley::JSONObj _options;
 	_options <<
-		"widget" << _widget <<
-		"params" << _params;
+	"widget" << _widget <<
+	"params" << _params;
 	this->changeWidget(_participant_id, _options, _callback);
 }
 
@@ -935,13 +1011,13 @@ void muzzley::Client::changeWidget(long long _participant_id, muzzley::JSONObj& 
 			"cid" << this->__serial <<
 			"t" << 1 <<
 			"pid" << _participant_id
-		) <<
+			) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << "changeWidget" <<
 			"d" << _options
-		)
-	));
+			)
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -969,7 +1045,7 @@ void muzzley::Client::setupComponent(long long _participant_id, string _componen
 			"cid" << this->__serial <<
 			"t" << 1 <<
 			"pid" << _participant_id
-		) <<
+			) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << "setupComponent" <<
@@ -977,9 +1053,9 @@ void muzzley::Client::setupComponent(long long _participant_id, string _componen
 				"c" << _component <<
 				"id" << _component_id <<
 				"a" << _action
+				)
 			)
-		)
-	));
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -1007,7 +1083,7 @@ void muzzley::Client::setupComponent(long long _participant_id, string _componen
 			"cid" << this->__serial <<
 			"t" << 1 <<
 			"pid" << _participant_id
-		) <<
+			) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << "setupComponent" <<
@@ -1016,9 +1092,9 @@ void muzzley::Client::setupComponent(long long _participant_id, string _componen
 				"id" << _component_id <<
 				"a" << _action <<
 				"p" << _options
+				)
 			)
-		)
-	));
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -1046,12 +1122,12 @@ void muzzley::Client::sendSignal(long long _participant_id, string _type, muzzle
 			"cid" << this->__serial <<
 			"t" << 1 <<
 			"pid" << _participant_id
-		) <<
+			) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << _type
-		)
-	));
+			)
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -1079,13 +1155,13 @@ void muzzley::Client::sendSignal(long long _participant_id, string _type, muzzle
 			"cid" << this->__serial <<
 			"t" << 1 <<
 			"pid" << _participant_id
-		) <<
+			) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << _type <<
 			"d" << _data
-		)
-	));
+			)
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -1106,12 +1182,12 @@ void muzzley::Client::sendSignal(string _type, muzzley::Callback _callback) {
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-		) <<
+			) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << _type
-		)
-	));
+			)
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -1130,13 +1206,13 @@ void muzzley::Client::sendSignal(string _type, muzzley::JSONObj& _data, muzzley:
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-		) <<
+			) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"a" << _type <<
 			"d" << _data
-		)
-	));
+			)
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -1154,15 +1230,15 @@ void muzzley::Client::sendWidgetData(string _widget, string _component, string _
 	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"t" << 5
-		) <<
+			) <<
 		"a" << "signal" <<
 		"d" << JSON(
 			"w" << _widget <<
 			"c" << _component <<
 			"e" << _event_type <<
 			"v" << _event_value
-		)
-	));
+			)
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -1188,7 +1264,7 @@ void muzzley::Client::subscribe(muzzley::Subscription& _to_property, muzzley::Ca
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-		) <<
+			) <<
 		"a" << "subscribe" <<
 		"d" << JSON(
 			"ns" << (string) _to_property["namespace"] <<
@@ -1197,9 +1273,9 @@ void muzzley::Client::subscribe(muzzley::Subscription& _to_property, muzzley::Ca
 				"channel" << (string) _to_property["channel"] <<
 				"component" << (string) _to_property["component"] <<
 				"property" << (string) _to_property["property"]
+				)
 			)
-		)
-	));
+		));
 
 	string _ns_channel("mc:");
 	_ns_channel.insert(_ns_channel.length(), (string) _to_property["namespace"]);
@@ -1263,7 +1339,7 @@ void muzzley::Client::unsubscribe(muzzley::Subscription& _to_property) {
 				"cid" << this->__serial <<
 				"t" << 1 <<
 				"ch" << _ns
-			) <<
+				) <<
 			"a" << "unsubscribe" <<
 			"d" << JSON(
 				"ns" << (string) _to_property["namespace"] <<
@@ -1272,9 +1348,9 @@ void muzzley::Client::unsubscribe(muzzley::Subscription& _to_property) {
 					"channel" << (string) _to_property["channel"] <<
 					"component" << (string) _to_property["component"] <<
 					"property" << (string) _to_property["property"]
+					)
 				)
-			)
-		));
+			));
 
 #ifdef MUZZLEY_DEBUG
 		{
@@ -1309,7 +1385,7 @@ void muzzley::Client::publish(muzzley::Subscription& _to_property, muzzley::Mess
 	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"t" << 5
-		) <<
+			) <<
 		"a" << "publish" <<
 		"d" << JSON(
 			"ns" << (string) _to_property["namespace"] <<
@@ -1319,9 +1395,9 @@ void muzzley::Client::publish(muzzley::Subscription& _to_property, muzzley::Mess
 				"channel" << (string) _to_property["channel"] <<
 				"component" << (string) _to_property["component"] <<
 				"property" << (string) _to_property["property"]
+				)
 			)
-		)
-	));
+		));
 	if (!!_payload["d"]["data"]) {
 		_message["d"]["p"] << "data" << _payload["d"]["data"];
 	}
@@ -1377,8 +1453,8 @@ bool muzzley::Client::isInitiatingMaster() const {
 	return __is_initiating_master;
 }
 
-bool muzzley::Client::isConnected() const {
-	return this->__is_connected;
+bool muzzley::Client::isConnected() {
+	return __channel.is_open();
 }
 
 bool muzzley::Client::isLoopAssynchronous() const {
@@ -1409,13 +1485,13 @@ bool muzzley::Client::handshake(muzzley::Handler _callback) {
 		"h" << JSON(
 			"cid" << this->__serial <<
 			"t" << 1
-		) <<
+			) <<
 		"a" << "handshake" <<
 		"d" << JSON(
 			"protocolVersion" << "2.0" <<
 			"lib" << "C++ 0.1.0"
-		)
-	));
+			)
+		));
 
 #ifdef MUZZLEY_DEBUG
 	{
@@ -1433,35 +1509,35 @@ bool muzzley::Client::process(muzzley::Message& _received, muzzley::EventType* _
 	string _action;
 	string _signal_action;
 	switch (_interaction) {
-		// Requests originated at the server or client
+// Requests originated at the server or client
 		case muzzley::RequestInitiatedByEndpoint:
-			// Fall through
+// Fall through
 		case muzzley::RequestInitiatedMuzzleyCore:
-			// Fall through
+// Fall through
 		case muzzley::Signaling:
-			_action.assign((string) _received["a"]);
-			if (_action == "signal" && !!_received["d"] && !!_received["d"]["a"]) {
-				_signal_action.assign((string) _received["d"]["a"]);
-			}
-			break;
-			// Replies to requests initiated here
+		_action.assign((string) _received["a"]);
+		if (_action == "signal" && !!_received["d"] && !!_received["d"]["a"]) {
+			_signal_action.assign((string) _received["d"]["a"]);
+		}
+		break;
+// Replies to requests initiated here
 		case muzzley::ReplyToEndpoint:
-			// Fall through
+// Fall through
 		case muzzley::ReplyToMuzzleyCore:
-			pthread_mutex_lock(this->__mtx);
-			CallbackQueue::iterator _req_data = this->__queue.find((int) _received["h"]["cid"]);
-			pthread_mutex_unlock(this->__mtx);
+		pthread_mutex_lock(this->__mtx);
+		CallbackQueue::iterator _req_data = this->__queue.find((int) _received["h"]["cid"]);
+		pthread_mutex_unlock(this->__mtx);
 
-			if (_req_data != this->__queue.end()) {
-				_action.assign(_req_data->second.first);
-				if (_req_data->second.second != nullptr) {
-					(_req_data->second.second)(_received, *this);
-				}
-
-				pthread_mutex_lock(this->__mtx);
-				this->__queue.erase(_req_data);
-				pthread_mutex_unlock(this->__mtx);
+		if (_req_data != this->__queue.end()) {
+			_action.assign(_req_data->second.first);
+			if (_req_data->second.second != nullptr) {
+				(_req_data->second.second)(_received, *this);
 			}
+
+			pthread_mutex_lock(this->__mtx);
+			this->__queue.erase(_req_data);
+			pthread_mutex_unlock(this->__mtx);
+		}
 	}
 
 	if (_action == "handshake") {
@@ -1502,13 +1578,13 @@ bool muzzley::Client::process(muzzley::Message& _received, muzzley::EventType* _
 			*_type = muzzley::SetupComponent;
 		}
 		else if (_signal_action == "" && !!_received["d"]["w"] && !!_received["d"]["c"]) {
-			// {"c":"ba","e":"release","v":"a","w":"gamepad"}
+// {"c":"ba","e":"release","v":"a","w":"gamepad"}
 			*_type = muzzley::WidgetAction;
 		}
 		else {
 			if (_interaction == muzzley::ReplyToEndpoint) {
-				// Don't trigger a Signaling Message event
-				// if this is a reply to one we sent before.
+// Don't trigger a Signaling Message event
+// if this is a reply to one we sent before.
 				return false;
 			}
 			*_type = muzzley::SignalingMessage;
@@ -1522,16 +1598,19 @@ void muzzley::Client::run() {
 	for (; true;) {
 		try {
 			if (!this->isConnected()) {
-				this->reconnect();
+				if (!this->reconnect()) {
+					return;
+				}
 			}
 
 			if (this->read()) {
 				if (this->__message == "h") {
+					this->disarm();
 					this->write(this->__message);
 					this->__message.clear();
+					this->arm();
 					continue;
 				}
-
 #ifdef MUZZLEY_DEBUG
 				{
 					string _log("received a message\n<- ");
@@ -1587,7 +1666,7 @@ void muzzley::printbits(unsigned char _b) {
 
 void muzzley::Client::start() {
 	if (pthread_equal(pthread_self(), *this->__thr)) {
-		// Thread already started
+// Thread already started
 		return;
 	}
 	pthread_create(this->__thr, 0, &Client::launch, this);

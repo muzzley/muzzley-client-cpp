@@ -8,6 +8,7 @@
 // $insert class_ih
 #include <muzzley/parsers/HTTPLexerimpl.h>
 
+#ifdef HAVE_HTTP_CLIENT
 // $insert namespace-open
 namespace muzzley
 {
@@ -1438,3 +1439,4 @@ void HTTPLexerBase::print__() const
 
 // $insert namespace-close
 }
+#endif

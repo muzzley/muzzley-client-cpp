@@ -67,6 +67,10 @@ namespace muzzley {
 
 		void set_socket(int _sock) {
 			this->__sock = _sock;
+			if (_sock != 0) {
+				int iOption = 1; 
+				setsockopt(this->__sock, SOL_SOCKET, SO_KEEPALIVE, (const char *) &iOption,  sizeof(int));
+			}
 		}
 
 		int get_socket() {
@@ -74,19 +78,7 @@ namespace muzzley {
 		}
 
 		virtual bool __good() {
-			char _buf;
-			
-			int _opts = fcntl(this->__sock, F_GETFL);
-			_opts = _opts | O_NONBLOCK;
-			fcntl(this->__sock, F_SETFL, _opts);
-
-			int _err = ::recv(this->__sock, &_buf, 1, MSG_PEEK);
-			bool _ret = errno == EAGAIN || errno == EWOULDBLOCK || _err > 0;
-
-			_opts = _opts & ~O_NONBLOCK;
-			fcntl(this->__sock, F_SETFL, _opts);
-
-			return _ret;
+			return this->__sock != 0;
 		}
 
 	protected:
@@ -97,7 +89,12 @@ namespace muzzley {
 			}
 
 			int num = __buf_type::pptr() - __buf_type::pbase();
-			if (::send(__sock, reinterpret_cast<char*>(obuf), num * char_size, 0) != num) {
+			int err = -1;
+			if ((err = ::send(__sock, reinterpret_cast<char*>(obuf), num * char_size, MSG_NOSIGNAL)) != num) {
+				if (err < 0) {
+					::shutdown(this->__sock, 2);
+					this->__sock = 0;
+				}
 				return __traits_type::eof();
 			}
 			__buf_type::pbump(-num);
@@ -133,7 +130,11 @@ namespace muzzley {
 			}
 
 			int num = -1;
-			if ((num = ::recv(__sock, reinterpret_cast<char*>(ibuf), SIZE * char_size, 0)) <= 0) {
+			if ((num = ::recv(__sock, reinterpret_cast<char*>(ibuf), SIZE * char_size, MSG_NOSIGNAL)) <= 0) {
+				if (num < 0) {
+					::shutdown(this->__sock, 2);
+					this->__sock = 0;
+				}
 				return __traits_type::eof();
 			}
 			__buf_type::setg(ibuf, ibuf, ibuf + num);
@@ -174,20 +175,21 @@ namespace muzzley {
 			__stream_type::flush();
 			__stream_type::clear();
 			if (__buf.get_socket() != 0) {
-				::close(__buf.get_socket());
+				::shutdown(__buf.get_socket(), 2);
 			}
 			__buf.set_socket(0);
 		}
 
 		bool is_open() {
-			return __buf.get_socket() != 0 && __buf.__good();
+			bool _return = (__buf.get_socket() != 0 && __buf.__good());
+			return _return;
 		}
 
 		bool ready() {
 			fd_set sockset;
 			FD_ZERO(&sockset);
 			FD_SET(__buf.get_socket(), &sockset);
-			return select(__buf.get_socket() + 1, &sockset, NULL, NULL, NULL) == 1;
+			return select(__buf.get_socket() + 1, &sockset, nullptr, nullptr, nullptr) == 1;
 		}
 
 		__buf_type& buffer() {
@@ -199,14 +201,18 @@ namespace muzzley {
 			int _sd = socket(AF_INET, SOCK_STREAM, 0);
 			sockaddr_in _sin;
 			hostent *_he = gethostbyname(_host.c_str());
+			if (_he == nullptr) {
+				return false;
+			}
 
 			std::copy(reinterpret_cast<char*>(_he->h_addr), reinterpret_cast<char*>(_he->h_addr) + _he->h_length, reinterpret_cast<char*>(&_sin.sin_addr.s_addr));
 			_sin.sin_family = AF_INET;
 			_sin.sin_port = htons(_port);
 
-			if (::connect(_sd, reinterpret_cast<sockaddr*>(&_sin), sizeof(_sin)) < 0) {
+			if (::connect(_sd, reinterpret_cast<sockaddr*>(& _sin), sizeof(_sin)) < 0) {
 				__stream_type::setstate(std::ios::failbit);
 				__buf.set_socket(0);
+				return false;
 			}
 			else {
 				__buf.set_socket(_sd);
@@ -245,7 +251,7 @@ namespace muzzley {
 			__stream_type::flush();
 			__stream_type::clear();
 			if (__buf.get_socket() != 0) {
-				::close(__buf.get_socket());
+				::shutdown(__buf.get_socket(), 2);
 			}
 			__buf.set_socket(0);
 		}
@@ -258,7 +264,7 @@ namespace muzzley {
 			fd_set sockset;
 			FD_ZERO(&sockset);
 			FD_SET(__buf.get_socket(), &sockset);
-			return select(__buf.get_socket() + 1, &sockset, NULL, NULL, NULL) == 1;
+			return select(__buf.get_socket() + 1, &sockset, nullptr, nullptr, nullptr) == 1;
 		}
 
 		__buf_type& buffer() {
@@ -269,15 +275,15 @@ namespace muzzley {
 			this->__sockfd = socket(AF_INET, SOCK_STREAM, 0);
 			if (this->__sockfd < 0) {
 				__stream_type::setstate(std::ios::failbit);
-				throw muzzley::ClosedException("Could not create server socket");
+				return false;
 			}
 
 			int _opt = 1;
 			if (setsockopt(this->__sockfd, SOL_SOCKET, SO_REUSEADDR, (char *) &_opt, sizeof(_opt)) == SO_ERROR) {
-				::close(this->__sockfd);
+				::shutdown(this->__sockfd, 2);
 				this->__sockfd = -1;
 				__stream_type::setstate(std::ios::failbit);
-				throw muzzley::ClosedException("Could not bind to the provided port");
+				return false;
 			}
 
 			struct sockaddr_in _serv_addr;
@@ -286,11 +292,11 @@ namespace muzzley {
 			_serv_addr.sin_addr.s_addr = INADDR_ANY;
 			_serv_addr.sin_port = htons(_port);
 			if (::bind(this->__sockfd, (struct sockaddr *) &_serv_addr, sizeof(_serv_addr)) < 0) {
-				::close(this->__sockfd);
+				::shutdown(this->__sockfd, 2);
 				this->__sockfd = -1;
 				__buf.set_socket(0);
 				__stream_type::setstate(std::ios::failbit);
-				throw muzzley::ClosedException("Could not bind to the provided port");
+				return false;
 			}
 			::listen(this->__sockfd, 100);
 			__buf.set_socket(this->__sockfd);
@@ -304,7 +310,7 @@ namespace muzzley {
 				int _newsockfd = ::accept(this->__sockfd, (struct sockaddr *) _cli_addr, &_clilen);
 
 				if (_newsockfd < 0) {
-					throw muzzley::ClosedException("Could not accept client socket");
+					return false;
 				}
 
 				struct linger _so_linger;
@@ -324,7 +330,7 @@ namespace muzzley {
 				int _newsockfd = ::accept(this->__sockfd, (struct sockaddr *) _cli_addr, &_clilen);
 
 				if (_newsockfd < 0) {
-					throw muzzley::ClosedException("Could not accept client socket");
+					return false;
 				}
 
 				struct linger _so_linger;

@@ -23,7 +23,6 @@ SOFTWARE.
 */
 #include <muzzley/config.h>
 #ifdef HAVE_HTTP_CLIENT
-
 #include <muzzley/parsers/HTTPParser.h>
 
 muzzley::HTTPParser::HTTPParser(std::istream &_in, std::ostream &_out) {
