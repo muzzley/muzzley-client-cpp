@@ -1,10 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
 
 PACKAGE=muzzley
-VERSION=0.0.2
+VERSION=0.0.3
 
 AC_PREREQ(2.59)
-AC_INIT(muzzley, 0.0.2, pedro.figueiredo@muzzley.com)
+AC_INIT(muzzley, 0.0.3, pedro.figueiredo@muzzley.com)
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([.])

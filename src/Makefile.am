@@ -1,7 +1,7 @@
 lib_LTLIBRARIES = libmuzzley.la
 
 libmuzzley_la_LIBADD = -lpthread
-libmuzzley_la_LDFLAGS = -version-info 0:2:0
+libmuzzley_la_LDFLAGS = -version-info 0:3:0
 libmuzzley_la_CPPFLAGS = -std=c++0x -Wall -Wno-reorder -I../include
 
 libmuzzley_la_SOURCES = \

@@ -12,13 +12,14 @@ This library depends on:
 
 - GCC 4.5+
 - pthread
+- rt
 - autotools
 - libtool
 - [OpenSSL's libssl and libcrypto][open_ssl] (libraries and development packages)
 
 # VERSIONING
 
-Current version: [0.0.2][changelog] - ***Please read since this version contains breaking changes***
+Current version: [0.0.3][changelog] - ***Please read since this version contains breaking changes***
 
 # INSTALL
 
@@ -85,7 +86,7 @@ In the `Examples` folder, you can find several examples of muzzley-enabled appli
 
 To compile and run the Galileo example, for instance, you'd execute the following commands:
 
-> $ g++ -std=c++0x examples/galileo_app.cpp -o myapp -lpthread -lmuzzley -lssl -lcrypto 
+> $ g++ -std=c++0x examples/galileo_app.cpp -o myapp -lpthread -lmuzzley -lrt -lssl -lcrypto 
 
 > $ ./myapp
 
@@ -126,7 +127,7 @@ int main(int argc, char* argv[]) {
 
 A compilation command could look something like this:
 
-> $ g++ -std=c++0x main.cpp -o mymuzzley -lpthread -lmuzzley -lssl -lcrypto
+> $ g++ -std=c++0x main.cpp -o mymuzzley -lpthread -lmuzzley -lrt -lssl -lcrypto
 
 # MULTI-THREADING
 
@@ -172,7 +173,8 @@ You can register handlers for the following events:
       SetupComponent, // when a setup component request is received
       WidgetAction, // when a widget action is received
       Published, // when a message is published to a given Pub/Sub channel
-      Publish // to publish a message to a given Pub/Sub channel
+      Publish, // to publish a message to a given Pub/Sub channel
+      Reconnect, // to be invoked when socket hangup is detected, to determine if the library should try to reconnect
     };
 
 An event register could look something like this:
@@ -252,6 +254,19 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 ```
+
+## Reconnecting
+
+When a *socket hang-up* is detected, either by faulty I/O operation invocation or by *heartbeat* timeout, the library will trigger the **muzzley::Reconnect** event in order to determine if it should automatically reconnect. To control the library behavior in this cases, you should register a callback for this event type, returning either a ***true*** or ***false*** value, depending on weather or not you would like to automtically reconnect:
+
+```
+  _client.on(muzzley::Reconnect, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+    // reset your app internal states here
+    return true;
+  });
+```
+
+If ***true*** is returned, the library will reset all internal states, reconnect to the server and and re-invoke one of **initApp**, **initUser**, **connectApp** or **connectUser** methods, depending on what was your initial choice. After that, the main program loop is re-estabilished. For an example, see the *app_reconnect.cpp* example.
 
 # REPLYING TO A MESSAGE
 

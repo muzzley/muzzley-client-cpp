@@ -1,5 +1,10 @@
 # Version 0.0.2
 
+## Apr 07, 2015
+
+- Added **muzzley::Reconnect** event, in order to determine if the library should try to reconnect when socket hangup is detected
+- Added ***rt*** library dependency, for timer-callback utilities (used in reconnect feature)
+
 ## Jan 25, 2015
 
 - SSL socket channels became the default for WebSocket connection to the **muzzley** cloud
