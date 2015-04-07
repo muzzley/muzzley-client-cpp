@@ -163,6 +163,8 @@ Your program's interaction with this library is centered in 3 simple and well de
 You can register handlers for the following events:
 
     enum EventType {
+      AppLoggedIn, // when the initApp method and the one-step-initialization process is ended successfully
+      UserLoggedIn, // when the initUser method and the one-step-initialization process is ended successfully
       ActivityCreated, // when an activity is created with success
       ActivityJoined,  // when a response to joinActivity is finished successfully
       ActivityTerminated,  // when an Activity Master quits
@@ -174,7 +176,7 @@ You can register handlers for the following events:
       WidgetAction, // when a widget action is received
       Published, // when a message is published to a given Pub/Sub channel
       Publish, // to publish a message to a given Pub/Sub channel
-      Reconnect, // to be invoked when socket hangup is detected, to determine if the library should try to reconnect
+      Reconnect // to be invoked when socket hangup is detected, to determine if the library should try to reconnect
     };
 
 An event register could look something like this:
