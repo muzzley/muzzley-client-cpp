@@ -571,8 +571,12 @@ bool muzzley::Client::reply(muzzley::Message& _data_received, muzzley::Message& 
 			return false;
 	}
 	if (_data_received["a"]->ok() && ((string) _data_received["a"]) == "publish") {
-		muzzley::JSONObj _data = _reply.getData();
-		_reply.setData(JSON(
+		muzzley::JSONObj _d = _reply.getData();
+		muzzley::JSONObj _data;
+		for (auto _f : _d) {
+			_data << _f.first << _f.second;
+		}
+		_d << 
 			"ns" << _data_received["d"]["ns"] <<
 			"p" << JSON(
 				"io" << "i" <<
@@ -581,8 +585,7 @@ bool muzzley::Client::reply(muzzley::Message& _data_received, muzzley::Message& 
 				"component" << _data_received["d"]["p"]["component"] <<
 				"property" << _data_received["d"]["p"]["property"] <<
 				"data" << _data
-			)
-		));
+			);
 	}
 	return this->write(_reply);
 }
