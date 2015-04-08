@@ -41,20 +41,21 @@ using namespace __gnu_cxx;
 #endif
 
 int main(int argc, char* argv[]) {
+	string _component_id = ${due to public usage of demo channels and to the load balacing infra-strucuture, when using the muzzley:_demo-channel_, replace this with a unique string, for instance you IP address combined with the timestamp};
 
 	muzzley::Client _client;
 
 	// Register listener to be invoked when user succesfully joins the activity.
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::UserLoggedIn, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+	_client.on(muzzley::UserLoggedIn, [ _component_id ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		// _client.sendWidgetData("xpto", "a", "some", "value");
 
 		muzzley::Subscription _s1;
 		_s1.setNamespace("iot");
-		_s1.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
-		_s1.setChannel("2183hroqw89");
-		_s1.setComponent("bulb");
+		_s1.setProfile("muzzley");
+		_s1.setChannel("_demo-channel_");
+		_s1.setComponent(_component_id);
 		_s1.setProperty("intensity");
 
 		muzzley::Message _m1;
@@ -80,8 +81,6 @@ int main(int argc, char* argv[]) {
 	});
 
 	// Connects the application to the Muzzley server, using the one-step-initialization process.
-	//
-	// Assuming that the program receives the activityId as argument.
 	//
 	// It will start the application loop synchronously,
 	// i.e. the program will not execute anything below this line.

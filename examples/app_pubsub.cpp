@@ -45,6 +45,7 @@ using namespace __gnu_cxx;
 #endif
 
 int main(int argc, char* argv[]) {
+	string _component_id = ${due to public usage of demo channels and to the load balacing infra-strucuture, when using the muzzley:_demo-channel_, replace this with a unique string, for instance you IP address combined with the timestamp};
 
 	// Create the Muzzley client
 	muzzley::Client _client;
@@ -55,14 +56,14 @@ int main(int argc, char* argv[]) {
 	// access it through the 'getActivityId' method.
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::AppLoggedIn, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+	_client.on(muzzley::AppLoggedIn, [ _component_id ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		cout << "App logged in with created with session id " << (string) _data["d"]["sessionId"] << endl << flush;
 
 		muzzley::Subscription _s1;
 		_s1.setNamespace("iot");
-		_s1.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
-		_s1.setChannel("2183hroqw89");
-		_s1.setComponent("switch");
+		_s1.setProfile("muzzley");
+		_s1.setChannel("_demo-channel_");
+		_s1.setComponent(_component_id);
 		_s1.setProperty("status");
 		_client.on(muzzley::Published, _s1, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 			_data->prettify(cout);
@@ -72,11 +73,11 @@ int main(int argc, char* argv[]) {
 
 		muzzley::Subscription _s2;
 		_s2.setNamespace("iot");
-		_s2.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
-		_s2.setChannel("2183hroqw89");
-		_s2.setComponent("bulb");
+		_s2.setProfile("muzzley");
+		_s2.setChannel("_demo-channel_");
+		_s2.setComponent(_component_id);
 		_s2.setProperty("intensity");
-		_client.on(muzzley::Published, _s2, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+		_client.on(muzzley::Published, _s2, [ _component_id ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 			_data->prettify(cout);
 			cout << endl << flush;
 
@@ -90,7 +91,11 @@ int main(int argc, char* argv[]) {
 				_client.reply(_data, _m);
 				
 				muzzley::Subscription _s;
-				_data.getSubscriptionInfo(_s);
+				_s.setNamespace("iot");
+				_s.setProfile("muzzley");
+				_s.setChannel("_demo-channel_");
+				_s.setComponent(_component_id);
+				_s.setProperty("intensity");
 				_client.off(muzzley::Published, _s);
 			}
 			return true;			

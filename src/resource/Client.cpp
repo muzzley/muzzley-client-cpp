@@ -538,7 +538,7 @@ bool muzzley::Client::reply(muzzley::Message& _data_received, muzzley::Message& 
 
 	switch (_type) {
 		case muzzley::RequestInitiatedByEndpoint: {
-			if (!!_reply["h"]) {
+			if (_reply["h"]->ok()) {
 				((muzzley::JSONObj) _reply["h"]) <<
 				"t" << (int) muzzley::ReplyToEndpoint <<
 				"cid" << (string) _data_received["h"]["cid"];
@@ -548,12 +548,12 @@ bool muzzley::Client::reply(muzzley::Message& _data_received, muzzley::Message& 
 				"h" << JSON(
 					"t" << (int) muzzley::ReplyToEndpoint <<
 					"cid" << (string) _data_received["h"]["cid"]
-					);
+				);
 			}
 			break;
 		}
 		case muzzley::RequestInitiatedMuzzleyCore: {
-			if (!!_reply["h"]) {
+			if (_reply["h"]->ok()) {
 				((muzzley::JSONObj) _reply["h"]) <<
 				"t" << (int) muzzley::ReplyToEndpoint <<
 				"cid" << (string) _data_received["h"]["cid"];
@@ -563,14 +563,27 @@ bool muzzley::Client::reply(muzzley::Message& _data_received, muzzley::Message& 
 				"h" << JSON(
 					"t" << (int) muzzley::ReplyToMuzzleyCore <<
 					"cid" << (string) _data_received["h"]["cid"]
-					);
+				);
 			}
 			break;
 		}
 		default:
-		return false;
+			return false;
 	}
-
+	if (_data_received["a"]->ok() && ((string) _data_received["a"]) == "publish") {
+		muzzley::JSONObj _data = _reply.getData();
+		_reply.setData(JSON(
+			"ns" << _data_received["d"]["ns"] <<
+			"p" << JSON(
+				"io" << "i" <<
+				"profile" << _data_received["d"]["p"]["profile"] <<
+				"channel" << _data_received["d"]["p"]["channel"] <<
+				"component" << _data_received["d"]["p"]["component"] <<
+				"property" << _data_received["d"]["p"]["property"] <<
+				"data" << _data
+			)
+		));
+	}
 	return this->write(_reply);
 }
 
@@ -641,7 +654,7 @@ void muzzley::Client::loginApp(string _app_token) {
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("login app:\n-> ");
+		string _log("login app -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -664,7 +677,7 @@ void muzzley::Client::loginUser(string _user_token) {
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("login user:\n-> ");
+		string _log("login user -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -728,7 +741,7 @@ void muzzley::Client::initApp(string _app_token) {
 
 #ifdef MUZZLEY_DEBUG
 		{
-			string _log("login app:\n-> ");
+			string _log("login app -> ");
 			muzzley::tostr(_log, _message);
 			muzzley::log(_log, muzzley::notice);
 		}
@@ -806,7 +819,7 @@ void muzzley::Client::initUser(string _user_token) {
 
 #ifdef MUZZLEY_DEBUG
 		{
-			string _log("login app:\n-> ");
+			string _log("login app -> ");
 			muzzley::tostr(_log, _message);
 			muzzley::log(_log, muzzley::notice);
 		}
@@ -857,7 +870,7 @@ void muzzley::Client::createActivity(string _activity_id) {
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("creating activity:\n-> ");
+		string _log("creating activity -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -893,7 +906,7 @@ void muzzley::Client::joinActivity(string _activity_id) {
 	{
 		string _log("joining activity ");
 		_log.insert(_log.length(), _activity_id);
-		_log.insert(_log.length(), ":\n-> ");
+		_log.insert(_log.length(), " -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -918,7 +931,7 @@ void muzzley::Client::quit() {
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("quiting:\n-> ");
+		string _log("quiting -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -944,7 +957,7 @@ void muzzley::Client::participantQuit() {
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("participant quiting:\n-> ");
+		string _log("participant quiting -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -970,7 +983,7 @@ void muzzley::Client::participantReady(muzzley::Callback _callback) {
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("participant ready:\n-> ");
+		string _log("participant ready -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -1022,7 +1035,7 @@ void muzzley::Client::changeWidget(long long _participant_id, muzzley::JSONObj& 
 	{
 		string _log("change widget, participant");
 		muzzley::tostr(_log, _participant_id);
-		_log.insert(_log.length(), ":\n-> ");
+		_log.insert(_log.length(), " -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -1060,7 +1073,7 @@ void muzzley::Client::setupComponent(long long _participant_id, string _componen
 	{
 		string _log("setup component, participant");
 		muzzley::tostr(_log, _participant_id);
-		_log.insert(_log.length(), ":\n-> ");
+		_log.insert(_log.length(), " -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -1099,7 +1112,7 @@ void muzzley::Client::setupComponent(long long _participant_id, string _componen
 	{
 		string _log("setup component, participant");
 		muzzley::tostr(_log, _participant_id);
-		_log.insert(_log.length(), ":\n-> ");
+		_log.insert(_log.length(), " -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -1132,7 +1145,7 @@ void muzzley::Client::sendSignal(long long _participant_id, string _type, muzzle
 	{
 		string _log("sending signal to participant ");
 		muzzley::tostr(_log, _participant_id);
-		_log.insert(_log.length(), ":\n-> ");
+		_log.insert(_log.length(), " -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -1166,7 +1179,7 @@ void muzzley::Client::sendSignal(long long _participant_id, string _type, muzzle
 	{
 		string _log("sending signal to participant ");
 		muzzley::tostr(_log, _participant_id);
-		_log.insert(_log.length(), ":\n-> ");
+		_log.insert(_log.length(), " -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -1190,7 +1203,7 @@ void muzzley::Client::sendSignal(string _type, muzzley::Callback _callback) {
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("sending signal:\n-> ");
+		string _log("sending signal -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -1215,7 +1228,7 @@ void muzzley::Client::sendSignal(string _type, muzzley::JSONObj& _data, muzzley:
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("sending signal:\n-> ");
+		string _log("sending signal -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -1241,7 +1254,7 @@ void muzzley::Client::sendWidgetData(string _widget, string _component, string _
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("sending widget data:\n-> ");
+		string _log("sending widget data -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -1253,11 +1266,54 @@ void muzzley::Client::sendWidgetData(string _widget, string _component, string _
 
 void muzzley::Client::subscribe(muzzley::Subscription& _to_property, muzzley::Callback _callback) {
 	assertz(this->__is_one_step_initialization, "can not subscribe after invoking 'connectUser/connectApp' since it initializes protocol version 1.2 (signaling communication pattern).", 500, 101);
-	assertz(!!_to_property["namespace"], "field 'namespace' must be included in '_to_property' parameter (e.g., _to_proprety << \"namespace\" << \"iot\").", 500, 200);
-	assertz(!!_to_property["profile"], "field 'profile' must be included in '_to_property' parameter (e.g., _to_proprety << \"profile\" << \"internal-profile-id\").", 500, 201);
-	assertz(!!_to_property["channel"], "field 'channel' must be included in '_to_property' parameter (e.g., _to_proprety << \"channel\" << \"remote-channel-id\").", 500, 202);
-	assertz(!!_to_property["component"], "field 'component' must be included in '_to_property' parameter (e.g., _to_proprety << \"component\" << \"component-1\").", 500, 203);
-	assertz(!!_to_property["property"], "field 'property' must be included in '_to_property' parameter (e.g., _to_proprety << \"property\" << \"prop-1\").", 500, 204);
+	assertz(_to_property["namespace"]->ok() || _to_property["profile"]->ok() || _to_property["channel"]->ok() || _to_property["component"]->ok() || _to_property["component"]->ok() || _to_property["property"]->ok(), "you must subscribe to something, subscription object must not be empty.", 500, 200);
+
+	string _ns_channel("mc:");
+	muzzley::JSONObj _data;
+	muzzley::JSONObj _payload;
+
+	if (_to_property["namespace"]->ok()) {
+		_data << "ns" << (string) _to_property["namespace"];
+		_ns_channel.insert(_ns_channel.length(), (string) _to_property["namespace"]);
+	}
+	else {
+		_ns_channel.insert(_ns_channel.length(), "*");
+	}
+	_ns_channel.insert(_ns_channel.length(), ":ps:");
+	if (_to_property["profile"]->ok()) {
+		_payload << "profile" << (string) _to_property["profile"];
+		_ns_channel.insert(_ns_channel.length(), (string) _to_property["profile"]);
+	}
+	else {
+		_ns_channel.insert(_ns_channel.length(), "*");
+	}
+	_ns_channel.insert(_ns_channel.length(), ":");
+	if (_to_property["channel"]->ok()) {
+		_payload << "channel" << (string) _to_property["channel"];
+		_ns_channel.insert(_ns_channel.length(), (string) _to_property["channel"]);
+	}
+	else {
+		_ns_channel.insert(_ns_channel.length(), "*");
+	}
+	_ns_channel.insert(_ns_channel.length(), ":");
+	if (_to_property["component"]->ok()) {
+		_payload << "component" << (string) _to_property["component"];
+		_ns_channel.insert(_ns_channel.length(), (string) _to_property["component"]);
+	}
+	else {
+		_ns_channel.insert(_ns_channel.length(), "*");
+	}
+	_ns_channel.insert(_ns_channel.length(), ":");
+	if (_to_property["property"]->ok()) {
+		_payload << "property" << (string) _to_property["property"];
+		_ns_channel.insert(_ns_channel.length(), (string) _to_property["property"]);
+	}
+	else {
+		_ns_channel.insert(_ns_channel.length(), "*");
+	}
+	_ns_channel.insert(_ns_channel.length(), ":");
+
+	_data << "p" << _payload;
 
 	muzzley::Message _message(JSON(
 		"h" << JSON(
@@ -1265,32 +1321,12 @@ void muzzley::Client::subscribe(muzzley::Subscription& _to_property, muzzley::Ca
 			"t" << 1
 			) <<
 		"a" << "subscribe" <<
-		"d" << JSON(
-			"ns" << (string) _to_property["namespace"] <<
-			"p" << JSON(
-				"profile" << (string) _to_property["profile"] <<
-				"channel" << (string) _to_property["channel"] <<
-				"component" << (string) _to_property["component"] <<
-				"property" << (string) _to_property["property"]
-				)
-			)
-		));
-
-	string _ns_channel("mc:");
-	_ns_channel.insert(_ns_channel.length(), (string) _to_property["namespace"]);
-	_ns_channel.insert(_ns_channel.length(), ":ps:");
-	_ns_channel.insert(_ns_channel.length(), (string) _to_property["profile"]);
-	_ns_channel.insert(_ns_channel.length(), ":");
-	_ns_channel.insert(_ns_channel.length(), (string) _to_property["channel"]);
-	_ns_channel.insert(_ns_channel.length(), ":");
-	_ns_channel.insert(_ns_channel.length(), (string) _to_property["component"]);
-	_ns_channel.insert(_ns_channel.length(), ":");
-	_ns_channel.insert(_ns_channel.length(), (string) _to_property["property"]);
-	_ns_channel.insert(_ns_channel.length(), ":");
+		"d" << _data
+	));
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("sending widget data:\n-> ");
+		string _log("sending widget data -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -1311,23 +1347,54 @@ void muzzley::Client::subscribe(muzzley::Subscription& _to_property, muzzley::Ca
 
 void muzzley::Client::unsubscribe(muzzley::Subscription& _to_property) {
 	assertz(this->__is_one_step_initialization, "can not publish after invoking 'connectUser/connectApp' since it initializes protocol version 1.2 (signaling communication pattern).", 500, 101);
-	assertz(!!_to_property["namespace"], "field 'namespace' must be included in '_to_property' parameter (e.g., _to_proprety << \"namespace\" << \"iot\").", 500, 200);
-	assertz(!!_to_property["profile"], "field 'profile' must be included in '_to_property' parameter (e.g., _to_proprety << \"profile\" << \"internal-profile-id\").", 500, 201);
-	assertz(!!_to_property["channel"], "field 'channel' must be included in '_to_property' parameter (e.g., _to_proprety << \"channel\" << \"remote-channel-id\").", 500, 202);
-	assertz(!!_to_property["component"], "field 'component' must be included in '_to_property' parameter (e.g., _to_proprety << \"component\" << \"component-1\").", 500, 203);
-	assertz(!!_to_property["property"], "field 'property' must be included in '_to_property' parameter (e.g., _to_proprety << \"property\" << \"prop-1\").", 500, 204);
+	assertz(_to_property["namespace"]->ok() || _to_property["profile"]->ok() || _to_property["channel"]->ok() || _to_property["component"]->ok() || _to_property["component"]->ok() || _to_property["property"]->ok(), "you must subscribe to something, subscription object must not be empty.", 500, 200);
 
 	string _ns_channel("mc:");
-	_ns_channel.insert(_ns_channel.length(), (string) _to_property["namespace"]);
+	muzzley::JSONObj _data;
+	muzzley::JSONObj _payload;
+
+	if (_to_property["namespace"]->ok()) {
+		_data << "ns" << (string) _to_property["namespace"];
+		_ns_channel.insert(_ns_channel.length(), (string) _to_property["namespace"]);
+	}
+	else {
+		_ns_channel.insert(_ns_channel.length(), "*");
+	}
 	_ns_channel.insert(_ns_channel.length(), ":ps:");
-	_ns_channel.insert(_ns_channel.length(), (string) _to_property["profile"]);
+	if (_to_property["profile"]->ok()) {
+		_payload << "profile" << (string) _to_property["profile"];
+		_ns_channel.insert(_ns_channel.length(), (string) _to_property["profile"]);
+	}
+	else {
+		_ns_channel.insert(_ns_channel.length(), "*");
+	}
 	_ns_channel.insert(_ns_channel.length(), ":");
-	_ns_channel.insert(_ns_channel.length(), (string) _to_property["channel"]);
+	if (_to_property["channel"]->ok()) {
+		_payload << "channel" << (string) _to_property["channel"];
+		_ns_channel.insert(_ns_channel.length(), (string) _to_property["channel"]);
+	}
+	else {
+		_ns_channel.insert(_ns_channel.length(), "*");
+	}
 	_ns_channel.insert(_ns_channel.length(), ":");
-	_ns_channel.insert(_ns_channel.length(), (string) _to_property["component"]);
+	if (_to_property["component"]->ok()) {
+		_payload << "component" << (string) _to_property["component"];
+		_ns_channel.insert(_ns_channel.length(), (string) _to_property["component"]);
+	}
+	else {
+		_ns_channel.insert(_ns_channel.length(), "*");
+	}
 	_ns_channel.insert(_ns_channel.length(), ":");
-	_ns_channel.insert(_ns_channel.length(), (string) _to_property["property"]);
+	if (_to_property["property"]->ok()) {
+		_payload << "property" << (string) _to_property["property"];
+		_ns_channel.insert(_ns_channel.length(), (string) _to_property["property"]);
+	}
+	else {
+		_ns_channel.insert(_ns_channel.length(), "*");
+	}
 	_ns_channel.insert(_ns_channel.length(), ":");
+
+	_data << "p" << _payload;
 
 	auto _found = this->__namespaces.find(_ns_channel);
 	assertz(_found != this->__namespaces.end(), "this property has not been subscribed", 500, 205);
@@ -1338,22 +1405,14 @@ void muzzley::Client::unsubscribe(muzzley::Subscription& _to_property) {
 				"cid" << this->__serial <<
 				"t" << 1 <<
 				"ch" << _ns
-				) <<
+			) <<
 			"a" << "unsubscribe" <<
-			"d" << JSON(
-				"ns" << (string) _to_property["namespace"] <<
-				"p" << JSON(
-					"profile" << (string) _to_property["profile"] <<
-					"channel" << (string) _to_property["channel"] <<
-					"component" << (string) _to_property["component"] <<
-					"property" << (string) _to_property["property"]
-					)
-				)
-			));
+			"d" << _data
+		));
 
 #ifdef MUZZLEY_DEBUG
 		{
-			string _log("sending widget data:\n-> ");
+			string _log("sending widget data -> ");
 			muzzley::tostr(_log, _message);
 			muzzley::log(_log, muzzley::notice);
 		}
@@ -1384,7 +1443,7 @@ void muzzley::Client::publish(muzzley::Subscription& _to_property, muzzley::Mess
 	muzzley::Message _message(JSON(
 		"h" << JSON(
 			"t" << 5
-			) <<
+		) <<
 		"a" << "publish" <<
 		"d" << JSON(
 			"ns" << (string) _to_property["namespace"] <<
@@ -1394,9 +1453,9 @@ void muzzley::Client::publish(muzzley::Subscription& _to_property, muzzley::Mess
 				"channel" << (string) _to_property["channel"] <<
 				"component" << (string) _to_property["component"] <<
 				"property" << (string) _to_property["property"]
-				)
 			)
-		));
+		)
+	));
 	if (!!_payload["d"]["data"]) {
 		_message["d"]["p"] << "data" << _payload["d"]["data"];
 	}
@@ -1407,7 +1466,7 @@ void muzzley::Client::publish(muzzley::Subscription& _to_property, muzzley::Mess
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("sending widget data:\n-> ");
+		string _log("sending widget data -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -1494,7 +1553,7 @@ bool muzzley::Client::handshake(muzzley::Handler _callback) {
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("sending handshake:\n-> ");
+		string _log("sending handshake -> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}

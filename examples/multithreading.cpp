@@ -67,6 +67,7 @@ void stop(int sig) {
 }
 
 int main(int argc, char* argv[]) {
+	string _component_id = ${due to public usage of demo channels and to the load balacing infra-strucuture, when using the muzzley:_demo-channel_, replace this with a unique string, for instance you IP address combined with the timestamp};
 
 	// Create the Muzzley client
 	muzzley::Client _client;
@@ -82,14 +83,14 @@ int main(int argc, char* argv[]) {
 	// access it through the 'getActivityId' method.
 	//
 	// Return 'false' if you want to stop other listeners from being invoked.
-	_client.on(muzzley::AppLoggedIn, [ &semaphore ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
+	_client.on(muzzley::AppLoggedIn, [ & semaphore, & _component_id ] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		cout << "App logged in with created with session id " << (string) _data["d"]["sessionId"] << endl << flush;
 
 		muzzley::Subscription _s1;
 		_s1.setNamespace("iot");
-		_s1.setProfile("cb17073b-9428-4f55-9a22-26a008c0bf4e");
-		_s1.setChannel("2183hroqw89");
-		_s1.setComponent("bulb");
+		_s1.setProfile("muzzley");
+		_s1.setChannel("_demo-channel_");
+		_s1.setComponent(_component_id);
 		_s1.setProperty("intensity");
 
 		muzzley::Message _m1;
