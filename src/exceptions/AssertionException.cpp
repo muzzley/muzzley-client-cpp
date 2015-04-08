@@ -28,8 +28,6 @@ muzzley::AssertionException::AssertionException(string _in, int _http_code, int 
 	this->__description.insert(this->__description.length(), this->__file);
 	this->__description.insert(this->__description.length(),  ", line ");
 	muzzley::tostr(this->__description, this->__line);
-
-	this->__stacktrace = muzzley::stacktrace();
 }
 
 muzzley::AssertionException::~AssertionException() throw() {
@@ -41,10 +39,6 @@ const char* muzzley::AssertionException::what() const throw() {
 
 const char* muzzley::AssertionException::description() {
 	return this->__description.data();
-}
-
-const char* muzzley::AssertionException::backtrace() {
-	return this->__stacktrace.data();
 }
 
 int muzzley::AssertionException::code() {
