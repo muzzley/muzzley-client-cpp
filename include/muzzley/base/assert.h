@@ -17,8 +17,23 @@ PERFORMANCE OF THIS SOFTWARE.
 */
 #pragma once
 
-#include <execinfo.h>
 #include <muzzley/config.h>
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#ifndef __USE_GNU
+#define __USE_GNU
+#endif
+
+#include <execinfo.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ucontext.h>
+#include <unistd.h>
+
 #include <muzzley/exceptions/AssertionException.h>
 
 #if __cplusplus <= 199711L
@@ -31,8 +46,7 @@ PERFORMANCE OF THIS SOFTWARE.
  * @param y the error message
  * @param z the HTTP status code to be replied to the invoking HTTP client
  */
-#define assertz(x,y,z,c) if (! (x)) { throw muzzley::AssertionException(y, z, c, #x, __LINE__, __FILE__); }
-
+#define assertz(x,y,z,c) if (! (x)) { void *__backtrace_array__[10]; size_t __backtrace__size__ = backtrace(__backtrace_array__, 10); throw muzzley::AssertionException(y, z, c, #x, __LINE__, __FILE__, backtrace_symbols(__backtrace_array__, __backtrace__size__), __backtrace__size__); }
 #define MAX_FRAMES 10
 
 namespace muzzley {

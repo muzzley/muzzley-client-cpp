@@ -38,9 +38,10 @@ namespace muzzley {
 			string __description;
 			int __line;
 			string __file;
+			string __backtrace;
 
 		public:
-			AssertionException(string _what,  int _http_code, int _code, string _desc, int _line, string _file);
+			AssertionException(string _what,  int _http_code, int _code, string _desc, int _line, string _file, char** _backtrace, size_t _backtrace_size);
 			virtual ~AssertionException() throw();
 
 			virtual const char* what() const throw();

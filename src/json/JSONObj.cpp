@@ -561,7 +561,7 @@ void muzzley::JSONElementT::stringify(ostream& _out) {
 			break;
 		}
 		case muzzley::JSDouble : {
-			_out << this->__target.__double << flush;
+			_out << fixed << this->__target.__double << flush;
 			break;
 		}
 		case muzzley::JSBoolean : {
@@ -671,7 +671,7 @@ void muzzley::JSONElementT::prettify(ostream& _out, uint _n_tabs) {
 			break;
 		}
 		case muzzley::JSDouble : {
-			_out << this->__target.__double << flush;
+			_out << fixed << this->__target.__double << flush;
 			break;
 		}
 		case muzzley::JSBoolean : {
