@@ -31,6 +31,7 @@ muzzley::AssertionException::AssertionException(string _in, int _http_code, int 
 
 	for (size_t _i = 0; _i != _backtrace_size; _i++) 
 		this->__backtrace.insert(this->__backtrace.length(), string(_backtrace[_i]));
+		this->__backtrace.insert(this->__backtrace.length(), "\n");
 	free(_backtrace);
 }
 
