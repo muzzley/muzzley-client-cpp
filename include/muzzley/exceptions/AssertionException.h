@@ -46,6 +46,7 @@ namespace muzzley {
 
 			virtual const char* what() const throw();
 			virtual const char* description();
+			virtual const char* backtrace();
 			int code();
 			int status();
 	};

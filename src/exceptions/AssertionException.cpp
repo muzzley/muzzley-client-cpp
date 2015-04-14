@@ -20,6 +20,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <muzzley/exceptions/AssertionException.h>
 
 #include <sstream>
+#include <stdlib.h> 
 #include <muzzley/text/convert.h>
 
 muzzley::AssertionException::AssertionException(string _in, int _http_code, int _code, string _desc, int _line, string _file, char** _backtrace, size_t _backtrace_size) : __what(_in), __http_code(_http_code), __code(_code), __description(_desc), __line(_line), __file(_file){
@@ -44,6 +45,10 @@ const char* muzzley::AssertionException::what() const throw() {
 
 const char* muzzley::AssertionException::description() {
 	return this->__description.data();
+}
+
+const char* muzzley::AssertionException::backtrace() {
+	return this->__backtrace.data();
 }
 
 int muzzley::AssertionException::code() {
