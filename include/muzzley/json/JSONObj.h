@@ -64,6 +64,8 @@ namespace muzzley {
 		template <typename T>
 		JSONPtr& operator<<(T _in);
 		template <typename T>
+		JSONPtr& operator>>(T _in);
+		template <typename T>
 		JSONPtr& operator[](T _idx);
 
 		operator string();
@@ -456,6 +458,11 @@ bool muzzley::JSONPtr::operator!=(T _rhs){
 template <typename T>
 muzzley::JSONPtr& muzzley::JSONPtr::operator<<(T _in) {
 	*(this->get()) << _in;
+	return * this;
+};
+template <typename T>
+muzzley::JSONPtr& muzzley::JSONPtr::operator>>(T _in) {
+	*(this->get()) >> _in;
 	return * this;
 };
 template <typename T>
