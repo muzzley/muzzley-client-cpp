@@ -329,37 +329,37 @@ void muzzley::JSONElementT::parent(JSONElementT* _parent) {
 }
 
 muzzley::JSONObj& muzzley::JSONElementT::obj() {
-	assertz(this->__target.__type == muzzley::JSObject, "this element is not of type JSObject", 0, 0);
+	assertz(this->__target.__type == muzzley::JSObject, string("this element is not of type JSObject: ") + this->stringify(), 0, 0);
 	return this->__target.__object;
 }
 
 muzzley::JSONArr& muzzley::JSONElementT::arr() {
-	assertz(this->__target.__type == muzzley::JSArray, "this element is not of type JSArray", 0, 0);
+	assertz(this->__target.__type == muzzley::JSArray, string("this element is not of type JSArray: ") + this->stringify(), 0, 0);
 	return this->__target.__array;
 }
 
 string muzzley::JSONElementT::str() {
-	assertz(this->__target.__type == muzzley::JSString, "this element is not of type JSString", 0, 0);
+	assertz(this->__target.__type == muzzley::JSString, string("this element is not of type JSString: ") + this->stringify(), 0, 0);
 	return *(this->__target.__string.get());
 }
 
 long long muzzley::JSONElementT::intr() {
-	assertz(this->__target.__type == muzzley::JSInteger, "this element is not of type JSInteger", 0, 0);
+	assertz(this->__target.__type == muzzley::JSInteger, string("this element is not of type JSInteger: ") + this->stringify(), 0, 0);
 	return this->__target.__integer;
 }
 
 double muzzley::JSONElementT::dbl() {
-	assertz(this->__target.__type == muzzley::JSDouble, "this element is not of type JSDouble", 0, 0);
+	assertz(this->__target.__type == muzzley::JSDouble, string("this element is not of type JSDouble: ") + this->stringify(), 0, 0);
 	return this->__target.__double;
 }
 
 bool muzzley::JSONElementT::bln() {
-	assertz(this->__target.__type == muzzley::JSBoolean, "this element is not of type JSBoolean", 0, 0);
+	assertz(this->__target.__type == muzzley::JSBoolean, string("this element is not of type JSBoolean: ") + this->stringify(), 0, 0);
 	return this->__target.__boolean;
 }
 
 muzzley::timestamp_t muzzley::JSONElementT::date() {
-	assertz(this->__target.__type == muzzley::JSDate || this->__target.__type == muzzley::JSString, "this element is not of type JSDate", 0, 0);
+	assertz(this->__target.__type == muzzley::JSDate || this->__target.__type == muzzley::JSString, string("this element is not of type JSDate: ") + this->stringify(), 0, 0);
 	if (this->__target.__type == muzzley::JSString) {
 		time_t _n = 0;
 		int _ms = 0;
@@ -376,7 +376,7 @@ muzzley::timestamp_t muzzley::JSONElementT::date() {
 }
 
 double muzzley::JSONElementT::number() {
-	assertz(this->__target.__type == muzzley::JSInteger || this->__target.__type == muzzley::JSDouble || this->__target.__type == muzzley::JSBoolean, "this element is not of type JSInteger, JSDouble or JSBoolean", 0, 0);
+	assertz(this->__target.__type == muzzley::JSInteger || this->__target.__type == muzzley::JSDouble || this->__target.__type == muzzley::JSBoolean, string("this element is not of type JSInteger, JSDouble or JSBoolean: ") + this->stringify(), 0, 0);
 	switch(this->__target.__type) {
 		case muzzley::JSInteger : {
 			return (double) this->__target.__integer;
@@ -645,6 +645,12 @@ void muzzley::JSONElementT::stringify(string& _out) {
 			break;
 		}
 	}
+}
+
+std::string muzzley::JSONElementT::stringify() {
+	string _out;
+	this->stringify(_out);
+	return _out;
 }
 
 void muzzley::JSONElementT::prettify(ostream& _out, uint _n_tabs) {
@@ -1492,22 +1498,22 @@ muzzley::JSONPtr::operator muzzley::timestamp_t() {
 }
 
 muzzley::JSONPtr::operator JSONObj() {
-	assertz(this->get() != nullptr && this->get()->type() == muzzley::JSObject, "this element is not of type JSObject", 0, 0);
+	assertz(this->get() != nullptr && this->get()->type() == muzzley::JSObject, string("this element is not of type JSObject: ") + ((string) * this), 0, 0);
 	return this->get()->obj();
 }
 
 muzzley::JSONPtr::operator JSONArr() {
-	assertz(this->get() != nullptr && this->get()->type() == muzzley::JSArray, "this element is not of type JSArray", 0, 0);
+	assertz(this->get() != nullptr && this->get()->type() == muzzley::JSArray, string("this element is not of type JSArray: ") + ((string) * this), 0, 0);
 	return this->get()->arr();
 }
 
 muzzley::JSONPtr::operator JSONObj&() {
-	assertz(this->get() != nullptr && this->get()->type() == muzzley::JSObject, "this element is not of type JSObject", 0, 0);
+	assertz(this->get() != nullptr && this->get()->type() == muzzley::JSObject, string("this element is not of type JSObject: ") + ((string) * this), 0, 0);
 	return this->get()->obj();
 }
 
 muzzley::JSONPtr::operator JSONArr&() {
-	assertz(this->get() != nullptr && this->get()->type() == muzzley::JSArray, "this element is not of type JSArray", 0, 0);
+	assertz(this->get() != nullptr && this->get()->type() == muzzley::JSArray, string("this element is not of type JSArray: ") + ((string) * this), 0, 0);
 	return this->get()->arr();
 }
 

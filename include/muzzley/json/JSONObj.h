@@ -434,6 +434,7 @@ namespace muzzley {
 
 		virtual void stringify(string& _out);
 		virtual void stringify(ostream& _out);
+		virtual string stringify();
 
 		virtual void prettify(string& _out, uint _n_tabs = 0);
 		virtual void prettify(ostream& _out, uint _n_tabs = 0);
