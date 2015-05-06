@@ -31,7 +31,9 @@ using namespace __gnu_cxx;
 namespace muzzley {
 
 	/**
-	 * \brief 
+	 * \brief Exception to be thrown by *assertz* macro definition. The *assertz* macro should be used to create instances of this class. 
+	 *
+	 * This class allows the access to the line number and file name where the *assertz* failed and the related backtrace invocation heap.
 	 */
 	class AssertionException : public std::exception {
 		private:
@@ -45,7 +47,7 @@ namespace muzzley {
 
 		public:
 			/**
-			 * [AssertionException description]
+			 * \brief Exception to be 
 			 *
 			 * @param _what           [description]
 			 * @param _http_code      [description]
