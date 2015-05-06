@@ -47,49 +47,49 @@ namespace muzzley {
 
 		public:
 			/**
-			 * \brief Exception to be 
+			 * \brief Constructor for the class. This constructor should not be used directly, *assertz* should be used instead.
 			 *
-			 * @param _what           [description]
-			 * @param _http_code      [description]
-			 * @param _code           [description]
-			 * @param _desc           [description]
-			 * @param _line           [description]
-			 * @param _file           [description]
-			 * @param _backtrace      [description]
-			 * @param _backtrace_size [description]
+			 * @param _what           brief but comprehensive description
+			 * @param _http_code      HTTP status code to be used if this exception is to be used as a REST reply
+			 * @param _code           error code this exception refers to
+			 * @param _desc           detailed description
+			 * @param _line           line number of the *assertz* directive
+			 * @param _file           file name of the *assertz* directive
+			 * @param _backtrace      invocation backtrace heap
+			 * @param _backtrace_size invocation backtrace heap size
 			 */
 			AssertionException(string _what,  int _http_code, int _code, string _desc, int _line, string _file, char** _backtrace, size_t _backtrace_size);
 			/**
-			 * 
+			 * \brief Destroys the current AssertionException instance, freeing all allocated memory.
 			 */
 			virtual ~AssertionException() throw();
 
 			/**
-			 * \brief 
+			 * \brief Read-access method for the brief description
 			 *
-			 * @return [description]
+			 * @return the brief description
 			 */
 			virtual const char* what() const throw();
 			/**
-			 * \brief 
+			 * \brief Read-access method for the detailed description
 			 *
-			 * @return [description]
+			 * @return the detailed description
 			 */
 			virtual const char* description();
 			/**
-			 * \brief 
+			 * \brief Read-access method for the invocation backtrace heap
 			 *
-			 * @return [description]
+			 * @return the invocation backtrace heap
 			 */
 			virtual const char* backtrace();
 			/**
-			 * \brief 
+			 * \brief Read-access method for the internal error code
 			 *
-			 * @return [description]
+			 * @return the internal error code
 			 */
 			int code();
 			/**
-			 * \brief 
+			 * \brief Read-access method for the HTTP status to be used if this exception is a RESTful reply
 			 *
 			 * @return [description]
 			 */

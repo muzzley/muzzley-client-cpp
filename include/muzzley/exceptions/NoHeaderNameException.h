@@ -34,14 +34,30 @@ using namespace __gnu_cxx;
 
 namespace muzzley {
 
+	/**
+	 * \brief Exception to be thrown when an attempt to set an HTTP header value without setting the header name
+	 */
 	class NoHeaderNameException: public std::exception {
 		private:
 			string __what;
 
 		public:
+			/**
+			 * \brief Creates a new NoHeaderNameException instance.
+			 *
+			 * @param _what brief but comprehensive description of the exception
+			 */
 			NoHeaderNameException(string _what);
+			/**
+			 * \brief Destroys the current NoHeaderNameException instance, freeing all allocated memory.
+			 */
 			virtual ~NoHeaderNameException() throw();
 
+			/**
+			 * \brief Read-access method for the brief description.
+			 *
+			 * @return the brief description
+			 */
 			const char* what();
 	};
 

@@ -29,14 +29,30 @@ using namespace __gnu_cxx;
 
 namespace muzzley {
 
+	/**
+	 * \brief Exception to be thrown when an attempt to set a JSON object value without setting the attribute name
+	 */
 	class NoAttributeNameException: public std::exception {
 		private:
 			string __what;
 
 		public:
+			/**
+			 * \brief Creates a new NoAttributeNameException instance.
+			 *
+			 * @param _what brief but comprehensive description of the exception
+			 */
 			NoAttributeNameException(string _what);
+			/**
+			 * \brief Destroys the current NoAttributeNameException instance, freeing all allocated memory.
+			 */
 			virtual ~NoAttributeNameException() throw();
 
+			/**
+			 * \brief Read-access method for the brief description.
+			 *
+			 * @return the brief description
+			 */
 			virtual const char* what() const throw();
 	};
 

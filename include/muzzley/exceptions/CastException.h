@@ -29,14 +29,30 @@ using namespace __gnu_cxx;
 
 namespace muzzley {
 
+	/**
+	 * \brief Exception to be thrown when an incompatible JSON object casting is requested.
+	 */
 	class CastException: public std::exception {
 		private:
 			string __what;
 
 		public:
+			/**
+			 * \brief Creates a new CastException instance.
+			 *
+			 * @param _what brief but comprehensive description of the exception
+			 */
 			CastException(string _what);
+			/**
+			 * \brief Destroys the current CastException instance, freeing all allocated memory.
+			 */
 			virtual ~CastException() throw();
 
+			/**
+			 * \brief Read-access method for the brief description.
+			 *
+			 * @return the brief description
+			 */
 			virtual const char* what() const throw();
 	};
 

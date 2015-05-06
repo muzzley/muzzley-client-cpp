@@ -92,7 +92,8 @@ namespace muzzley {
 			int err = -1;
 			if ((err = ::send(__sock, reinterpret_cast<char*>(obuf), num * char_size, MSG_NOSIGNAL)) != num) {
 				if (err < 0) {
-					::shutdown(this->__sock, 2);
+					::shutdown(this->__sock, SHUT_RDWR);
+					::close(this->__sock);
 					this->__sock = 0;
 				}
 				return __traits_type::eof();
@@ -132,7 +133,8 @@ namespace muzzley {
 			int num = -1;
 			if ((num = ::recv(__sock, reinterpret_cast<char*>(ibuf), SIZE * char_size, MSG_NOSIGNAL)) <= 0) {
 				if (num < 0) {
-					::shutdown(this->__sock, 2);
+					::shutdown(this->__sock, SHUT_RDWR);
+					::close(this->__sock);
 					this->__sock = 0;
 				}
 				return __traits_type::eof();
@@ -175,7 +177,8 @@ namespace muzzley {
 			__stream_type::flush();
 			__stream_type::clear();
 			if (__buf.get_socket() != 0) {
-				::shutdown(__buf.get_socket(), 2);
+				::shutdown(__buf.get_socket(), SHUT_RDWR);
+				::close(__buf.get_socket());
 			}
 			__buf.set_socket(0);
 		}
@@ -251,7 +254,8 @@ namespace muzzley {
 			__stream_type::flush();
 			__stream_type::clear();
 			if (__buf.get_socket() != 0) {
-				::shutdown(__buf.get_socket(), 2);
+				::shutdown(__buf.get_socket(), SHUT_RDWR);
+				::close(__buf.get_socket());
 			}
 			__buf.set_socket(0);
 		}
@@ -280,8 +284,9 @@ namespace muzzley {
 
 			int _opt = 1;
 			if (setsockopt(this->__sockfd, SOL_SOCKET, SO_REUSEADDR, (char *) &_opt, sizeof(_opt)) == SO_ERROR) {
-				::shutdown(this->__sockfd, 2);
-				this->__sockfd = -1;
+				::shutdown(this->__sockfd, SHUT_RDWR);
+				::close(this->__sock);
+				this->__sockfd = 0;
 				__stream_type::setstate(std::ios::failbit);
 				return false;
 			}
@@ -292,8 +297,9 @@ namespace muzzley {
 			_serv_addr.sin_addr.s_addr = INADDR_ANY;
 			_serv_addr.sin_port = htons(_port);
 			if (::bind(this->__sockfd, (struct sockaddr *) &_serv_addr, sizeof(_serv_addr)) < 0) {
-				::shutdown(this->__sockfd, 2);
-				this->__sockfd = -1;
+				::shutdown(this->__sockfd, SHUT_RDWR);
+				::close(this->__sock);
+				this->__sockfd = 0;
 				__buf.set_socket(0);
 				__stream_type::setstate(std::ios::failbit);
 				return false;

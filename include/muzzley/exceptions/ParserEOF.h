@@ -29,14 +29,30 @@ using namespace __gnu_cxx;
 
 namespace muzzley {
 
+	/**
+	 * \brief Exception to be thrown when the parser reaches the EOF control character.
+	 */
 	class ParserEOF: public std::exception {
 		private:
 			string __what;
 
 		public:
+			/**
+			 * \brief Creates a new ParserEOF instance.
+			 *
+			 * @param _what brief but comprehensive description of the exception
+			 */
 			ParserEOF(string _what);
+			/**
+			 * \brief Destroys the current ParserEOF instance, freeing all allocated memory.
+			 */
 			virtual ~ParserEOF() throw();
 
+			/**
+			 * \brief Read-access method for the brief description.
+			 *
+			 * @return the brief description
+			 */
 			virtual const char* what() const throw();
 	};
 

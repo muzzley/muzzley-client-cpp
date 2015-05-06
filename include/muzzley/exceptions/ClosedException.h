@@ -29,14 +29,30 @@ using namespace __gnu_cxx;
 
 namespace muzzley {
 
+	/**
+	 * \brief Exception to be thrown when the connection with the Muzzley core is lost or closed.
+	 */
 	class ClosedException: public std::exception {
 		private:
 			string __what;
 
 		public:
+			/**
+			 * \brief Creates a new ClosedException instance.
+			 *
+			 * @param _what brief but comprehensive description of the exception
+			 */
 			ClosedException(string _what);
+			/**
+			 * \brief Destroys the current ClosedException instance, freeing all allocated memory.
+			 */
 			virtual ~ClosedException() throw();
 
+			/**
+			 * \brief Read-access method for the brief description.
+			 *
+			 * @return the brief description
+			 */
 			virtual const char* what() const throw();
 	};
 

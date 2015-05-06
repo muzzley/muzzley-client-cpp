@@ -29,14 +29,30 @@ using namespace __gnu_cxx;
 
 namespace muzzley {
 
+	/**
+	 * \brief Exception to be thrown when the parser reads a non-valid character
+	 */
 	class SyntaxErrorException: public std::exception {
 		private:
 			string __what;
 
 		public:
+			/**
+			 * \brief Creates a new SyntaxErrorException instance.
+			 *
+			 * @param _what brief but comprehensive description of the exception
+			 */
 			SyntaxErrorException(string _what);
+			/**
+			 * \brief Destroys the current SyntaxErrorException instance, freeing all allocated memory.
+			 */
 			virtual ~SyntaxErrorException() throw();
 
+			/**
+			 * \brief Read-access method for the brief description.
+			 *
+			 * @return the brief description
+			 */
 			virtual const char* what() const throw();
 	};
 

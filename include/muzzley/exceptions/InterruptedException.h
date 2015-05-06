@@ -29,14 +29,30 @@ using namespace __gnu_cxx;
 
 namespace muzzley {
 
+	/**
+	 * \brief Exception to be thrown when the a muzzley::Client thread has to be interrupted
+	 */
 	class InterruptedException: public std::exception {
 		private:
 			string __what;
 
 		public:
+			/**
+			 * \brief Creates a new InterruptedException instance.
+			 *
+			 * @param _what brief but comprehensive description of the exception
+			 */
 			InterruptedException(string _what);
+			/**
+			 * \brief Destroys the current InterruptedException instance, freeing all allocated memory.
+			 */
 			virtual ~InterruptedException() throw();
 
+			/**
+			 * \brief Read-access method for the brief description.
+			 *
+			 * @return the brief description
+			 */
 			virtual const char* what() const throw();
 	};
 

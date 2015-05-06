@@ -102,7 +102,8 @@ namespace muzzley {
 			if (SSL_write(this->__sslstream, reinterpret_cast<char*>(obuf), num * char_size) != num) {
 				SSL_free(this->__sslstream);
 				SSL_CTX_free(this->__context);
-				::shutdown(this->__sock, 2);
+				::shutdown(this->__sock, SHUT_RDWR);
+				::close(this->__sock);
 				this->__sock = 0;
 				this->__sslstream = nullptr;
 				this->__context = nullptr;
@@ -144,7 +145,8 @@ namespace muzzley {
 			if ((num = SSL_read(this->__sslstream, reinterpret_cast<char*>(ibuf), SIZE * char_size)) <= 0) {
 				SSL_free(this->__sslstream);
 				SSL_CTX_free(this->__context);
-				::shutdown(this->__sock, 2);
+				::shutdown(this->__sock, SHUT_RDWR);
+				::close(this->__sock);
 				this->__sock = 0;
 				this->__sslstream = nullptr;
 				this->__context = nullptr;
@@ -188,7 +190,8 @@ namespace muzzley {
 
 		void close() {
 			if (__buf.get_socket() != 0) {
-				::shutdown(__buf.get_socket(), 2);
+				::shutdown(__buf.get_socket(), SHUT_RDWR);
+				::close(__buf.get_socket());
 			}
 			__stream_type::clear();
 		}
@@ -287,7 +290,8 @@ namespace muzzley {
 			EVP_cleanup();
 			SSL_CTX_free(this->__context);
 			if (__buf.get_socket() != 0) {
-				::shutdown(__buf.get_socket(), 2);
+				::shutdown(__buf.get_socket(), SHUT_RDWR);
+				::close(__buf.get_socket());
 			}
 			__stream_type::clear();
 		}
@@ -341,7 +345,8 @@ namespace muzzley {
 
 			int _opt = 1;
 			if (setsockopt(this->__sockfd, SOL_SOCKET, SO_REUSEADDR, (char *) &_opt, sizeof(_opt)) == SO_ERROR) {
-				::shutdown(this->__sockfd, 2);
+				::shutdown(this->__sockfd, SHUT_RDWR);
+				::close(this->__sockfd);
 				this->__sockfd = -1;
 				__stream_type::setstate(std::ios::failbit);
 				return false;
@@ -353,7 +358,8 @@ namespace muzzley {
 			_serv_addr.sin_addr.s_addr = INADDR_ANY;
 			_serv_addr.sin_port = htons(_port);
 			if (::bind(this->__sockfd, (struct sockaddr *) &_serv_addr, sizeof(_serv_addr)) < 0) {
-				::shutdown(this->__sockfd, 2);
+				::shutdown(this->__sockfd, SHUT_RDWR);
+				::close(this->__sockfd);
 				this->__sockfd = -1;
 				__buf.set_context(0);
 				__stream_type::setstate(std::ios::failbit);
