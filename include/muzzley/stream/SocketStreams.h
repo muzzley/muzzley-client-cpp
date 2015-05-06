@@ -285,7 +285,7 @@ namespace muzzley {
 			int _opt = 1;
 			if (setsockopt(this->__sockfd, SOL_SOCKET, SO_REUSEADDR, (char *) &_opt, sizeof(_opt)) == SO_ERROR) {
 				::shutdown(this->__sockfd, SHUT_RDWR);
-				::close(this->__sock);
+				::close(this->__sockfd);
 				this->__sockfd = 0;
 				__stream_type::setstate(std::ios::failbit);
 				return false;
@@ -298,7 +298,7 @@ namespace muzzley {
 			_serv_addr.sin_port = htons(_port);
 			if (::bind(this->__sockfd, (struct sockaddr *) &_serv_addr, sizeof(_serv_addr)) < 0) {
 				::shutdown(this->__sockfd, SHUT_RDWR);
-				::close(this->__sock);
+				::close(this->__sockfd);
 				this->__sockfd = 0;
 				__buf.set_socket(0);
 				__stream_type::setstate(std::ios::failbit);
