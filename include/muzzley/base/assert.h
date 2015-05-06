@@ -41,7 +41,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 /**
- * Compact form for throwing exceptions when validating logical requirements and input/output validation
+ * \brief Compact form for throwing exceptions when validating logical requirements and input/output validation
  * @param x a boolean expression to be validated
  * @param y the error message
  * @param z the HTTP status code to be replied to the invoking HTTP client
@@ -49,11 +49,20 @@ PERFORMANCE OF THIS SOFTWARE.
 #define assertz(x,y,z,c) if (! (x)) { void *__backtrace_array__[10]; size_t __backtrace__size__ = backtrace(__backtrace_array__, 10); throw muzzley::AssertionException(y, z, c, #x, __LINE__, __FILE__, backtrace_symbols(__backtrace_array__, __backtrace__size__), __backtrace__size__); }
 #define MAX_FRAMES 10
 
+/**
+ * \brief base namespace for all C++ based Muzzley projects. 
+ */
 namespace muzzley {
+	/**
+	 * \brief JSON object type enumeration for type validation in muzzley::JSONElementT
+	 */
 	enum JSONType {
 		JSObject, JSArray, JSString, JSInteger, JSDouble, JSBoolean, JSNil, JSDate
 	};
 
+	/**
+	 * \brief Allowed manipulators for muzzley::JSONPtr class objects
+	 */
 	enum ObjectOp {
 		pretty = 1, minified = 2, json = 4,  xml = 8,  nil = 16,  headers = 32,  params = 64,  body = 128
 	};

@@ -30,6 +30,9 @@ using namespace __gnu_cxx;
 
 namespace muzzley {
 
+	/**
+	 * \brief 
+	 */
 	class AssertionException : public std::exception {
 		private:
 			string __what;
@@ -41,13 +44,53 @@ namespace muzzley {
 			string __backtrace;
 
 		public:
+			/**
+			 * [AssertionException description]
+			 *
+			 * @param _what           [description]
+			 * @param _http_code      [description]
+			 * @param _code           [description]
+			 * @param _desc           [description]
+			 * @param _line           [description]
+			 * @param _file           [description]
+			 * @param _backtrace      [description]
+			 * @param _backtrace_size [description]
+			 */
 			AssertionException(string _what,  int _http_code, int _code, string _desc, int _line, string _file, char** _backtrace, size_t _backtrace_size);
+			/**
+			 * 
+			 */
 			virtual ~AssertionException() throw();
 
+			/**
+			 * \brief 
+			 *
+			 * @return [description]
+			 */
 			virtual const char* what() const throw();
+			/**
+			 * \brief 
+			 *
+			 * @return [description]
+			 */
 			virtual const char* description();
+			/**
+			 * \brief 
+			 *
+			 * @return [description]
+			 */
 			virtual const char* backtrace();
+			/**
+			 * \brief 
+			 *
+			 * @return [description]
+			 */
 			int code();
+			/**
+			 * \brief 
+			 *
+			 * @return [description]
+			 */
 			int status();
 	};
 
