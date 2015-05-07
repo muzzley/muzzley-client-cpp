@@ -35,7 +35,7 @@ namespace muzzley {
 		/**
 		 * \brief Creates a new HTTPRep instance, pointing to a *null* object.
 		 *
-		 * @param _in  the std::istream where the string representation of the HTTP message is stream for parsing 
+		 * @param _in  the std::istream where the textual representation of the HTTP message is stream for parsing 
 		 * @param _out the std::ostream to where the transformed HTTP message may be outputed. Just for reference, *this* parser will not output a transform byte buffer, instead it will instantiate a muzzley::JSONPtr class derivative.
 		 */
 		 JSONParser(std::istream &_in = std::cin, std::ostream &_out = std::cout);

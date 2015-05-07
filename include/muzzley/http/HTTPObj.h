@@ -46,11 +46,11 @@ namespace muzzley {
 	 */
 	extern string nil_header;
 	/**
-	 * \brief Table of string representations for HTTP request methods.
+	 * \brief Table of textual representations for HTTP request methods.
 	 */
 	extern const char* method_names[];
 	/**
-	 * \brief Table of string representations for HTTP status codes.
+	 * \brief Table of textual representations for HTTP status codes.
 	 */
 	extern const char* status_names[];
 
@@ -245,9 +245,9 @@ namespace muzzley {
 	};
 
 	/**
-	 * \brief Retrieves the enumerated representation of an HTTP request method string representation.
+	 * \brief Retrieves the enumerated representation of an HTTP request method textual representation.
 	 *
-	 * @param _in  the HTTP request method string representation
+	 * @param _in  the HTTP request method textual representation
 	 * @param _out the HTTP request method enumerated representation
 	 */
 	void fromstr(string& _in, HTTPMethod* _out);
@@ -281,13 +281,13 @@ namespace muzzley {
 		/**
 		 * \brief Read-access method for retrieving the HTTP request resource path
 		 *
-		 * @return the string representation of the HTTP request resource path
+		 * @return the textual representation of the HTTP request resource path
 		 */
 		string& url();
 		/**
 		 * \brief Write-access method that instantiates *this* instance HTTP request resource path.
 		 *
-		 * @param string the string representation of the HTTP request resource path
+		 * @param string the textual representation of the HTTP request resource path
 		 */
 		void url(string);
 		/**
@@ -339,13 +339,13 @@ namespace muzzley {
 		void param(string _name, string _value);
 
 		/**
-		 * \brief Retrieves the string representation of *this* HTTP request instance.
+		 * \brief Retrieves the textual representation of *this* HTTP request instance.
 		 *
-		 * @param _out the string representation for the HTTP request
+		 * @param _out the textual representation for the HTTP request
 		 */
 		virtual void stringify(string& _out);
 		/**
-		 * \brief Outputs to the std::ostring *out* the string representation of *this* HTTP request instance.
+		 * \brief Outputs to the std::ostring *out* the textual representation of *this* HTTP request instance.
 		 *
 		 * @param _out the std::ostream to output the HTTP representation to
 		 */
@@ -386,13 +386,13 @@ namespace muzzley {
 		void status(HTTPStatus);
 
 		/**
-		 * \brief Retrieves the string representation of *this* HTTP reply instance.
+		 * \brief Retrieves the textual representation of *this* HTTP reply instance.
 		 *
-		 * @param _out the string representation for the HTTP reply
+		 * @param _out the textual representation for the HTTP reply
 		 */
 		virtual void stringify(string& _out);
 		/**
-		 * \brief Outputs to the std::ostring *out* the string representation of *this* HTTP reply instance.
+		 * \brief Outputs to the std::ostring *out* the textual representation of *this* HTTP reply instance.
 		 *
 		 * @param _out the std::ostream to output the HTTP representation to
 		 */
@@ -428,7 +428,7 @@ namespace muzzley {
 		virtual void parse(istream& _in);
 
 		/**
-		 * \brief Friendly *<<* std::ostream operator override that ouputs the string representation of a muzzley::HTTPReq to an std::ostream object. 
+		 * \brief Friendly *<<* std::ostream operator override that ouputs the textual representation of a muzzley::HTTPReq to an std::ostream object. 
 		 */
 		friend ostream& operator<<(ostream& _out, HTTPReq& _in) {
 			_in->stringify(_out);
@@ -436,7 +436,7 @@ namespace muzzley {
 		};
 
 		/**
-		 * \brief Friendly *>>* std::istream operator override that parses the string representation available on an std::istream object into a of a muzzley::HTTPReq object.
+		 * \brief Friendly *>>* std::istream operator override that parses the textual representation available on an std::istream object into a of a muzzley::HTTPReq object.
 		 */
 		friend istream& operator>>(istream& _in, HTTPReq& _out) {
 			_out.parse(_in);
@@ -470,7 +470,7 @@ namespace muzzley {
 		virtual void parse(istream& _in);
 
 		/**
-		 * \brief Friendly *<<* std::ostream operator override that ouputs the string representation of a muzzley::HTTPRep to an std::ostream object. 
+		 * \brief Friendly *<<* std::ostream operator override that ouputs the textual representation of a muzzley::HTTPRep to an std::ostream object. 
 		 */
 		friend ostream& operator<<(ostream& _out, HTTPRep& _in) {
 			_in->stringify(_out);
@@ -478,7 +478,7 @@ namespace muzzley {
 		};
 
 		/**
-		 * \brief Friendly *>>* std::istream operator override that parses the string representation available on an std::istream object into a of a muzzley::HTTPRep object.
+		 * \brief Friendly *>>* std::istream operator override that parses the textual representation available on an std::istream object into a of a muzzley::HTTPRep object.
 		 */
 		friend istream& operator>>(istream& _in, HTTPRep& _out) {
 			_out.parse(_in);

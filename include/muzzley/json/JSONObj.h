@@ -82,6 +82,8 @@ namespace muzzley {
 		 * \brief Operator '==' override for comparing *this* instance with other JSON typed argument. Type conversion between JSON type is attempted in order to determine the objects equality.
 		 *
 		 * Allowed types for *T* are: muzzley::JSONElementT, muzzley::JSONPtr, muzzley::JSONObj, muzzley::JSONArr, std::string, const char*, long long, double, bool, muzzley::timestamp_t, int, size_t.
+		 *
+		 * @return **true** if the objects are equal, **false** otherwise
 		 */
 		template <typename T>
 		bool operator==(T _rhs);
@@ -147,11 +149,13 @@ namespace muzzley {
 		/**
 		 * \brief Operator '[]' override for accessing attributes or array elements of *this* object instance. This is a convenience wrapper method for the muzzley::JSONObjT or muzzley::JSONArrT '[]' operators.
 		 *
-		 * Returns the attribute or array element identified by *idx*. It allows chaining, for instance, you may write  something like:
+		 * Returns the attribute or array element identified by *idx*. It allows chaining, for instance:
 		 *
 		 *     my_json_obj["some_array"][2]["first_value"] ...
 		 * 
 		 * Allowed types for *T* are: std::string, const char*, size_t.
+		 *
+		 * @return            the pointer to the child object if it exists or muzzley::undefined otherwise
 		 */
 		template <typename T>
 		JSONPtr& operator[](T _idx);
@@ -159,7 +163,7 @@ namespace muzzley {
 		/**
 		 * \brief Casting operator for the std::string class. **All** JSON types are castable to an std::string.
 		 *
-		 * @return the std::string representation of *this* instance JSON typed object
+		 * @return the std::textual representation of *this* instance JSON typed object
 		 */
 		operator string();
 		/**
@@ -282,6 +286,9 @@ namespace muzzley {
 		 */
 		operator JSONArr&();
 
+		/**
+		 * \brief Friendly '>>' std::istream operator override that parses the textual representation available on an std::istream object into a of a muzzley::JSONPtr object.
+		 */
 		friend istream& operator>>(istream& _in, JSONPtr& _out) {
 			_out.parse(_in);
 			return _in;
@@ -304,48 +311,214 @@ namespace muzzley {
 	extern JSONPtr nilptr;
 
 	/**
-	 * \brief 
+	 * \brief Class that represents the *object* JSON type. It inherits from the std::map class and is composed of std::string and muzzley::JSONPtr key-value pairs.
 	 */
 	class JSONObjT : public map< string, JSONPtr > {
 	public: 
+		/**
+		 * \brief Creates a new JSONObjT instance.
+		 */		
 		JSONObjT();
+		/**
+		 * \brief Destroys the current JSONObjT instance, freeing all allocated memory. It will free the objects pointed by each muzzley::JSONPtr smart pointer only if there aren't any more std::shared_ptr pointing to it.
+		 */
 		virtual ~JSONObjT();
 
+		/**
+		 * \brief Retrieves the textual representation of *this* JSON object instance. The textual representation has no empty characters, that is, no spaces, tabs or new lines.
+		 *
+		 * @param _out the textual representation for the JSON object
+		 */
 		virtual void stringify(string& _out);
+		/**
+		 * \brief Outputs to the std::ostring *out* the textual representation of *this* JSON object instance. The textual representation has no empty characters, that is, no spaces, tabs or new lines.
+		 *
+		 * @param _out the std::ostream to output the JSON object representation to
+		 */
 		virtual void stringify(ostream& _out);
 
+		/**
+		 * \brief Retrieves a human readable textual representation of *this* JSON object instance. The textual representation is multi-line indented.
+		 *
+		 * @param _out    the textual representation for the JSON object
+		 * @param _n_tabs the initial number of tabs to indent
+		 */
 		virtual void prettify(string& _out, uint _n_tabs = 0);
+		/**
+		 * \brief Outputs to the std::ostring *out* a human readable textual representation of *this* JSON object instance. The textual representation is multi-line indented.
+		 *
+		 * @param _out    the std::ostream to output the JSON object representation to
+		 * @param _n_tabs the initial number of tabs to indent
+		 */
 		virtual void prettify(ostream& _out, uint _n_tabs = 0);
 
+		/**
+		 * \brief Write-access method that inserts an std::string into *this* object map. 
+		 * 
+		 * If there isn't any std::string in context to be used as name/key the *name* string will be used as one. If there is an std::string in context, then the *name* string is used as value.
+		 *
+		 * @param _name the attribute name or attribute value
+		 */
 		virtual void push(string _name);
+		/**
+		 * \brief Write-access method that inserts a muzzley::JSONElementT object into *this* object map. 
+		 *
+		 * @param _value [description]
+		 */
 		virtual void push(JSONElementT& _value);
+		/**
+		 * \brief Write-access method that inserts a muzzley::JSONElementT object into *this* object map. 
+		 *
+		 * @param _value [description]
+		 */
 		virtual void push(JSONElementT* _value);
 
+		/**
+		 * \brief Write-access method that removes the JSON element identified by *idx*.
+		 *
+		 * @param _idx the identification of the element to remove
+		 */
 		virtual void pop(int _idx);
+		/**
+		 * \brief Write-access method that removes the JSON element identified by *idx*.
+		 *
+		 * @param _idx the identification of the element to remove
+		 */
 		virtual void pop(size_t _idx);
+		/**
+		 * \brief Write-access method that removes the JSON element identified by *idx*.
+		 *
+		 * @param _idx the identification of the element to remove
+		 */
 		virtual void pop(const char* _idx);
+		/**
+		 * \brief Write-access method that removes the JSON element identified by *idx*.
+		 *
+		 * @param _idx the identification of the element to remove
+		 */
 		virtual void pop(string _idx);
 
+		/**
+		 * \brief Read-access method for retrieving a child element represented by the *path* object path.
+		 *
+		 * An object path is sequence of child object identifiers, separated by a given character. For instance, the following code
+		 *
+		 *     muzzley::JSONPtr child = my_json_object["some_array"][0]["first_field"]["name"];
+		 *
+		 * is analogue to
+		 *
+		 *     muzzley::JSONPtr child = my_json_object->getPath("some_array.0.first_field.name");
+		 *
+		 * or 
+		 *
+		 *     muzzley::JSONPtr child = my_json_object->getPath("some_array/0/first_field/name", "/");
+		 *
+		 * @param  _path      the object path to search for
+		 * @param  _separator the object path separator
+		 *
+		 * @return            the pointer to the child object if it exists or muzzley::undefined otherwise
+		 */
 		muzzley::JSONPtr getPath(std::string _path, std::string _separator = ".");
 
+		/**
+		 * \brief Operator '==' override for comparing *this* instance with other JSON typed argument. Type conversion between JSON type is attempted in order to determine the objects equality.
+		 *
+		 * @return **true** if the objects are equal, **false** otherwise
+		 */
 		bool operator==(JSONObjT& _in);
+		/**
+		 * \brief Operator '==' override for comparing *this* instance with other JSON typed argument. Type conversion between JSON type is attempted in order to determine the objects equality.
+		 *
+		 * @return **true** if the objects are equal, **false** otherwise
+		 */
 		bool operator==(JSONObj& _in);
+		/**
+		 * \brief Operator '==' override for comparing *this* instance with other JSON typed argument. Type conversion between JSON type is attempted in order to determine the objects equality.
+		 *
+		 * Allowed types for *T* are: muzzley::JSONElementT, muzzley::JSONPtr, muzzley::JSONObj, muzzley::JSONArr, std::string, const char*, long long, double, bool, muzzley::timestamp_t, int, size_t.
+		 *
+		 * @return **true** if the objects are equal, **false** otherwise
+		 */
 		template <typename T>
 		bool operator==(T _in) {
 			return false;
 		};
+		/**
+		 * \brief Operator '!=' override for comparing *this* instance with other JSON typed argument.
+		 *
+		 * @return **true** if the objects are different, **false** otherwise
+		 */
 		bool operator!=(JSONObjT& _in);
+		/**
+		 * \brief Operator '!=' override for comparing *this* instance with other JSON typed argument.
+		 *
+		 * @return **true** if the objects are different, **false** otherwise
+		 */
 		bool operator!=(JSONObj& _in);
+		/**
+		 * \brief Operator '!=' override for comparing *this* instance with other JSON typed argument.
+		 *
+		 * Allowed types for *T* are: muzzley::JSONElementT, muzzley::JSONPtr, muzzley::JSONObj, muzzley::JSONArr, std::string, const char*, long long, double, bool, muzzley::timestamp_t, int, size_t.
+		 *
+		 * @return **true** if the objects are different, **false** otherwise
+		 */
 		template <typename T>
 		bool operator!=(T _in) {
 			return true;
 		};
 
+		/**
+		 * \brief Operator '[]' override for accessing attributes or array elements of *this* object instance.
+		 *
+		 * Returns the attribute or array element identified by *idx*. It allows chaining, for instance:
+		 *
+		 *     my_json_obj["some_array"][2]["first_value"] ...
+		 * 
+		 * @param  _idx the child object identifier
+		 *
+		 * @return  the pointer to the child object if it exists or muzzley::undefined otherwise
+		 */
 		JSONPtr& operator[](int _idx);
+		/**
+		 * \brief Operator '[]' override for accessing attributes or array elements of *this* object instance.
+		 *
+		 * Returns the attribute or array element identified by *idx*. It allows chaining, for instance:
+		 *
+		 *     my_json_obj["some_array"][2]["first_value"] ...
+		 * 
+		 * @param  _idx the child object identifier
+		 *
+		 * @return  the pointer to the child object if it exists or muzzley::undefined otherwise
+		 */
 		JSONPtr& operator[](size_t _idx);
+		/**
+		 * \brief Operator '[]' override for accessing attributes or array elements of *this* object instance.
+		 *
+		 * Returns the attribute or array element identified by *idx*. It allows chaining, for instance:
+		 *
+		 *     my_json_obj["some_array"][2]["first_value"] ...
+		 * 
+		 * @param  _idx the child object identifier
+		 *
+		 * @return  the pointer to the child object if it exists or muzzley::undefined otherwise
+		 */
 		JSONPtr& operator[](const char* _idx);
+		/**
+		 * \brief Operator '[]' override for accessing attributes or array elements of *this* object instance.
+		 *
+		 * Returns the attribute or array element identified by *idx*. It allows chaining, for instance:
+		 *
+		 *     my_json_obj["some_array"][2]["first_value"] ...
+		 * 
+		 * @param  _idx the child object identifier
+		 *
+		 * @return  the pointer to the child object if it exists or muzzley::undefined otherwise
+		 */
 		JSONPtr& operator[](string _idx);
 
+		/**
+		 * \brief Friendly '<<' std::ostream operator override that outputs the textual representation of *this* object instance into the *out* stream.
+		 */
 		friend ostream& operator<<(ostream& _out, JSONObjT& _in) {
 			_in.stringify(_out);
 			return _out;
@@ -355,45 +528,207 @@ namespace muzzley {
 		string __name;
 	};
 
+	/**
+	 * \brief Class that represents the *array* JSON type. It inherits from the std::vector class and is composed of muzzley::JSONPtr elements.
+	 */
 	class JSONArrT : public vector<JSONPtr > {
 	public: 
+		/**
+		 * \brief Creates a new JSONArrT instance.
+		 */		
 		JSONArrT();
+		/**
+		 * \brief Destroys the current JSONArrT instance, freeing all allocated memory. It will free the objects pointed by each muzzley::JSONPtr smart pointer only if there aren't any more std::shared_ptr pointing to it.
+		 */
 		virtual ~JSONArrT();
 
+		/**
+		 * \brief Retrieves the textual representation of *this* JSON array instance. The textual representation has no empty characters, that is, no spaces, tabs or new lines.
+		 *
+		 * @param _out the textual representation for the JSON array
+		 */
 		virtual void stringify(string& _out);
+		/**
+		 * \brief Outputs to the std::ostring *out* the textual representation of *this* JSON array instance. The textual representation has no empty characters, that is, no spaces, tabs or new lines.
+		 *
+		 * @param _out the std::ostream to output the JSON array representation to
+		 */
 		virtual void stringify(ostream& _out);
 
+		/**
+		 * \brief Retrieves a human readable textual representation of *this* JSON array instance. The textual representation is multi-line indented.
+		 *
+		 * @param _out    the textual representation for the JSON array
+		 * @param _n_tabs the initial number of tabs to indent
+		 */
 		virtual void prettify(string& _out, uint _n_tabs = 0);
+		/**
+		 * \brief Outputs to the std::ostring *out* a human readable textual representation of *this* JSON array instance. The textual representation is multi-line indented.
+		 *
+		 * @param _out    the std::ostream to output the JSON array representation to
+		 * @param _n_tabs the initial number of tabs to indent
+		 */
 		virtual void prettify(ostream& _out, uint _n_tabs = 0);
 
+		/**
+		 * \brief Write-access method that inserts a muzzley::JSONElementT object into *this* array vector. 
+		 *
+		 * @param _value [description]
+		 */
 		virtual void push(JSONElementT& _value);
+		/**
+		 * \brief Write-access method that inserts a muzzley::JSONElementT object into *this* array vector. 
+		 *
+		 * @param _value [description]
+		 */
 		virtual void push(JSONElementT* _value);
 
+		/**
+		 * \brief Write-access method that removes the JSON element identified by *idx*.
+		 *
+		 * @param _idx the identification of the element to remove
+		 */
 		virtual void pop(int _idx);
+		/**
+		 * \brief Write-access method that removes the JSON element identified by *idx*.
+		 *
+		 * @param _idx the identification of the element to remove
+		 */
 		virtual void pop(size_t _idx);
+		/**
+		 * \brief Write-access method that removes the JSON element identified by *idx*.
+		 *
+		 * @param _idx the identification of the element to remove
+		 */
 		virtual void pop(const char* _idx);
+		/**
+		 * \brief Write-access method that removes the JSON element identified by *idx*.
+		 *
+		 * @param _idx the identification of the element to remove
+		 */
 		virtual void pop(string _idx);
 
+		/**
+		 * \brief Read-access method for retrieving a child element represented by the *path* object path.
+		 *
+		 * An object path is sequence of child object identifiers, separated by a given character. For instance, the following code
+		 *
+		 *     muzzley::JSONPtr child = my_json_array[1]["some_array"][0]["first_field"]["name"];
+		 *
+		 * is analogue to
+		 *
+		 *     muzzley::JSONPtr child = my_json_array->getPath("1.some_array.0.first_field.name");
+		 *
+		 * or 
+		 *
+		 *     muzzley::JSONPtr child = my_json_array->getPath("1/some_array/0/first_field/name", "/");
+		 *
+		 * @param  _path      the object path to search for
+		 * @param  _separator the object path separator
+		 *
+		 * @return            the pointer to the child object if it exists or muzzley::undefined otherwise
+		 */
 		muzzley::JSONPtr getPath(std::string _path, std::string _separator = ".");
 
+		/**
+		 * \brief Operator '==' override for comparing *this* instance with other JSON typed argument. Type conversion between JSON type is attempted in order to determine the objects equality.
+		 *
+		 * @return **true** if the objects are equal, **false** otherwise
+		 */
 		bool operator==(JSONArrT& _in);
+		/**
+		 * \brief Operator '==' override for comparing *this* instance with other JSON typed argument. Type conversion between JSON type is attempted in order to determine the objects equality.
+		 *
+		 * @return **true** if the objects are equal, **false** otherwise
+		 */
 		bool operator==(JSONArr& _in);
+		/**
+		 * \brief Operator '==' override for comparing *this* instance with other JSON typed argument. Type conversion between JSON type is attempted in order to determine the objects equality.
+		 *
+		 * Allowed types for *T* are: muzzley::JSONElementT, muzzley::JSONPtr, muzzley::JSONObj, muzzley::JSONArr, std::string, const char*, long long, double, bool, muzzley::timestamp_t, int, size_t.
+		 *
+		 * @return **true** if the objects are equal, **false** otherwise
+		 */
 		template <typename T>
 		bool operator==(T _in) {
 			return false;
 		};
+		/**
+		 * \brief Operator '!=' override for comparing *this* instance with other JSON typed argument.
+		 *
+		 * @return **true** if the objects are different, **false** otherwise
+		 */
 		bool operator!=(JSONArrT& _in);
+		/**
+		 * \brief Operator '!=' override for comparing *this* instance with other JSON typed argument.
+		 *
+		 * @return **true** if the objects are different, **false** otherwise
+		 */
 		bool operator!=(JSONArr& _in);
+		/**
+		 * \brief Operator '!=' override for comparing *this* instance with other JSON typed argument.
+		 *
+		 * Allowed types for *T* are: muzzley::JSONElementT, muzzley::JSONPtr, muzzley::JSONObj, muzzley::JSONArr, std::string, const char*, long long, double, bool, muzzley::timestamp_t, int, size_t.
+		 *
+		 * @return **true** if the objects are different, **false** otherwise
+		 */
 		template <typename T>
 		bool operator!=(T _in) {
 			return true;
 		};
 
+		/**
+		 * \brief Operator '[]' override for accessing attributes or array elements of *this* array instance.
+		 *
+		 * Returns the attribute or array element identified by *idx*. It allows chaining, for instance:
+		 *
+		 *     my_json_arr[1]["some_array"][2]["first_value"] ...
+		 * 
+		 * @param  _idx the child object identifier
+		 *
+		 * @return  the pointer to the child object if it exists or muzzley::undefined otherwise
+		 */
 		JSONPtr& operator[](int _idx);
+		/**
+		 * \brief Operator '[]' override for accessing attributes or array elements of *this* array instance.
+		 *
+		 * Returns the attribute or array element identified by *idx*. It allows chaining, for instance:
+		 *
+		 *     my_json_arr[1]["some_array"][2]["first_value"] ...
+		 * 
+		 * @param  _idx the child object identifier
+		 *
+		 * @return  the pointer to the child object if it exists or muzzley::undefined otherwise
+		 */
 		JSONPtr& operator[](size_t _idx);
+		/**
+		 * \brief Operator '[]' override for accessing attributes or array elements of *this* array instance.
+		 *
+		 * Returns the attribute or array element identified by *idx*. It allows chaining, for instance:
+		 *
+		 *     my_json_arr[1]["some_array"][2]["first_value"] ...
+		 * 
+		 * @param  _idx the child object identifier
+		 *
+		 * @return  the pointer to the child object if it exists or muzzley::undefined otherwise
+		 */
 		JSONPtr& operator[](const char* _idx);
+		/**
+		 * \brief Operator '[]' override for accessing attributes or array elements of *this* array instance.
+		 *
+		 * Returns the attribute or array element identified by *idx*. It allows chaining, for instance:
+		 *
+		 *     my_json_arr[1]["some_array"][2]["first_value"] ...
+		 * 
+		 * @param  _idx the child object identifier
+		 *
+		 * @return  the pointer to the child object if it exists or muzzley::undefined otherwise
+		 */
 		JSONPtr& operator[](string _idx);
 
+		/**
+		 * \brief Friendly '<<' std::ostream operator override that outputs the textual representation of *this* array instance into the *out* stream.
+		 */
 		friend ostream& operator<<(ostream& _out, JSONArrT& _in) {
 			_in.stringify(_out);
 			return _out;
@@ -401,22 +736,69 @@ namespace muzzley {
 
 	};	
 
+	/**
+	 * \brief Smart shared pointer to a muzzley::JSONObjT object.
+	 */
 	class JSONObj : public shared_ptr<JSONObjT> {
 	public:
+		/**
+		 * \brief Creates a new JSONObj instance, pointing to a *null* object.
+		 */
 		JSONObj();
+		/**
+		 * \brief Creates a new JSONObj instance copying the target reference from *rhs*.
+		 *
+		 * @param _rhs the smart pointer to copy the target from
+		 */
 		JSONObj(JSONObj& _rhs);
+		/**
+		 * \brief Creates a new JSONObj instance, pointing to the *target* object.
+		 */
 		JSONObj(JSONObjT* _target);
+		/**
+		 * \brief Destroys the current JSONObj instance. It will only free the pointed object if there are no more *shared_ptr* objects pointing to it.
+		 */
 		virtual ~JSONObj();
 
+		/**
+		 * \brief Retrieves an iterator pointing to the beginning of *this* object attribute list. 
+		 *
+		 * @return the iterator pointing to the beginning of *this* object attribute list
+		 */
 		JSONObjT::iterator begin();
+		/**
+		 * \brief Retrieves an iterator pointing to the end of *this* object attribute list. 
+		 *
+		 * @return the iterator pointing to the end of *this* object attribute list
+		 */
 		JSONObjT::iterator end();
 
+		/**
+		 * \brief Cast operation for the std::string class. This is a convenience wrapper operator for muzzley::JSONObjT::stringify method.
+		 *
+		 * @return the textual representation of *this* object instance
+		 */
 		operator string();
 
+
+		/**
+		 * \brief Operator '==' override for comparing *this* instance with other JSON typed argument. Type conversion between JSON type is attempted in order to determine the objects equality.
+		 *
+		 * Allowed types for *T* are: muzzley::JSONElementT, muzzley::JSONPtr, muzzley::JSONObj, muzzley::JSONArr, std::string, const char*, long long, double, bool, muzzley::timestamp_t, int, size_t.
+		 *
+		 * @return **true** if the objects are equal, **false** otherwise
+		 */
 		template <typename T>
 		bool operator==(T _rhs) {
 			return *(this->get()) == _rhs;
 		};
+		/**
+		 * \brief Operator '!=' override for comparing *this* instance with other JSON typed argument.
+		 *
+		 * Allowed types for *T* are: muzzley::JSONElementT, muzzley::JSONPtr, muzzley::JSONObj, muzzley::JSONArr, std::string, const char*, long long, double, bool, muzzley::timestamp_t, int, size_t.
+		 *
+		 * @return **true** if the objects are different, **false** otherwise
+		 */
 		template <typename T>
 		bool operator!=(T _rhs) {
 			return *(this->get()) != _rhs;
