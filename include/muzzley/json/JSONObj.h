@@ -661,6 +661,7 @@ namespace muzzley {
 
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 template <typename T>
 bool muzzley::JSONPtr::operator==(T _rhs) {
 	return *(this->get()) == _rhs;
@@ -683,3 +684,4 @@ template <typename T>
 muzzley::JSONPtr& muzzley::JSONPtr::operator[](T _idx) {
 	return (*(this->get()))[_idx];
 };
+#endif
