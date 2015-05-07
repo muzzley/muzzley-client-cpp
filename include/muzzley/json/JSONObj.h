@@ -42,46 +42,244 @@ using namespace __gnu_cxx;
 
 
 namespace muzzley {
+
+	/**
+	 * \brief Type definition for representing a millisecond based timestamp.
+	 */
 	typedef unsigned long long timestamp_t;
 
 	class JSONElementT;
 	class JSONObj;
 	class JSONArr;
 
+	/**
+	 * \brief Smart shared pointer to a muzzley::JSONElementT object.
+	 */
 	class JSONPtr : public shared_ptr<JSONElementT> {
 	public:
+		/**
+		 * \brief Creates a new JSONPtr instance, pointing to a *null* object.
+		 */
 		JSONPtr();
+		/**
+		 * \brief Creates a new JSONPtr instance, pointing to the *target* object.
+		 */
 		JSONPtr(JSONElementT* _target);
+		/**
+		 * \brief Destroys the current JSONPtr instance. It will only free the pointed object if there are no more *shared_ptr* objects pointing to it.
+		 */
 		virtual ~JSONPtr();
 
+		/**
+		 * \brief Read-access method for retrieving the value pointed by *this* instance.
+		 *
+		 * @return the value pointed by *this* instance
+		 */
 		JSONElementT& value();
 		void parse(istream& _in);
 
+		/**
+		 * \brief Operator '==' override for comparing *this* instance with other JSON typed argument. Type conversion between JSON type is attempted in order to determine the objects equality.
+		 *
+		 * Allowed types for *T* are: muzzley::JSONElementT, muzzley::JSONPtr, muzzley::JSONObj, muzzley::JSONArr, std::string, const char*, long long, double, bool, muzzley::timestamp_t, int, size_t.
+		 */
 		template <typename T>
 		bool operator==(T _rhs);
+		/**
+		 * \brief Operator '!=' override for comparing *this* instance with other JSON typed argument.
+		 *
+		 * Allowed types for *T* are: muzzley::JSONElementT, muzzley::JSONPtr, muzzley::JSONObj, muzzley::JSONArr, std::string, const char*, long long, double, bool, muzzley::timestamp_t, int, size_t.
+		 *
+		 * @return **true** if the objects are different, **false** otherwise
+		 */
 		template <typename T>
 		bool operator!=(T _rhs);
+		/**
+		 * \brief Operator '<<' override form injecting values into *this* instance object. This is a convenience wrapper method for the muzzley::JSONObjT or muzzley::JSONArrT **push** methods.
+		 * 
+		 * According to *this* object type, behaviors differ:
+		 *
+		 * to add attributes to your object:
+		 * 
+		 *     muzzley::JSONObj _o;
+		 *     _o << "name" << "Mr Muzzley";
+		 *     _o << "serial" << 123;
+		 *     _o << "sorting_field" << "name";
+		 * 
+		 * or
+		 * 
+		 *     muzzley::JSONObj _o;
+		 *     _o << 
+		 *       "name" << "Mr Muzzley" <<
+		 *       "serial" << 123 <<
+		 *       "sorting_field" << "name";
+		 *     // this one is more JSON like
+		 *
+		 * (when *this* object is a muzzley::JSONObj and *T* is std::string, it will either be injected as an attribute name or as an attribute value, depending on whether or not you've already injected an attribute name)
+		 * 
+		 * to add a JSON array, use the *muzzley::JSONArr* class:
+		 * 
+		 *     muzzley::JSONArr _a;
+		 *     _a << 123 << 345 << 67 << 78;
+		 * 
+		 *     muzzley::JSONArr _b;
+		 *     _b << "lions" << 345 << "horses" << 78;
+		 * 
+		 *     muzzley::JSONObj _o;
+		 *     _o << 
+		 *       "name" << "Mr Muzzley" <<
+		 *       "serial" << 123 <<
+		 *       "sorting_field" << "name" <<
+		 *       "numbers" << _a <<
+		 *       "animal_numbers" << _b;
+		 *
+		 * Allowed types for *T* are: muzzley::JSONElementT, muzzley::JSONPtr, muzzley::JSONObj, muzzley::JSONArr, std::string, const char*, long long, double, bool, muzzley::timestamp_t, int, size_t.
+		 */
 		template <typename T>
 		JSONPtr& operator<<(T _in);
+		/**
+		 * \brief Operator '>>' override for removing attributes or array elements from *this* object instance. This is a convenience wrapper method for the muzzley::JSONObjT or muzzley::JSONArrT **pop** methods.
+		 *
+		 * Allowed types for *T* are: std::string, const char*, int, size_t,.
+		 */
 		template <typename T>
 		JSONPtr& operator>>(T _in);
+		/**
+		 * \brief Operator '[]' override for accessing attributes or array elements of *this* object instance. This is a convenience wrapper method for the muzzley::JSONObjT or muzzley::JSONArrT '[]' operators.
+		 *
+		 * Returns the attribute or array element identified by *idx*. It allows chaining, for instance, you may write  something like:
+		 *
+		 *     my_json_obj["some_array"][2]["first_value"] ...
+		 * 
+		 * Allowed types for *T* are: std::string, const char*, size_t.
+		 */
 		template <typename T>
 		JSONPtr& operator[](T _idx);
 
+		/**
+		 * \brief Casting operator for the std::string class. **All** JSON types are castable to an std::string.
+		 *
+		 * @return the std::string representation of *this* instance JSON typed object
+		 */
 		operator string();
+		/**
+		 * \brief Casting operator for the *bool* basic type. **All** JSON types as castable to a *bool* value: 
+		 * 
+		 * - anything equals to a numerical zero or is empty, is castable to **false**
+		 * - anything instantiated and different from a numerical zero is castable to **true**.
+		 *
+		 * @return the *bool* representation of *this* instance JSON typed object
+		 */
 		operator bool();
+		/**
+		 * \brief Casting operator for the *int* basic type. **All** JSON types as castable to a *int* value: 
+		 * 
+		 * - anything numerical is truncated to *int*
+		 * - if *this* object instance is a JSON string that an attempt is made to parse the string value as an *int*, zero is returned if unsuccessful
+		 * - if *this* object instance is a JSON object, the number of attributes is returned, truncated to *int*
+		 * - if *this* object instance is a JSON array, the number of elements is returned, truncated to *int*
+		 * - if *this* object instance is a JSON date, the number of milliseconds since *epoch* is returned, truncated to *int*
+		 *
+		 * @return the *int* representation of *this* instance JSON typed object
+		 */
 		operator int();
+		/**
+		 * \brief Casting operator for the *long* basic type. **All** JSON types as castable to a *long* value: 
+		 * 
+		 * - anything numerical is truncated to *long*
+		 * - if *this* object instance is a JSON string that an attempt is made to parse the string value as a *long*, zero is returned if unsuccessful
+		 * - if *this* object instance is a JSON object, the number of attributes is returned, truncated to *long*
+		 * - if *this* object instance is a JSON array, the number of elements is returned, truncated to *long*
+		 * - if *this* object instance is a JSON date, the number of milliseconds since *epoch* is returned, truncated to *long*
+		 *
+		 * @return the *long* representation of *this* instance JSON typed object
+		 */
 		operator long();
+		/**
+		 * \brief Casting operator for the *long long* basic type. **All** JSON types as castable to a *long long* value: 
+		 * 
+		 * - anything numerical is truncated to *long long*
+		 * - if *this* object instance is a JSON string that an attempt is made to parse the string value as a *long long*, zero is returned if unsuccessful
+		 * - if *this* object instance is a JSON object, the number of attributes is returned, truncated to *long long*
+		 * - if *this* object instance is a JSON array, the number of elements is returned, truncated to *long long*
+		 * - if *this* object instance is a JSON date, the number of milliseconds since *epoch* is returned, truncated to *long long*
+		 *
+		 * @return the *long long* representation of *this* instance JSON typed object
+		 */
 		operator long long();
 #ifdef __LP64__
+		/**
+		 * \brief Casting operator for the *unsigned int* basic type. **All** JSON types as castable to a *unsigned int* value: 
+		 * 
+		 * - anything numerical is truncated to *unsigned int*
+		 * - if *this* object instance is a JSON string that an attempt is made to parse the string value as an *unsigned int*, zero is returned if unsuccessful
+		 * - if *this* object instance is a JSON object, the number of attributes is returned, truncated to *unsigned int*
+		 * - if *this* object instance is a JSON array, the number of elements is returned, truncated to *unsigned int*
+		 * - if *this* object instance is a JSON date, the number of milliseconds since *epoch* is returned, truncated to *unsigned int*
+		 *
+		 * @return the *unsigned int* representation of *this* instance JSON typed object
+		 */
 		operator unsigned int();
 #endif
+		/**
+		 * \brief Casting operator for the *size_t* basic type. **All** JSON types as castable to a *size_t* value: 
+		 * 
+		 * - anything numerical is truncated to *size_t*
+		 * - if *this* object instance is a JSON string that an attempt is made to parse the string value as a *size_t*, zero is returned if unsuccessful
+		 * - if *this* object instance is a JSON object, the number of attributes is returned, truncated to *size_t*
+		 * - if *this* object instance is a JSON array, the number of elements is returned, truncated to *size_t*
+		 * - if *this* object instance is a JSON date, the number of milliseconds since *epoch* is returned, truncated to *size_t*
+		 *
+		 * @return the *size_t* representation of *this* instance JSON typed object
+		 */
 		operator size_t();
+		/**
+		 * \brief Casting operator for the *double* basic type. **All** JSON types as castable to a *double* value: 
+		 * 
+		 * - anything numerical is truncated to *double*
+		 * - if *this* object instance is a JSON string that an attempt is made to parse the string value as a *double*, zero is returned if unsuccessful
+		 * - if *this* object instance is a JSON object, the number of attributes is returned, truncated to *double*
+		 * - if *this* object instance is a JSON array, the number of elements is returned, truncated to *double*
+		 * - if *this* object instance is a JSON date, the number of milliseconds since *epoch* is returned, truncated to *double*
+		 *
+		 * @return the *double* representation of *this* instance JSON typed object
+		 */
 		operator double();
+		/**
+		 * \brief Casting operator for the *muzzley::timestamp_t* basic type. **All** JSON types as castable to a *muzzley::timestamp_t* value: 
+		 * 
+		 * - anything numerical is truncated to *muzzley::timestamp_t*
+		 * - if *this* object instance is a JSON string that an attempt is made to parse the string value as a *muzzley::timestamp_t*, zero is returned if unsuccessful
+		 * - if *this* object instance is a JSON object, the number of attributes is returned, truncated to *muzzley::timestamp_t*
+		 * - if *this* object instance is a JSON array, the number of elements is returned, truncated to *muzzley::timestamp_t*
+		 * - if *this* object instance is a JSON date, the number of milliseconds since *epoch* is returned, truncated to *muzzley::timestamp_t*
+		 *
+		 * @return the *muzzley::timestamp_t* representation of *this* instance JSON typed object
+		 */
 		operator timestamp_t();
+		/**
+		 * \brief Casting operator for *muzzley::JSONObj* class. If *this* instance object is not of type muzzley::JSONType::JSObject or muzzley::JSONType::JSNil, a muzzley::AssertionException is thrown.
+		 *
+		 * @return the *muzzley::JSONObj* representation of *this* instance JSON typed object
+		 */
 		operator JSONObj();
+		/**
+		 * \brief Casting operator for *muzzley::JSONArr* class. If *this* instance object is not of type muzzley::JSONType::JSArray or muzzley::JSONType::JSNil, a muzzley::AssertionException is thrown.
+		 *
+		 * @return the *muzzley::JSONArr* representation of *this* instance JSON typed object
+		 */
 		operator JSONArr();
+		/**
+		 * \brief Casting operator for *muzzley::JSONObj* class. If *this* instance object is not of type muzzley::JSONType::JSObject or muzzley::JSONType::JSNil, a muzzley::AssertionException is thrown.
+		 *
+		 * @return the *muzzley::JSONObj* representation of *this* instance JSON typed object
+		 */
 		operator JSONObj&();
+		/**
+		 * \brief Casting operator for *muzzley::JSONArr* class. If *this* instance object is not of type muzzley::JSONType::JSArray or muzzley::JSONType::JSNil, a muzzley::AssertionException is thrown.
+		 *
+		 * @return the *muzzley::JSONArr* representation of *this* instance JSON typed object
+		 */
 		operator JSONArr&();
 
 		friend istream& operator>>(istream& _in, JSONPtr& _out) {
@@ -93,10 +291,21 @@ namespace muzzley {
 
 	typedef JSONPtr JSONElement;
 
+	/**
+	 * \brief Convenience global variable that represents the *undefined* JSON type, to be used in comparisons and default return values.
+	 *
+	 * Example:
+	 * 
+	 *     if (my_json_object["some_attribute"] == muzzley::undefined) {
+	 *         ...
+	 *     } 
+	 */
 	extern JSONPtr undefined;
 	extern JSONPtr nilptr;
 
-
+	/**
+	 * \brief 
+	 */
 	class JSONObjT : public map< string, JSONPtr > {
 	public: 
 		JSONObjT();
@@ -304,7 +513,9 @@ namespace muzzley {
 		JSONStruct& operator=(JSONStruct&&) = delete;
 
 		JSONType __type;
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 		union {
+#endif
 			JSONObj __object;
 			JSONArr __array;
 			JSONStr __string;
@@ -313,7 +524,9 @@ namespace muzzley {
 			bool __boolean;
 			void* __nil;
 			muzzley::timestamp_t __date;
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 		};
+#endif
 	} JSONUnion;
 
 	class JSONElementT {

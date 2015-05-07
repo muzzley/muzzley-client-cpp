@@ -57,10 +57,6 @@ PERFORMANCE OF THIS SOFTWARE.
  * - libtool
  * - [OpenSSL's libssl and libcrypto][open_ssl] (libraries and development packages)
  * 
- * # VERSIONING
- * 
- * Current version: [0.0.3][changelog] - **Please read since this version contains breaking changes**
- * 
  * # INSTALL
  * 
  * ## Linux & OSX
@@ -760,7 +756,6 @@ PERFORMANCE OF THIS SOFTWARE.
  * 
  * [muzzley_homepage]: https://www.muzzley.com
  * [lambda_functions]: http://www.cprogramming.com/c++11/c++11-lambda-closures.html
- * [changelog]: CHANGES.md
  * [cpp_smart_pointers]: http://en.cppreference.com/w/cpp/memory/shared_ptr
  * [cpp_map]: http://en.cppreference.com/w/cpp/container/map
  * [cpp_vector]: http://en.cppreference.com/w/cpp/container/vector

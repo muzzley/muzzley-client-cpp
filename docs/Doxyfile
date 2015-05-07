@@ -847,7 +847,10 @@ EXCLUDE_SYMLINKS       = NO
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       = 
+EXCLUDE_PATTERNS       = HTTPLexer* \
+                         HTTPTokenizer* \
+                         JSONLexer* \
+                         JSONTokenizer*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
@@ -1988,7 +1991,8 @@ INCLUDE_FILE_PATTERNS  =
 # recursively expanded use the := operator instead of the = operator.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-PREDEFINED             = HAVE_HTTP_CLIENT=1
+PREDEFINED             = HAVE_HTTP_CLIENT=1 \
+                         DOXYGEN_SHOULD_SKIP_THIS=1
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
