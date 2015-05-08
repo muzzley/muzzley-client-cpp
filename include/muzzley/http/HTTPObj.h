@@ -428,7 +428,7 @@ namespace muzzley {
 		virtual void parse(istream& _in);
 
 		/**
-		 * \brief Friendly *<<* std::ostream operator override that ouputs the textual representation of a muzzley::HTTPReq to an std::ostream object. 
+		 * \brief Friendly '<<' std::ostream operator override that ouputs the textual representation of a muzzley::HTTPReq to an std::ostream object. 
 		 */
 		friend ostream& operator<<(ostream& _out, HTTPReq& _in) {
 			_in->stringify(_out);
@@ -470,7 +470,7 @@ namespace muzzley {
 		virtual void parse(istream& _in);
 
 		/**
-		 * \brief Friendly *<<* std::ostream operator override that ouputs the textual representation of a muzzley::HTTPRep to an std::ostream object. 
+		 * \brief Friendly '<<' std::ostream operator override that ouputs the textual representation of a muzzley::HTTPRep to an std::ostream object. 
 		 */
 		friend ostream& operator<<(ostream& _out, HTTPRep& _in) {
 			_in->stringify(_out);
