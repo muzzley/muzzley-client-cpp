@@ -310,6 +310,16 @@ namespace muzzley {
 	extern JSONPtr undefined;
 	extern JSONPtr nilptr;
 
+	template <typename T>	
+	muzzley::JSONElementT * make_element(T& _e) {
+		return new muzzley::JSONElementT(_e);
+	}
+
+	template <typename T>	
+	muzzley::JSONPtr make_ptr(T& _e) {
+		return muzzley::JSONPtr(new muzzley::JSONElementT(_e));
+	}
+
 	/**
 	 * \brief Class that represents the *object* JSON type. It inherits from the std::map class and is composed of std::string and muzzley::JSONPtr key-value pairs.
 	 */
@@ -419,6 +429,53 @@ namespace muzzley {
 		 * @return            the pointer to the child object if it exists or muzzley::undefined otherwise
 		 */
 		muzzley::JSONPtr getPath(std::string _path, std::string _separator = ".");
+
+		/**
+		 * \brief Write-access method for adding a child element represented by the *path* object path and with *value* value.
+		 *
+		 * An object path is sequence of child object identifiers, separated by a given character. For instance, the following code
+		 *
+		 *     muzzley::JSONPtr child = my_json_object["some_array"][0]["first_field"]["name"];
+		 *
+		 * is analogue to
+		 *
+		 *     muzzley::JSONPtr child = my_json_object->getPath("some_array.0.first_field.name");
+		 *
+		 * or 
+		 *
+		 *     muzzley::JSONPtr child = my_json_object->getPath("some_array/0/first_field/name", "/");
+		 *
+		 * @param _path      the object path to search for
+		 * @param _value     the value to be assigned to the child element
+		 * @param _separator the object path separator
+		 */
+		void setPath(std::string _path, muzzley::JSONPtr _value, std::string _separator = ".");
+
+		/**
+		 * \brief Write-access method for removing a child element represented by the *path* object path.
+		 *
+		 * An object path is sequence of child object identifiers, separated by a given character. For instance, the following code
+		 *
+		 *     muzzley::JSONPtr child = my_json_object["some_array"][0]["first_field"]["name"];
+		 *
+		 * is analogue to
+		 *
+		 *     muzzley::JSONPtr child = my_json_object->getPath("some_array.0.first_field.name");
+		 *
+		 * or 
+		 *
+		 *     muzzley::JSONPtr child = my_json_object->getPath("some_array/0/first_field/name", "/");
+		 *
+		 * @param  _path      the object path to search for
+		 * @param  _separator the object path separator
+		 */
+		void delPath(std::string _path, std::string _separator = ".");
+
+		/**
+		 * @brief Creates a full copy of the JSON representation stored in *this* *muzzley::JSONObjT*
+		 * @return a pointer to the copy of the underlying JSON representation
+		 */
+		JSONPtr clone();
 
 		/**
 		 * \brief Operator '==' override for comparing *this* instance with other JSON typed argument. Type conversion between JSON type is attempted in order to determine the objects equality.
@@ -629,6 +686,53 @@ namespace muzzley {
 		 * @return            the pointer to the child object if it exists or muzzley::undefined otherwise
 		 */
 		muzzley::JSONPtr getPath(std::string _path, std::string _separator = ".");
+
+		/**
+		 * \brief Write-access method for adding a child element represented by the *path* object path and with *value* value.
+		 *
+		 * An object path is sequence of child object identifiers, separated by a given character. For instance, the following code
+		 *
+		 *     muzzley::JSONPtr child = my_json_object["some_array"][0]["first_field"]["name"];
+		 *
+		 * is analogue to
+		 *
+		 *     muzzley::JSONPtr child = my_json_object->getPath("some_array.0.first_field.name");
+		 *
+		 * or 
+		 *
+		 *     muzzley::JSONPtr child = my_json_object->getPath("some_array/0/first_field/name", "/");
+		 *
+		 * @param _path      the object path to search for
+		 * @param _value     the value to be assigned to the child element
+		 * @param _separator the object path separator
+		 */
+		void setPath(std::string _path, muzzley::JSONPtr _value, std::string _separator = ".");
+
+		/**
+		 * \brief Write-access method for removing a child element represented by the *path* object path.
+		 *
+		 * An object path is sequence of child object identifiers, separated by a given character. For instance, the following code
+		 *
+		 *     muzzley::JSONPtr child = my_json_object["some_array"][0]["first_field"]["name"];
+		 *
+		 * is analogue to
+		 *
+		 *     muzzley::JSONPtr child = my_json_object->getPath("some_array.0.first_field.name");
+		 *
+		 * or 
+		 *
+		 *     muzzley::JSONPtr child = my_json_object->getPath("some_array/0/first_field/name", "/");
+		 *
+		 * @param  _path      the object path to search for
+		 * @param  _separator the object path separator
+		 */
+		void delPath(std::string _path, std::string _separator = ".");
+
+		/**
+		 * @brief Creates a full copy of the JSON representation stored in *this* *muzzley::JSONArrT*
+		 * @return a pointer to the copy of the underlying JSON representation
+		 */
+		JSONPtr clone();
 
 		/**
 		 * \brief Operator '==' override for comparing *this* instance with other JSON typed argument. Type conversion between JSON type is attempted in order to determine the objects equality.
@@ -944,6 +1048,12 @@ namespace muzzley {
 		JSONElementT* parent();
 		void parent(JSONElementT* _parent);
 
+		/**
+		 * @brief Creates a full copy of the JSON representation pointed by this *muzzley::JSONPtr*
+		 * @return a pointer to the copy of the underlying JSON representation
+		 */
+		JSONPtr clone();
+
 		virtual JSONObj& obj();
 		virtual JSONArr& arr();
 		string str();
@@ -1026,6 +1136,8 @@ namespace muzzley {
 		};
 
 		muzzley::JSONPtr getPath(std::string _path, std::string _separator = ".");
+		void setPath(std::string _path, muzzley::JSONPtr _value, std::string _separator = ".");
+		void delPath(std::string _path, std::string _separator = ".");
 
 		virtual void stringify(string& _out);
 		virtual void stringify(ostream& _out);

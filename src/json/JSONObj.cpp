@@ -394,6 +394,41 @@ double muzzley::JSONElementT::number() {
 	return 0;
 }
 
+muzzley::JSONPtr muzzley::JSONElementT::clone() {
+	switch(this->type()) {
+		case muzzley::JSObject : {
+			return this->obj()->clone();
+		}
+		case muzzley::JSArray : {
+			return this->arr()->clone();
+		}
+		case muzzley::JSString : {
+			std::string _v = this->str();
+			return make_ptr(_v);
+		}
+		case muzzley::JSInteger : {
+			int _v = this->intr();
+			return make_ptr(_v);
+		}
+		case muzzley::JSDouble : {
+			double _v = this->dbl();
+			return make_ptr(_v);
+		}
+		case muzzley::JSBoolean : {
+			bool _v = this->bln();
+			return make_ptr(_v);
+		}
+		case muzzley::JSNil : {
+			return muzzley::undefined;
+		}
+		case muzzley::JSDate : {
+			muzzley::timestamp_t _v = this->date();
+			return make_ptr(_v);
+		}
+	}
+	return muzzley::undefined;	
+}
+
 muzzley::JSONElementT& muzzley::JSONElementT::operator<<(const char* _in) {
 	(* this) << string(_in);
 	return * this;
@@ -535,6 +570,27 @@ muzzley::JSONPtr muzzley::JSONElementT::getPath(std::string _path, std::string _
 		}
 	}
 	return muzzley::undefined;
+}
+
+void muzzley::JSONElementT::setPath(std::string _path, muzzley::JSONPtr _value, std::string _separator) {
+	assertz(this->__target.__type >= 0, "the type must be a valid value", 0, 0);
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			return this->__target.__object->setPath(_path, _value, _separator);
+		}
+		case muzzley::JSArray : {
+			return this->__target.__array->setPath(_path, _value, _separator);
+		}
+		case muzzley::JSString :
+		case muzzley::JSInteger :
+		case muzzley::JSDouble :
+		case muzzley::JSBoolean :
+		case muzzley::JSNil :
+		case muzzley::JSDate : {
+			return;
+		}
+	}
+	return;
 }
 
 void muzzley::JSONElementT::stringify(ostream& _out) {
@@ -828,8 +884,13 @@ void muzzley::JSONObjT::pop(string _name) {
 muzzley::JSONPtr muzzley::JSONObjT::getPath(std::string _path, std::string _separator) {
 	std::istringstream _iss(_path);
 	std::string _part;
+
 	getline(_iss, _part, _separator[0]);
 	muzzley::JSONPtr _current = (* this)[_part];
+	if (!_current->ok()) {
+		return muzzley::undefined;
+	}
+	
 	while(_iss.good()) {
 		getline(_iss, _part, _separator[0]);
 		if (_current[_part]->ok()) {
@@ -840,6 +901,82 @@ muzzley::JSONPtr muzzley::JSONObjT::getPath(std::string _path, std::string _sepa
 		}
 	}
 	return _current;
+}
+
+void muzzley::JSONObjT::setPath(std::string _path, muzzley::JSONPtr _value, std::string _separator) {
+	std::istringstream _iss(_path);
+	std::string _part;
+
+	getline(_iss, _part, _separator[0]);
+	muzzley::JSONPtr _current = (* this)[_part];
+	if (!_current->ok()) {
+		this->push(_part);
+		if (_iss.good()) {
+			muzzley::JSONObj _new;
+			this->push(new JSONElementT(_new));
+			_current = (* this)[_part];
+		}
+		else {
+			this->push(_value.get());
+		}
+	}
+
+	while(_iss.good()) {
+		getline(_iss, _part, _separator[0]);
+		if (_current[_part]->ok()) {
+			if (_iss.good()) {
+				_current = _current[_part];
+			}
+			else {
+				_current >> _part;
+				_current << _part << _value;
+			}
+		}
+		else {
+			if (_iss.good()) {
+				muzzley::JSONObj _new;
+				_current << _part << _new;
+				_current = _current[_part];
+			}
+			else {
+				_current << _part << _value;
+			}
+		}
+	}
+}
+
+void muzzley::JSONObjT::delPath(std::string _path, std::string _separator) {
+	std::istringstream _iss(_path);
+	std::string _part;
+
+	getline(_iss, _part, _separator[0]);
+	muzzley::JSONPtr _current = (* this)[_part];
+	if (!_current->ok()) {
+		return;
+	}
+
+	while(_iss.good()) {
+		getline(_iss, _part, _separator[0]);
+		if (_current[_part]->ok()) {
+			if (_iss.good()) {
+				_current = _current[_part];
+			}
+			else {
+				_current >> _part;
+			}
+		}
+		else {
+			return;
+		}
+	}
+}
+
+muzzley::JSONPtr muzzley::JSONObjT::clone() {
+	muzzley::JSONObj _return;
+	for (auto _f : * this) {
+		_return << _f.first << _f.second->clone();
+	}	
+	return make_ptr(_return);
 }
 
 bool muzzley::JSONObjT::operator==(muzzley::JSONObjT& _rhs) {
@@ -1010,8 +1147,13 @@ void muzzley::JSONArrT::pop(size_t _idx) {
 muzzley::JSONPtr muzzley::JSONArrT::getPath(std::string _path, std::string _separator) {
 	std::istringstream _iss(_path);
 	std::string _part;
+
 	getline(_iss, _part, _separator[0]);
 	muzzley::JSONPtr _current = (* this)[_part];
+	if (!_current->ok()) {
+		return muzzley::undefined;
+	}
+
 	while(_iss.good()) {
 		getline(_iss, _part, _separator[0]);
 		if (_current[_part]->ok()) {
@@ -1022,6 +1164,82 @@ muzzley::JSONPtr muzzley::JSONArrT::getPath(std::string _path, std::string _sepa
 		}
 	}
 	return _current;			
+}
+
+
+void muzzley::JSONArrT::setPath(std::string _path, muzzley::JSONPtr _value, std::string _separator) {
+	std::istringstream _iss(_path);
+	std::string _part;
+
+	getline(_iss, _part, _separator[0]);
+	muzzley::JSONPtr _current = (* this)[_part];
+	if (!_current->ok()) {
+		if (_iss.good()) {
+			muzzley::JSONArr _new;
+			this->push(new JSONElementT(_new));
+			_current = _current[this->size() - 1];
+		}
+		else {
+			this->push(_value.get());
+		}
+	}
+
+	while(_iss.good()) {
+		getline(_iss, _part, _separator[0]);
+		if (_current[_part]->ok()) {
+			if (_iss.good()) {
+				_current = _current[_part];
+			}
+			else {
+				_current >> _part;
+				_current << _part << _value;
+			}
+		}
+		else {
+			if (_iss.good()) {
+				muzzley::JSONObj _new;
+				_current << _part << _new;
+				_current = _current[_part];
+			}
+			else {
+				_current << _part << _value;
+			}
+		}
+	}
+}
+
+void muzzley::JSONArrT::delPath(std::string _path, std::string _separator) {
+	std::istringstream _iss(_path);
+	std::string _part;
+
+	getline(_iss, _part, _separator[0]);
+	muzzley::JSONPtr _current = (* this)[_part];
+	if (!_current->ok()) {
+		return;
+	}
+
+	while(_iss.good()) {
+		getline(_iss, _part, _separator[0]);
+		if (_current[_part]->ok()) {
+			if (_iss.good()) {
+				_current = _current[_part];
+			}
+			else {
+				_current >> _part;
+			}
+		}
+		else {
+			return;
+		}
+	}
+}
+
+muzzley::JSONPtr muzzley::JSONArrT::clone() {
+	muzzley::JSONArr _return;
+	for (auto _f : * this) {
+		_return << _f->clone();
+	}	
+	return make_ptr(_return);
 }
 
 bool muzzley::JSONArrT::operator==(muzzley::JSONArrT& _rhs) {
