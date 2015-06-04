@@ -781,7 +781,7 @@ namespace muzzley {
 	 * \brief JSON object type enumeration for type validation in muzzley::JSONElementT
 	 */
 	enum JSONType {
-		JSObject, JSArray, JSString, JSInteger, JSDouble, JSBoolean, JSNil, JSDate
+		JSObject = 0, JSArray = 1, JSString = 2, JSInteger = 3, JSDouble = 4, JSBoolean = 5, JSNil = 6, JSDate = 7
 	};
 
 	/**

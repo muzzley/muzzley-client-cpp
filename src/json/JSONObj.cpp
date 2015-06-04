@@ -376,7 +376,7 @@ muzzley::timestamp_t muzzley::JSONElementT::date() {
 }
 
 double muzzley::JSONElementT::number() {
-	assertz(this->__target.__type == muzzley::JSInteger || this->__target.__type == muzzley::JSDouble || this->__target.__type == muzzley::JSBoolean, string("this element is not of type JSInteger, JSDouble or JSBoolean: ") + this->stringify(), 0, 0);
+	assertz(this->__target.__type == muzzley::JSDate || this->__target.__type == muzzley::JSInteger || this->__target.__type == muzzley::JSDouble || this->__target.__type == muzzley::JSBoolean, string("this element is not of type JSInteger, JSDouble or JSBoolean: ") + this->stringify(), 0, 0);
 	switch(this->__target.__type) {
 		case muzzley::JSInteger : {
 			return (double) this->__target.__integer;
@@ -386,6 +386,9 @@ double muzzley::JSONElementT::number() {
 		}
 		case muzzley::JSBoolean : {
 			return (double) this->__target.__boolean;
+		}
+		case muzzley::JSDate : {
+			return (double) this->__target.__date;
 		}
 		default : {
 			return 0;
@@ -476,33 +479,42 @@ muzzley::JSONElementT& muzzley::JSONElementT::operator<<(JSONElementT* _in) {
 
 bool muzzley::JSONElementT::operator==(muzzley::JSONElementT& _in) {
 	assertz(this->__target.__type >= 0, "the type must be a valid value", 0, 0);
-	if (this->__target.__type !=  _in.type()) {
-		return false;
-	}
 	switch(this->__target.__type) {
 		case muzzley::JSObject : {
+			if (this->__target.__type != _in.type()) {
+				return false;
+			}
 			return *(this->__target.__object) == *(_in.obj());
 		}
 		case muzzley::JSArray : {
+			if (this->__target.__type != _in.type()) {
+				return false;
+			}
 			return *(this->__target.__array) == *(_in.arr());
 		}
 		case muzzley::JSString : {
+			if (this->__target.__type != _in.type()) {
+				return false;
+			}
 			return *(this->__target.__string.get()) == _in.str();
 		}
 		case muzzley::JSInteger : {
-			return this->__target.__integer == _in.intr();
+			return this->__target.__integer == _in.number();
 		}
 		case muzzley::JSDouble : {
-			return this->__target.__double == _in.dbl();
+			return this->__target.__double == _in.number();
 		}
 		case muzzley::JSBoolean : {
-			return this->__target.__boolean == _in.bln();
+			return this->__target.__boolean == _in.number();
 		}
 		case muzzley::JSNil : {
+			if (this->__target.__type != _in.type()) {
+				return false;
+			}
 			return true;
 		}
 		case muzzley::JSDate : {
-			return this->__target.__date == _in.date();
+			return this->__target.__date == _in.number();
 		}
 	}
 	return false;
