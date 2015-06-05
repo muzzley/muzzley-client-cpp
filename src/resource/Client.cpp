@@ -288,7 +288,7 @@ bool muzzley::Client::trigger(muzzley::EventType _type, muzzley::Subscription& _
 		this->publish(_to_property, _payload, _callback);
 	}
 	catch (muzzley::AssertionException& _e) {
-		return false;
+		throw;
 	}
 	return true;
 }
@@ -822,7 +822,7 @@ void muzzley::Client::initUser(string _user_token) {
 
 #ifdef MUZZLEY_DEBUG
 		{
-			string _log("login app -> ");
+			string _log("login user -> ");
 			muzzley::tostr(_log, _message);
 			muzzley::log(_log, muzzley::notice);
 		}
@@ -1459,6 +1459,9 @@ void muzzley::Client::publish(muzzley::Subscription& _to_property, muzzley::Mess
 			)
 		)
 	));
+	if (!!_payload["h"]["u"]) {
+		_message["h"] << "u" << _payload["h"]["u"];
+	}
 	if (!!_payload["d"]["data"]) {
 		_message["d"]["p"] << "data" << _payload["d"]["data"];
 	}
@@ -1715,7 +1718,7 @@ void muzzley::Client::run() {
 				muzzley::log(_log, muzzley::error);
 			}
 #endif
-			throw e;
+			throw;
 		}
 	}
 }
@@ -1832,6 +1835,15 @@ void muzzley::Message::setAction(string _in){
 
 void muzzley::Message::setData(muzzley::JSONObj& _in){
 	(* this) <<  "d" << _in;
+}
+
+void muzzley::Message::setUser(string _in){
+	if (!(* this)["h"]) {
+		(* this) << "h" << JSON( "u" << _in);
+	}
+	else {
+		(* this)["h"] <<  "u" << _in;
+	}
 }
 
 void muzzley::Message::setStatus(bool _in){

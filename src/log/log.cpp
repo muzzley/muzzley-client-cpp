@@ -49,6 +49,7 @@ namespace muzzley {
 	};
 }
 
+#ifndef MUZZLEY_DELEGATE_LOG
 void muzzley::log(string _prefix, string _text, muzzley::LogLevel _level) {
 	if (_level <= muzzley::log_lvl) {
 		string _time;
@@ -76,6 +77,7 @@ void muzzley::log(string _text, muzzley::LogLevel _level) {
 		}
 	}
 }
+#endif
 
 void muzzley::process_mem_usage(double& vm_usage, double& resident_set) {
 	using std::ios_base;

@@ -123,6 +123,7 @@
  		virtual void setChannelID(string _in);
  		virtual void setAction(string _in);
  		virtual void setData(muzzley::JSONObj& _in);
+ 		virtual void setUser(string _in);
  		virtual void setStatus(bool _in);
  		virtual void setStatusMessage(string _in);
 

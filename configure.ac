@@ -21,6 +21,10 @@ AC_ARG_ENABLE(logs, [  --enable-logs		Turn on log messages ],
 	[ AC_DEFINE(MUZZLEY_DEBUG, 1, "Turn on log messages") ]
 )
 
+AC_ARG_ENABLE(delegate-logs, [  --enable-delegate-logs		Delegate logging message (must implement muzzley::log) ],
+	[ AC_DEFINE(MUZZLEY_DELEGATE_LOG, 1, "Delegate logging message - must implement muzzley::log") ]
+)
+
 dnl Check for libraries
 AC_HAVE_LIBRARY(pthread)
 AC_HAVE_LIBRARY(rt)
