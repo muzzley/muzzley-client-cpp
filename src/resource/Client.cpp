@@ -46,8 +46,6 @@ muzzley::Client::Client() : __serial( 1 ),  __endpoint_host("geoplatform.muzzley
 
 	this->__heartbeat_timer = nullptr;
 
-	muzzley::log_fd = &cout;
-
 	this->on(muzzley::Connect, [] (muzzley::Message& _data, muzzley::Client& _client) -> bool {
 		if (_client.__is_one_step_initialization) {
 			return true;

@@ -25,7 +25,7 @@ PERFORMANCE OF THIS SOFTWARE.
 namespace muzzley {
 	short int log_lvl = 5;
 	bool log_color = true;
-	ostream* log_fd = NULL;
+	ostream* log_fd = & std::cout;
 
 	const char* log_lvl_colored_names[] = {
 		"\033[1;31m\033[4;31memergency\033[0m| ",
