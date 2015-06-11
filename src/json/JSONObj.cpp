@@ -20,6 +20,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include <ostream>
 #include <muzzley/parsers/JSONParser.h>
+#include <muzzley/log/log.h>
 
 namespace muzzley {
 	JSONPtr undefined;
@@ -618,9 +619,9 @@ void muzzley::JSONElementT::stringify(ostream& _out) {
 		case muzzley::JSString : {
 			string _str(this->str());
 			muzzley::replace(_str, "\"", "\\\"");
-			muzzley::replace(_str, "\n", "\\\n");
-			muzzley::replace(_str, "\r", "\\\b");
-			muzzley::replace(_str, "\t", "\\\t");
+			muzzley::replace(_str, "\n", "\\n");
+			muzzley::replace(_str, "\r", "\\b");
+			muzzley::replace(_str, "\t", "\\t");
 			_out << "\"" << _str << "\"" << flush;
 			break;
 		}
@@ -672,9 +673,9 @@ void muzzley::JSONElementT::stringify(string& _out) {
 		case muzzley::JSString : {
 			string _str(this->str());
 			muzzley::replace(_str, "\"", "\\\"");
-			muzzley::replace(_str, "\n", "\\\n");
-			muzzley::replace(_str, "\r", "\\\b");
-			muzzley::replace(_str, "\t", "\\\t");
+			muzzley::replace(_str, "\n", "\\n");
+			muzzley::replace(_str, "\r", "\\b");
+			muzzley::replace(_str, "\t", "\\t");
 			_out.insert(_out.length(), "\"");
 			_out.insert(_out.length(), _str);
 			_out.insert(_out.length(), "\"");
@@ -734,9 +735,9 @@ void muzzley::JSONElementT::prettify(ostream& _out, uint _n_tabs) {
 		case muzzley::JSString : {
 			string _str(this->str());
 			muzzley::replace(_str, "\"", "\\\"");
-			muzzley::replace(_str, "\n", "\\\n");
-			muzzley::replace(_str, "\r", "\\\b");
-			muzzley::replace(_str, "\t", "\\\t");
+			muzzley::replace(_str, "\n", "\\n");
+			muzzley::replace(_str, "\r", "\\b");
+			muzzley::replace(_str, "\t", "\\t");
 			_out << "\"" << _str << "\"" << flush;
 			break;
 		}
@@ -791,9 +792,9 @@ void muzzley::JSONElementT::prettify(string& _out, uint _n_tabs) {
 		case muzzley::JSString : {
 			string _str(this->str());
 			muzzley::replace(_str, "\"", "\\\"");
-			muzzley::replace(_str, "\n", "\\\n");
-			muzzley::replace(_str, "\r", "\\\b");
-			muzzley::replace(_str, "\t", "\\\t");
+			muzzley::replace(_str, "\n", "\\n");
+			muzzley::replace(_str, "\r", "\\b");
+			muzzley::replace(_str, "\t", "\\t");
 			_out.insert(_out.length(), "\"");
 			_out.insert(_out.length(), _str);
 			_out.insert(_out.length(), "\"");
@@ -1439,6 +1440,58 @@ muzzley::JSONPtr::operator string() {
 	return _out;
 }
 
+muzzley::JSONPtr::operator muzzley::pretty() {
+	if (this->get() == nullptr) {
+		return muzzley::pretty("");
+	}
+	string _out;
+	switch(this->get()->type()) {
+		case muzzley::JSObject : {
+			this->get()->obj()->prettify(_out);
+			break;
+		}
+		case muzzley::JSArray : {
+			this->get()->arr()->prettify(_out);
+			break;
+		}
+		case muzzley::JSString : {
+			_out.assign(this->get()->str().data());
+			break;
+		}
+		case muzzley::JSInteger : {
+			muzzley::tostr(_out, this->get()->intr());
+			break;
+		}
+		case muzzley::JSDouble : {
+			muzzley::tostr(_out, this->get()->dbl());
+			break;
+		}
+		case muzzley::JSBoolean : {
+			muzzley::tostr(_out, this->get()->bln());
+			break;
+		}
+		case muzzley::JSNil : {
+			_out.assign("");
+			break;
+		}
+		case muzzley::JSDate : {
+			muzzley::tostr(_out, (size_t) this->get()->date() / 1000, "%Y-%m-%dT%H:%M:%S");
+			_out.insert(_out.length(), ".");
+			size_t _remainder = this->get()->date() % 1000;
+			if (_remainder < 100) {
+				_out.insert(_out.length(), "0");
+				if (_remainder < 10) {
+					_out.insert(_out.length(), "0");
+				}
+			}
+			muzzley::tostr(_out, _remainder);
+			_out.insert(_out.length(), "Z");
+			break;
+		}
+	}
+	return muzzley::pretty(_out);
+}
+
 muzzley::JSONPtr::operator bool() {
 	if (this->get() == nullptr) {
 		return false;
@@ -1784,6 +1837,16 @@ muzzley::JSONObj::operator string() {
 	return _out;
 }
 
+
+muzzley::JSONObj::operator muzzley::pretty() {
+	if (this->get() == nullptr) {
+		return "";
+	}
+	string _out;
+	(* this)->prettify(_out);
+	return _out;
+}
+
 muzzley::JSONObj& muzzley::JSONObj::operator<<(string _in) {
 	(* this)->push(_in);
 	return * this;
@@ -1813,6 +1876,15 @@ muzzley::JSONArr::operator string() {
 	}
 	string _out;
 	(* this)->stringify(_out);
+	return _out;
+}
+
+muzzley::JSONArr::operator muzzley::pretty() {
+	if (this->get() == nullptr) {
+		return "";
+	}
+	string _out;
+	(* this)->prettify(_out);
 	return _out;
 }
 

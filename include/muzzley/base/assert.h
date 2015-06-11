@@ -33,7 +33,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <string.h>
 #include <ucontext.h>
 #include <unistd.h>
-
+#include <iostream>
 #include <muzzley/exceptions/AssertionException.h>
 
 #if __cplusplus <= 199711L
@@ -787,10 +787,7 @@ namespace muzzley {
 	/**
 	 * \brief Allowed manipulators for muzzley::JSONPtr class objects
 	 */
-	enum ObjectOp {
-		pretty = 1, minified = 2, json = 4,  xml = 8,  nil = 16,  headers = 32,  params = 64,  body = 128
-	};
-
+	//enum ObjectOp {	pretty = 1, minified = 2, json = 4,  xml = 8,  nil = 16,  headers = 32,  params = 64,  body = 128 };
 }
 
 extern "C" int muzzley_lib();

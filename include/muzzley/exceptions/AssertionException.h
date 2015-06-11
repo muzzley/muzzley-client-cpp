@@ -15,13 +15,11 @@ PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
 TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR 
 PERFORMANCE OF THIS SOFTWARE.
 */
-
-
 #pragma once
 
 #include <exception>
 #include <string>
-#include <muzzley/base/assert.h>
+//#include <muzzley/base/assert.h>
 
 using namespace std;
 #if !defined __APPLE__
