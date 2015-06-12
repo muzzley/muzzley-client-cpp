@@ -23,16 +23,17 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <stdlib.h> 
 #include <muzzley/text/convert.h>
 
-muzzley::AssertionException::AssertionException(string _in, int _http_code, int _code, string _desc, int _line, string _file, char** _backtrace, size_t _backtrace_size) : __what(_in), __http_code(_http_code), __code(_code), __description(_desc), __line(_line), __file(_file){
+muzzley::AssertionException::AssertionException(string _in, int _http_code, int _code, string _desc, int _line, string _file, char** _backtrace, size_t _backtrace_size) : __what( _in ), __http_code(_http_code), __code(_code), __description(_desc), __line(_line), __file(_file){
 	this->__description.insert(0, "'");
 	this->__description.insert(this->__description.length(), "' failed on file ");
 	this->__description.insert(this->__description.length(), this->__file);
 	this->__description.insert(this->__description.length(),  ", line ");
 	muzzley::tostr(this->__description, this->__line);
 
-	for (size_t _i = 0; _i != _backtrace_size; _i++) 
+	for (size_t _i = 0; _i != _backtrace_size; _i++) {
 		this->__backtrace.insert(this->__backtrace.length(), string(_backtrace[_i]));
 		this->__backtrace.insert(this->__backtrace.length(), "\n");
+	}
 	free(_backtrace);
 }
 

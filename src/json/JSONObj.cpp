@@ -408,26 +408,26 @@ muzzley::JSONPtr muzzley::JSONElementT::clone() {
 		}
 		case muzzley::JSString : {
 			std::string _v = this->str();
-			return make_ptr(_v);
+			return muzzley::make_ptr(_v);
 		}
 		case muzzley::JSInteger : {
 			int _v = this->intr();
-			return make_ptr(_v);
+			return muzzley::make_ptr(_v);
 		}
 		case muzzley::JSDouble : {
 			double _v = this->dbl();
-			return make_ptr(_v);
+			return muzzley::make_ptr(_v);
 		}
 		case muzzley::JSBoolean : {
 			bool _v = this->bln();
-			return make_ptr(_v);
+			return muzzley::make_ptr(_v);
 		}
 		case muzzley::JSNil : {
 			return muzzley::undefined;
 		}
 		case muzzley::JSDate : {
 			muzzley::timestamp_t _v = this->date();
-			return make_ptr(_v);
+			return muzzley::make_ptr(_v);
 		}
 	}
 	return muzzley::undefined;	
@@ -989,7 +989,7 @@ muzzley::JSONPtr muzzley::JSONObjT::clone() {
 	for (auto _f : * this) {
 		_return << _f.first << _f.second->clone();
 	}	
-	return make_ptr(_return);
+	return muzzley::make_ptr(_return);
 }
 
 bool muzzley::JSONObjT::operator==(muzzley::JSONObjT& _rhs) {
@@ -1252,7 +1252,7 @@ muzzley::JSONPtr muzzley::JSONArrT::clone() {
 	for (auto _f : * this) {
 		_return << _f->clone();
 	}	
-	return make_ptr(_return);
+	return muzzley::make_ptr(_return);
 }
 
 bool muzzley::JSONArrT::operator==(muzzley::JSONArrT& _rhs) {
