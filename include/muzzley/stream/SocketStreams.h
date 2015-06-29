@@ -88,18 +88,18 @@ namespace muzzley {
 				return __traits_type::eof();
 			}
 
-			int num = __buf_type::pptr() - __buf_type::pbase();
-			int err = -1;
-			if ((err = ::send(__sock, reinterpret_cast<char*>(obuf), num * char_size, MSG_NOSIGNAL)) != num) {
-				if (err < 0) {
+			int _num = __buf_type::pptr() - __buf_type::pbase();
+			int _actually_written = -1;
+			if ((_actually_written = ::send(__sock, reinterpret_cast<char*>(obuf), _num * char_size, MSG_NOSIGNAL)) < 0) {
+				if (_actually_written < 0) {
 					::shutdown(this->__sock, SHUT_RDWR);
 					::close(this->__sock);
 					this->__sock = 0;
 				}
 				return __traits_type::eof();
 			}
-			__buf_type::pbump(-num);
-			return num;
+			__buf_type::pbump(-_actually_written);
+			return _actually_written;
 		}
 
 		virtual __int_type overflow(__int_type c) {

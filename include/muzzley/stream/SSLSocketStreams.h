@@ -98,8 +98,9 @@ namespace muzzley {
 			if (!__good()) {
 				return __traits_type::eof();
 			}
-			int num = __buf_type::pptr() - __buf_type::pbase();
-			if (SSL_write(this->__sslstream, reinterpret_cast<char*>(obuf), num * char_size) != num) {
+			int _num = __buf_type::pptr() - __buf_type::pbase();
+			int _actually_written = 0;
+			if ((_actually_written = SSL_write(this->__sslstream, reinterpret_cast<char*>(obuf), _num * char_size)) <= 0) {
 				SSL_free(this->__sslstream);
 				SSL_CTX_free(this->__context);
 				::shutdown(this->__sock, SHUT_RDWR);
@@ -109,8 +110,8 @@ namespace muzzley {
 				this->__context = nullptr;
 				return __traits_type::eof();
 			}
-			__buf_type::pbump(-num);
-			return num;
+			__buf_type::pbump(-_actually_written);
+			return _actually_written;
 		}
 
 		virtual __int_type overflow(__int_type c) {
