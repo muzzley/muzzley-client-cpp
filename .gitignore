@@ -26,6 +26,7 @@ missing
 */**/Makefile
 */**/Makefile.in
 */**/.libs/
+src/.libs/
 */**/*.m4
 m4/*.m4
 .sublime-workspace
