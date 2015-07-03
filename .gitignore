@@ -27,6 +27,7 @@ missing
 */**/Makefile.in
 */**/.libs/
 */**/*.m4
+m4/*.m4
 .sublime-workspace
 examples/myapp
 examples/myuser
@@ -35,3 +36,4 @@ stamp-h1
 */**/config.h.in~
 docs/html/
 docs/latex/
+INSTALL
