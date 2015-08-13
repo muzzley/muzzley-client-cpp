@@ -1255,7 +1255,7 @@ void muzzley::Client::sendWidgetData(string _widget, string _component, string _
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("sending widget data -> ");
+		string _log("sending widget data\n-> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -1327,7 +1327,7 @@ void muzzley::Client::subscribe(muzzley::Subscription& _to_property, muzzley::Ca
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("sending widget data -> ");
+		string _log("sending widget data\n-> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
@@ -1413,7 +1413,7 @@ void muzzley::Client::unsubscribe(muzzley::Subscription& _to_property) {
 
 #ifdef MUZZLEY_DEBUG
 		{
-			string _log("sending widget data -> ");
+			string _log("sending widget data\n-> ");
 			muzzley::tostr(_log, _message);
 			muzzley::log(_log, muzzley::notice);
 		}
@@ -1470,7 +1470,7 @@ void muzzley::Client::publish(muzzley::Subscription& _to_property, muzzley::Mess
 
 #ifdef MUZZLEY_DEBUG
 	{
-		string _log("sending widget data -> ");
+		string _log("sending widget data\n-> ");
 		muzzley::tostr(_log, _message);
 		muzzley::log(_log, muzzley::notice);
 	}
