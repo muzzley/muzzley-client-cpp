@@ -60,9 +60,6 @@
    library needed" */
 /* #undef NOT_HAVE_SECURE_CHANNEL */
 
-/* Define to 1 if your C compiler doesn't accept -c and -o together. */
-/* #undef NO_MINUS_C_MINUS_O */
-
 /* Name of package */
 #define PACKAGE "muzzley"
 
