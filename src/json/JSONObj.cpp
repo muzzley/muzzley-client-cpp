@@ -606,6 +606,26 @@ void muzzley::JSONElementT::setPath(std::string _path, muzzley::JSONPtr _value, 
 	return;
 }
 
+void muzzley::JSONElementT::delPath(std::string _path, std::string _separator) {
+	assertz(this->__target.__type >= 0, "the type must be a valid value", 0, 0);
+	switch(this->__target.__type) {
+		case muzzley::JSObject : {
+			this->__target.__object->delPath(_path, _separator);
+		}
+		case muzzley::JSArray : {
+			this->__target.__array->delPath(_path, _separator);
+		}
+		case muzzley::JSString :
+		case muzzley::JSInteger :
+		case muzzley::JSDouble :
+		case muzzley::JSBoolean :
+		case muzzley::JSNil :
+		case muzzley::JSDate : {
+			return;
+		}
+	}
+}
+
 void muzzley::JSONElementT::stringify(ostream& _out) {
 	switch(this->__target.__type) {
 		case muzzley::JSObject : {
