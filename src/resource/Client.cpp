@@ -1713,6 +1713,8 @@ void muzzley::Client::run() {
 			{
 				string _log("assertion error: ");
 				_log.insert(_log.length(), e.description());
+				_log.insert(_log.length(), "\n");
+				_log.insert(_log.length(), e.backtrace());
 				muzzley::log(_log, muzzley::error);
 			}
 #endif
