@@ -321,14 +321,18 @@ bool muzzley::Client::connect(string _host, uint16_t _port, string _path) {
 
 	if(!this->__is_running){
 		while(!this->__channel.open(_host, _port)) {
+#ifdef MUZZLEY_DEBUG
 			string _log("could not open socket");
 			muzzley::log(_log, muzzley::warning);
+#endif
 			sleep(RECONNECT_TRIAL_INTERVAL);
 		}
 	}else{
 		if (!this->__channel.open(_host, _port)) {
+#ifdef MUZZLEY_DEBUG
 			string _log("could not open socket");
 			muzzley::log(_log, muzzley::warning);
+#endif
 			return false;
 		}
 	}
@@ -381,23 +385,28 @@ void muzzley::Client::disconnect() {
 	this->__participants.erase(this->__participants.begin(), this->__participants.end());
 	this->__stack.erase(this->__stack.begin(), this->__stack.end());
 	this->__namespaces.erase(this->__namespaces.begin(), this->__namespaces.end());
-
+#ifdef MUZZLEY_DEBUG
 	string _log("socket disconnected");
 	muzzley::log(_log, muzzley::warning);
+#endif
 }
 
 bool muzzley::Client::reconnect() {
 
 	if (this->isConnected()) {
+#ifdef MUZZLEY_DEBUG
 		string _log("socket is still open! will disconnect and try to reconect again");
 	    muzzley::log(_log, muzzley::warning);
+#endif
 		this->disconnect();
 	}
 
 	sleep(RECONNECT_TRIAL_INTERVAL);
 
+#ifdef MUZZLEY_DEBUG
 	string _log("reconnecting");
 	muzzley::log(_log, muzzley::notice);
+#endif
 
 	muzzley::Message _empty;
 	if (this->trigger(muzzley::Reconnect, _empty)) {
@@ -516,10 +525,12 @@ bool muzzley::Client::write(muzzley::Message& _message, muzzley::Callback _callb
 
 bool muzzley::Client::write(string& _to_send) {
 	if (!this->isConnected()) {
+#ifdef MUZZLEY_DEBUG
 		string _log("could not write to socket!");
 		muzzley::log(_log, muzzley::warning);
 		_log = "the socket is not open...";
 		muzzley::log(_log, muzzley::warning);
+#endif
 		this->disarm();
 		return false;
 	}
